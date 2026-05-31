@@ -1,0 +1,36 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.synctex.gz
+*.toc
+*.apx
+*.upa
+*.upb
+
+# Pandoc-generated docx exports (publish via GitHub Releases instead)
+main_thesis*.docx
+main_thesis*.html
+
+# Compiled PDF (publish via GitHub Releases instead of in-repo)
+main_thesis.pdf
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python build artifacts from the figure scripts
+__pycache__/
+*.pyc
+scripts/__pycache__/
+
+# Local working notes (not part of the published thesis)
+docs/

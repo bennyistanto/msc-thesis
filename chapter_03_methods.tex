@@ -1,0 +1,1214 @@
+% ============================================================
+% chapter_03_methods.tex - Chapter 3, Methods
+%
+% Purpose: describes the LSEQM+DL hybrid bias correction framework,
+%          the validation protocol, and the metric catalogue.
+% Sections: 3.1 Data and Domain, 3.2 Pipeline Architecture,
+%           3.3 Per-stage Formulation (LS, EQM/Gamma, GPD tail, CNN),
+%           3.4 Station-density-aware Blending,
+%           3.5 Validation Protocol (BMKG out-of-sample),
+%           3.6 Verification Metric Catalogue (four-pillar + CQI),
+%           3.7 Reproducibility Engineering.
+% Included by main_thesis.tex.
+% License: CC BY 4.0 (see ../LICENSE).
+% ============================================================
+%
+% Drafting position in workflow:
+%   [Methods] -> LitRev v1 -> Results -> Discussion -> LitRev v2
+%   -> Conclusion -> Introduction -> Front matter
+%
+% Source materials for this chapter:
+%   - paper/PPS1691_..._compact_20260526.tex  (compressed methods)
+%   - paper/PPS1691_..._20260522_seminar.tex  (master, 20pp)
+%   - paper/PPS1591_..._mdpi.docx              (parallel manuscript)
+%   - paper/additional_information.md          (deep technical material)
+%   - docs/ Quarto site                        (reproducibility evidence)
+%   - src/ Python codebase                     (implementation artefact)
+%   - notebooks/ Jupyter                       (workflow artefact)
+%
+% Conventions:
+%   - No em-dashes anywhere (hyphen-space or colon)
+%   - No AI-language watchlist words
+%   - Long-form abbreviation on first use, short form after
+%   - MDPI_STATUS placeholder for the parallel manuscript citation
+%   - Station density mask: design choice, NOT "key contribution"
+%   - alpha=0.70, GPD 80th percentile, density_saturation=3: sensitivity caveat preserved
+% ============================================================
+
+\chapter{Methods}\label{chap:methods}
+
+This chapter describes the study area and data
+(Section~\ref{sec:methods-data}), the four-stage hybrid pipeline
+LSEQM+DL, comprising Linear Scaling (LS), Empirical Quantile Mapping (EQM), Generalized Pareto Distribution (GPD), and Convolutional Neural Network (CNN) refinement that constitutes the Deep Learning (DL) stage (Section~\ref{sec:methods-pipeline}), the
+station-density-aware blending design
+(Section~\ref{sec:methods-blending}), the reproducible
+implementation that supports independent verification
+(Section~\ref{sec:methods-reproducibility}), the out-of-sample
+validation framework (Section~\ref{sec:methods-validation}), and
+the verification metric catalogue
+(Section~\ref{sec:methods-metrics}). The algorithmic details
+summarised here are extended from a parallel manuscript
+\citep{ref:istanto2026mdpi}\MDPIstatus; the present chapter adds
+the reproducibility design and the full 31-metric verification
+framework that the parallel manuscript reports in compressed form.
+
+
+% ------------------------------------------------------------
+\section{Study Area and Data}\label{sec:methods-data}
+% ------------------------------------------------------------
+
+Three datasets enter the framework. The Late Run variant of the
+Integrated Multi-satellitE Retrievals for Global Precipitation
+Measurement (IMERG) Version 7 (V07) is the product to be
+corrected. The CPC Unified Gauge-Based Analysis of Daily
+Precipitation (CPC-UNI) is the correction reference. The
+Indonesian Meteorological, Climatological, and Geophysical Agency
+(BMKG) operates the independent station network used for
+out-of-sample validation. Each is described in turn, with explicit
+attention to the BMKG filter logic that reduces the 180 archived
+stations to the 171 retained for the validation reported in
+Chapter~\ref{chap:results}.
+
+\subsection{Study area}
+
+The Indonesian archipelago spans approximately 47 degrees of
+longitude from $95^{\circ}$E (Sabang, northwestern Sumatra) to
+$141^{\circ}$E (Merauke, eastern Papua) and 17 degrees of
+latitude from $6^{\circ}$N to $11^{\circ}$S. It occupies the
+centre of the Maritime Continent, where the convergence of the
+Pacific and Indian Ocean basins drives a deep convective regime
+and where the seasonal cycle is governed by the
+Asian-Australian monsoon and the migration of the Inter-Tropical
+Convergence Zone \citep{ref:tan2016}. Daily-mean precipitation is
+high across the archipelago, but the spatial pattern is uneven:
+dense convective rainfall over Sumatra, Java, and Kalimantan
+contrasts with the comparatively drier eastern provinces. The
+convective diurnal cycle peaks at local 14:00 to 17:00 (UTC+7 to
+UTC+10), a detail that matters for daily aggregation because the
+IMERG calendar day is defined in UTC and therefore splits the
+local convective afternoon across two calendar days. The gauge
+network is concentrated in Java and southern Sumatra; coverage is
+sparse over Papua, Maluku, and eastern Nusa Tenggara
+\citep{ref:ramadhan2022}. This spatial gradient motivates the
+density-aware blending design described in
+Section~\ref{sec:methods-blending}.
+
+\subsection{IMERG Late Run}
+
+IMERG V07 \citep{ref:hou2014, ref:huffman2020} merges passive
+microwave retrievals from the Global Precipitation Measurement
+(GPM) constellation with geostationary infrared estimates and
+monthly gauge analyses to produce a quasi-global precipitation
+product at $0.1^{\circ}$ (approximately 11~km) and 30-minute
+resolution. Three latency variants are released: Early
+(approximately 4~h), Late (approximately 14~h), and Final
+(approximately 3.5~months). The framework operates on the Late
+Run (IMERG-L) because its 14-hour latency fits within the
+same-day decision window of operational services such as
+flash-flood warning and reservoir scheduling. The study period
+spans 2001-01-01 to 2025-12-31, providing 25 years of daily
+fields aggregated from the half-hourly native inputs. Native
+IMERG-L files are downloaded as NetCDF and subset to the
+Indonesian bounding box before processing.
+
+\subsection{CPC Unified Gauge-Based Analysis}
+
+CPC-UNI \citep{ref:chen2008} is a gauge-based daily precipitation
+analysis produced by the National Oceanic and Atmospheric
+Administration (NOAA) Climate Prediction Center on a
+$0.5^{\circ}$ (approximately 55~km) global land grid. The product
+interpolates daily station observations using optimal
+interpolation with a station-density-aware correlation function.
+Over Indonesia, approximately 180 contributing stations enter the
+analysis, with the contributing network concentrated in Java and
+Sumatra. CPC-UNI is documented to systematically undercatch heavy
+rainfall, reflecting both the smoothing introduced by interpolation
+onto a $0.5^{\circ}$ grid and the under-representation of
+mountain and coastal sites in the contributing network. Despite
+these limitations, CPC-UNI is the most widely used gauge-based
+daily reference for satellite product evaluation over the tropics
+and serves as the correction target throughout this study. The
+same 2001 to 2025 window is used.
+
+\subsection{BMKG validation network}
+
+BMKG operates a national synoptic station network whose daily
+precipitation archive serves as the independent validation
+reference. Independence here has a specific meaning. Some BMKG
+stations contribute to the global CPC-UNI analysis, so BMKG
+observations are not independent of CPC-UNI in a strict
+statistical sense. However, the validation pipeline compares
+per-station daily observations against the corrected satellite
+product extracted at each station's pixel, bypassing the CPC
+interpolation step entirely. Validation therefore tests whether
+the corrected satellite reproduces the original point
+observations, not whether it reproduces the gridded reference.
+
+The raw archive contains 180 stations with daily observations
+from 2001-01-01 to 2025-12-31. Missing days are sentinel-coded as
+$8888.0$ in the source file; after sentinel removal the archive
+yields 880{,}702 valid daily observations. Two filters are
+applied before validation:
+
+\begin{enumerate}
+    \item \textit{Spatial mapping filter.} The station's reported
+    latitude and longitude must fall within the Indonesian land
+    mask used by the satellite product. A small number of
+    stations near the maritime border or with mis-recorded
+    coordinates fail this check.
+    \item \textit{Minimum paired-day filter.} After sentinel
+    removal and pairing against the corrected satellite series at
+    the station pixel, the station must have at least 30 paired
+    daily observations in any dekadal window used for validation.
+    Stations with very sparse records fail.
+\end{enumerate}
+
+Together the two filters drop 9 of the 180 archived stations,
+leaving 171 with usable data for the per-station verification
+reported in Chapter~\ref{chap:results}. The 9 dropped stations
+fall into two categories. A small subset of stations report
+coordinates that lie outside the Indonesian land mask used by
+the satellite product, typically because the station is on a
+small offshore islet not covered by the $0.1^{\circ}$ mask grid,
+or because the coordinate string in the archive has a recording
+error. The remaining dropped stations satisfy the spatial filter
+but yield fewer than 30 paired daily observations after sentinel
+removal, generally reflecting extended periods of equipment
+failure, transmission gaps, or stations that came online only
+late in the 2001 to 2025 window. The retained network spans the
+seven major regions of the archipelago: Sumatra, Kalimantan,
+Sulawesi, Java, Bali and Nusa Tenggara, Maluku, and Papua. The
+full archived network is shown in Figure~\ref{fig:station-map},
+which illustrates the gauge-density gradient referred to
+throughout the remainder of the chapter.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figThreeOneWidth\textwidth]{fig_thesis_03_station_map.png}
+\caption[Spatial distribution of the 180 archived BMKG stations, color-coded by region]{Spatial distribution of the 180 archived BMKG stations,
+color-coded by region. The legend reports per-region counts in
+the archived network; 171 of the 180 are retained after spatial
+and minimum-paired-day filtering. Province boundaries (light
+gray) and the Indonesian national boundary (dark outline) are
+overlaid; neighbor countries appear in light gray. The gauge
+network is concentrated over Java and southern Sumatra, with
+sparser coverage over Papua, Maluku, and eastern Nusa
+Tenggara.\label{fig:station-map}}
+\end{figure}
+
+
+% ------------------------------------------------------------
+\section{Four-Stage Hybrid Pipeline (LSEQM+DL)}\label{sec:methods-pipeline}
+% ------------------------------------------------------------
+
+The framework is built on a one-bias-dimension-per-stage design.
+Section~\ref{sec:methods-data} described three bias modes that
+IMERG-L carries against the gauge reference: a mean offset, a
+distributional mismatch in the bulk, and a truncated upper tail.
+Each of these has a matched correction stage: LS for the mean,
+EQM with a Gamma fit for the bulk distribution, and GPD tail
+adjustment for the extremes. A fourth stage, a CNN, addresses a
+limitation that none of the marginal stages can reach by
+themselves: the lack of spatial coherence in the extreme pixels
+of a per-pixel statistical correction. The four stages execute
+in sequence; the output of one stage becomes the input of the
+next. All fitting is performed per pixel and per dekadal window,
+with the 36 dekadal windows pooled across 2001 to 2025 giving
+approximately 250 paired daily observations per pixel
+per window. Figure~\ref{fig:pipeline} shows the conceptual
+workflow.
+
+% Fig 3.2: dedicated page, image rotated 90 deg to occupy the page height
+% as its new width (same approach as Fig 3.3 below). The PNG itself is the
+% original landscape diagram; LaTeX handles the rotation.
+\begin{figure}[p]
+\centering
+\rotatebox{90}{%
+  \includegraphics[width=\figThreeTwoWidth\textheight]{fig_thesis_03_pipeline.png}%
+}
+\caption[Conceptual workflow of the LSEQM+DL hybrid bias correction framework]{Conceptual workflow of the LSEQM+DL hybrid bias
+correction framework. Each stage targets a distinct bias
+dimension; the output of one stage is the input of the next. The
+final stage blends the CNN refinement with the LSEQM result
+using a station-density-aware weight (Section~\ref{sec:methods-blending}).\label{fig:pipeline}}
+\end{figure}
+
+
+\subsection{Mean Bias Correction: Linear Scaling}\label{sec:methods-ls}
+
+The first stage addresses the mean offset between the satellite
+and the gauge reference. For each CPC 0.5$^{\circ}$ cell~$c$ and
+each dekadal window, a multiplicative correction factor is
+computed from the pooled means of the satellite and reference
+samples \citep{ref:teutschbein2012}:
+\begin{equation}
+P_{\text{LS}}(x, y, t) =
+P_{\text{IMERG}}(x, y, t)
+\cdot \frac{\overline{P}_{\text{CPC}}(c)}{\overline{P}_{\text{IMERG}}(c)},
+\label{eq:ls}
+\end{equation}
+where $\overline{P}_{\text{CPC}}$ and $\overline{P}_{\text{IMERG}}$
+are the pooled-dekad means of the gauge and satellite precipitation
+within cell~$c$, respectively. The factor is applied to every
+0.1$^{\circ}$ pixel that falls inside cell~$c$, following the
+Bias Correction Spatial Disaggregation (BCSD) strategy of
+\citep{ref:wood2004}. LS corrects the dekadal mean by construction;
+it does not change the rank ordering of values within a pixel,
+nor does it touch the distribution shape or the tail. Subsequent
+stages address these remaining bias dimensions on the LS-corrected
+series.
+
+
+\subsection{Distribution Alignment: Empirical Quantile Mapping with Gamma}\label{sec:methods-eqm}
+
+The second stage aligns the full marginal distribution of the
+LS-corrected satellite series to the gauge reference. A
+two-parameter Gamma distribution is fitted by maximum likelihood
+to the wet-day subset of each pixel and each dekadal window,
+yielding Gamma cumulative distribution functions (CDFs)
+$F_{\text{IMERG},\Gamma}$ and $F_{\text{CPC},\Gamma}$
+\citep{ref:gudmundsson2012, ref:themessl2012}. The corrected
+value at day~$t$ is then obtained by quantile composition:
+\begin{equation}
+P_{\text{EQM}}(x, y, t) =
+F_{\text{CPC},\Gamma}^{-1}\!
+\left(F_{\text{IMERG},\Gamma}\!\left(P_{\text{LS}}(x, y, t)\right)\right).
+\label{eq:eqm}
+\end{equation}
+The Gamma family is the standard parametric model for
+daily precipitation on wet days. Its two parameters describe the
+shape and the scale of the bulk distribution, where most of the
+sample mass concentrates.
+
+Dry-day handling uses wet-day-frequency matching
+\citep{ref:cannon2015}: the corrected series is constrained to
+reproduce the gauge wet-day fraction within each dekadal window.
+Days with $P_{\text{LS}} = 0$ are kept dry; days with non-zero
+LS values that fall below the gauge wet-day threshold are
+reclassified to dry. This mechanism is the source of the
+event-detection trade-off discussed in
+Chapter~\ref{chap:results}: matching the dry-day frequency
+suppresses spurious light-rain events at the cost of reduced
+aggregate probability of detection, but with the benefit of a
+reduced false alarm ratio.
+
+The Gamma family fits the bulk of the wet-day sample by design,
+which means its parameters are dominated by light and moderate
+rainfall, the segment that contains most of the sample mass. The
+upper tail, the segment that is operationally meaningful for
+flood and drought thresholds, is fit only as a by-product and is
+systematically too short. The next stage corrects this.
+
+
+\subsection{Extreme Tail Preservation: Generalized Pareto Distribution}\label{sec:methods-gpd}
+
+\medskip\noindent\textbf{Motivation.}
+The Gamma fit in Stage~2 is a two-parameter distribution fitted
+to the full wet-day sample. By construction its parameters are
+dominated by the bulk of the sample, that is, the light to
+moderate rainfall that contains most of the points. The upper
+tail, which is the segment operationally meaningful for flood
+and drought thresholds, is fit only as a by-product of forcing
+the Gamma curve through the bulk, and for tropical precipitation
+is systematically too short. Gamma cannot represent the heavy
+tail that real tropical convective rainfall exhibits. Stage~3
+grafts a GPD onto the upper
+tail, fitted explicitly to exceedances above a high threshold.
+The GPD is the canonical extreme-value model in the
+peaks-over-threshold framework: under mild regularity conditions
+the distribution of exceedances above a high threshold converges
+to a GPD with shape and scale parameters $(\xi, \sigma)$
+\citep{ref:coles2001}, with cumulative distribution function
+\begin{equation}
+F_{\text{GPD}}(x; u, \sigma, \xi) =
+1 - \left[1 + \xi\,\frac{x - u}{\sigma}\right]^{-1/\xi},
+\quad x > u,
+\label{eq:gpd}
+\end{equation}
+where $u$ is the threshold. The shape parameter $\xi$ controls
+tail heaviness: $\xi > 0$ indicates a heavy Pareto-like tail
+typical of tropical convective extremes, $\xi = 0$ an exponential
+tail, and $\xi < 0$ a bounded tail.
+
+\medskip\noindent\textbf{Method.}
+For each pixel and each dekadal window, the GPD fit proceeds in
+seven steps.
+
+\begin{enumerate}[noitemsep, topsep=0pt]
+    \item Extract the wet-day subset of the 25-year sample
+    (approximately 250 paired days multiplied by the wet-day fraction).
+    \item Reuse the Gamma fit from Stage~2 as the bulk model.
+    \item Compute the 80th-percentile threshold of the wet
+    sample.
+    \item Extract exceedances (wet observations above the
+    threshold), typically 50 points if the wet sample has 250
+    entries (250 times 0.20).
+    \item Fit GPD parameters $(\xi, \sigma)$ to the exceedances
+    by maximum likelihood with the location parameter fixed at
+    the threshold \citep{ref:coles2001}; the parameters are
+    averaged across five subsamples to reduce variance on the
+    small per-pixel exceedance set (see
+    Section~\ref{sec:methods-gpd} subsection on subsample
+    aggregation below).
+    \item Above the 80th percentile, replace the Gamma-based
+    quantile from Stage~2 with the GPD-based quantile.
+    \item Cap the final value at the 99.9th percentile of the
+    CPC reference distribution as a safety net against GPD
+    over-extrapolation in the extreme tail.
+\end{enumerate}
+
+The replacement in step~6 is a quantile remap through the
+reference tail. For a satellite value $P_{\text{LS}}$ above the
+satellite threshold $u_{\text{sat}}$, the conditional exceedance
+probability within the satellite tail is
+\begin{equation}
+p_c = \frac{F_{\text{sat}}(P_{\text{LS}}) - F_{\text{sat}}(u_{\text{sat}})}
+           {1 - F_{\text{sat}}(u_{\text{sat}})},
+\label{eq:gpd-pc}
+\end{equation}
+where $F_{\text{sat}}$ is the satellite wet-day cumulative
+distribution. This probability is then mapped onto the reference
+tail through the inverse of the reference GPD cumulative
+distribution $G_{\text{ref}}$, anchored at the reference
+threshold $u_{\text{ref}}$:
+\begin{equation}
+P_{\text{LSEQM}} = u_{\text{ref}} + G_{\text{ref}}^{-1}(p_c).
+\label{eq:gpd-map}
+\end{equation}
+Equations~\eqref{eq:gpd-pc} and~\eqref{eq:gpd-map} preserve the
+rank of the satellite value within its own tail and place it at
+the matching quantile of the reference tail, so the heavy-tail
+shape of the corrected field follows the reference GPD rather
+than the truncated Gamma extrapolation of Stage~2.
+
+\medskip\noindent\textbf{Threshold choice and sample-size considerations.}
+The 80th-percentile threshold is unconventionally low for a GPD
+fit. Standard practice in extreme-value analysis uses the 90th
+to 99th wet-day percentile, justified per region by mean
+residual life plots or parameter-stability diagnostics
+\citep{ref:coles2001}. The present study made an empirical
+trade-off in the other direction: a 90th-percentile choice would
+yield only about 25 exceedances per pixel-dekad at the typical
+wet-day fraction, on the edge of the sample size at which the
+GPD Maximum Likelihood Estimation (MLE) becomes operationally noisy \citep{ref:hoskingwallis1987};
+the 80th-percentile choice yields about 50 exceedances and
+trades cleanliness of the extreme regime for sample-size
+stability. Lower thresholds (60th or 70th) would yield still
+more exceedances but conflate the extreme tail with moderate
+rain that the Gamma EQM already represents adequately. The
+threshold was not formally optimised nor diagnosed with the
+standard residual-life plots; its empirical effect on the
+headline metrics is reported in
+Section~\ref{sec:results-sensitivity} and the limitation is
+acknowledged in the chapter close.
+
+The 80th-percentile choice carries a hidden assumption: every
+pixel and dekad combination has enough wet days for stable GPD
+fitting. Whether this holds depends on the local wet-day
+fraction. To obtain about 30 exceedances at the 80th percentile,
+a pixel needs about 150 wet days in the pooled 250-day sample
+(since $30 / 0.20 = 150$). Wet-day fractions in Indonesia vary
+dramatically with season and region: wet-season Java sees
+approximately 70 to 80~percent wet days, giving 175 to 200 wet
+days and 35 to 40 exceedances, a comfortable margin. Dry-season
+eastern Nusa Tenggara sees approximately 10 to 20~percent wet
+days, giving 25 to 50 wet days and only 5 to 10 exceedances,
+well below the practical floor for a stable MLE.
+
+In the latter case the GPD fit returns a degenerate default
+(shape~$= 0$, location~$= 0$, scale~$= 1$) that produces the
+trivial mapping $y = x$, effectively disabling the tail
+adjustment for that pixel and leaving the Gamma EQM value in
+place. The fallback is defensible in genuinely dry pixels, where
+the few wet days are climatologically light-rain events and the
+Gamma EQM result is the right answer by default; the fallback
+is less defensible in pixels with 25 to 50 wet days, where heavy
+events do exist but cannot be fit reliably. The fraction of
+pixel-dekads in which the GPD adjustment is active versus
+fallback was not reported as a spatial diagnostic in the present
+study; producing such a map would be a useful supplementary
+artefact for future work.
+
+\medskip\noindent\textbf{Why subsample-averaged MLE rather than a single fit.}
+A single GPD maximum-likelihood fit to approximately 50
+exceedances has wide confidence intervals on both $\xi$ and
+$\sigma$. The rule of thumb in \citep{ref:coles2001} is that GPD
+parameter uncertainty becomes operationally tolerable around 100
+or more exceedances; with 50 points the single-fit estimate is
+noisy and sensitive to a small number of high-leverage values.
+A subsample-averaging step reduces estimator variance: the
+exceedances are partitioned into five folds of about 10 points
+each, the GPD is fitted by maximum likelihood on four folds at a
+time (40 points), the parameters $(\xi, \sigma)$ are recorded,
+the partition rotates across all five subsamples, and the final
+estimate is the mean of the five parameter pairs. The procedure
+resembles the subsample step of a bootstrap and reduces variance
+arising from a single high-leverage exceedance, but it is not
+itself a cross-validation in the strict statistical sense (no
+held-out evaluation is performed) and it does not eliminate the
+small-sample bias of the GPD shape MLE \citep{ref:hoskingwallis1987}.
+The trade is a deliberate one: at 40 to 60 exceedances the
+shape estimator is biased but the bias is comparable in
+magnitude across folds, so averaging suppresses noise without
+making the bias worse.
+
+\medskip\noindent\textbf{Implementation notes.}
+The threshold is computed per pixel on the satellite distribution,
+not domain-wide and not on the reference. Each pixel uses its
+own 80th percentile of its own wet sample. A pixel in Java
+might have a threshold around 25~mm/day; a pixel in eastern
+Nusa Tenggara might have a threshold of about 8~mm/day. This
+per-pixel behaviour is the correct response to the
+climatological heterogeneity of the domain. Below the threshold
+the Gamma EQM result is used; above it, the GPD-adjusted
+quantile is used. There is no smoothing across the join: the
+two curves are constrained to match at the threshold percentile,
+so the discontinuity is small in practice but is not exactly
+zero. The 99.9th-percentile cap is also computed per pixel and
+varies spatially: over wet-season Java the cap is on the order
+of 200 to 400~mm/day, while over dry-season eastern Nusa
+Tenggara it may be 50 to 80~mm/day.
+
+
+\subsection{Spatial Refinement of Extremes: Convolutional Neural Network}\label{sec:methods-cnn}
+
+The first three stages each operate one pixel at a time. After
+the GPD step the corrected field has the right marginal
+distribution at every pixel, with the mean from LS, the bulk
+shape from Gamma EQM, and the tail from GPD. What it still lacks
+is spatial coherence among the extreme pixels. A 100~mm event in
+a cluster of adjacent pixels reflects organised convection and
+is climatologically plausible; a 100~mm event in a single pixel
+surrounded by 5~mm pixels is more likely a satellite retrieval
+artefact. Per-pixel statistical correction cannot tell the two
+apart, because each pixel is corrected independently.
+
+The fourth stage is a small CNN
+that refines extreme-pixel values using local spatial context.
+The architecture, implemented in \texttt{src/deep\_learning.py},
+is a sequential stack of two Conv2D layers (each followed by
+MaxPool2D and Dropout), a Flatten layer, a 128-unit Dense
+bottleneck (followed by a third Dropout), and a final Dense
+output layer that reconstructs the full grid
+\citep{ref:pan2019, ref:banomedina2020}. The output layer uses a
+\textit{linear} activation rather than ReLU or sigmoid;
+precipitation is non-negative, but a ReLU at the output would
+clamp at zero and remove the gradient signal that the mean
+squared error loss needs to refine values near the threshold.
+The non-negativity constraint is enforced at post-processing
+through the 99.9th-percentile cap from
+Section~\ref{sec:methods-gpd} rather than at the activation.
+Dropout in three places (after each of the two MaxPool layers
+and after the Dense bottleneck) is aggressive regularisation
+for a network this small; this is appropriate given the
+per-dekad sample size, discussed below.
+
+The model is trained one per dekadal window on the LSEQM-corrected
+field as input and the CPC-UNI reference as target. Loss is
+mean squared error computed at extreme pixels only, the Adam
+optimizer \citep{ref:kingma2014} drives the parameter update,
+and an internal $80/20$ train-validation split with early
+stopping (patience of five epochs) controls the number of
+training epochs. Thirty-six independent models are produced
+and saved for inference. The per-dekad training sample is
+approximately 200 days for training and 50 days for validation
+after the split. The split is implemented as a random
+within-dekad partition rather than a strict temporal hold-out,
+so the train and validation samples are drawn from the same
+2001 to 2025 range; this is a deliberate compromise that
+preserves sample size at the cost of not testing
+out-of-distribution generalisation strictly. The batch size
+is auto-shrunk at training time if the configured value would
+require more than approximately 2~GB per batch on the
+$171 \times 461$ Indonesian grid, which it typically does at
+default settings.
+
+Three properties of the design constrain the role of the CNN.
+First, it operates only above the GPD threshold; sub-threshold
+pixels pass through the LSEQM result unchanged. Second, its
+output is blended with the LSEQM result rather than replacing
+it, under a default weight $\alpha = 0.70$ for LSEQM and
+$1 - \alpha = 0.30$ for CNN. Third, the blending weight is
+modulated by a station-density confidence mask described in
+Section~\ref{sec:methods-blending}, so that the CNN contribution
+is suppressed in regions where the CPC reference itself is
+weakly constrained by the contributing gauge network. These
+three constraints together mean the CNN refines rather than
+replaces the statistical baseline: it cannot undo the work of
+the earlier stages, and the framework reduces cleanly to LSEQM
+when the blend weight is set to $\alpha = 1$, which is the
+ablation row reported in the sensitivity analysis of
+Section~\ref{sec:results-sensitivity}. The blend weight
+$\alpha = 0.70$ and the dependence on station density are
+design choices that were not formally optimized; their
+sensitivity is reported in
+Section~\ref{sec:results-sensitivity}.
+
+Three implementation quirks are worth flagging for any reader
+who plans to extend or reuse the CNN component. First, the
+choice of mean squared error rather than mean absolute error
+penalises large deviations more heavily, which is the right
+loss when the goal is to fit the upper tail of the
+precipitation distribution; a defensible alternative would be
+a quantile loss focused on the same tail, but this was not
+tried. Second, the saved model expects a fixed input shape
+matching the $171 \times 461$ Indonesian grid; transferring
+the framework to a different domain or grid resolution
+requires retraining rather than direct inference. Third, a
+spatial diagnostic of per-dekad CNN validation loss across the
+36 dekadal windows would surface seasons in which the CNN
+contribution is weaker because the training extreme-event
+sample is thinner (typically dry-season dekads with few
+heavy-rain events); such a diagnostic is not formally produced
+in the present study and is flagged in
+Section~\ref{sec:methods-cnn} as a useful supplementary
+artefact for future work.
+
+Figure~\ref{fig:cnn-arch} shows the CNN architecture in detail
+alongside the station-density-aware blending mechanism that
+Section~\ref{sec:methods-blending} formalises: the upper region
+of the figure presents the Conv2D-MaxPool-Dropout backbone and
+the Flatten-Dense reconstruction head described above, the
+centre presents the alpha-blending equation that combines the
+CNN output with the LSEQM intermediate, and the lower region
+presents the station-density confidence-mask construction.
+
+% Fig 3.3: dedicated page, image rotated 90 deg to occupy the page height
+% as its new width. The original PNG is landscape-oriented; rotating it
+% lets the reader see the full diagram at print scale without reducing it
+% to thumbnail size on the body text width.
+\begin{figure}[p]
+\centering
+\rotatebox{90}{%
+  \includegraphics[width=\figThreeThreeWidth\textheight]{fig_thesis_03_cnn_workflow.png}%
+}
+\caption[Stage~4 architecture in detail: the Convolutional Neural Network forward pass (top), the alpha-blending step]{Stage~4 architecture in detail: the Convolutional
+Neural Network forward pass (top), the alpha-blending step that
+combines the CNN refinement with the LSEQM intermediate
+(centre), and the station-density confidence-mask construction
+(bottom). The training configuration and key behavioural rules
+are summarised in the sidebars. The blending and confidence-mask
+construction are formalised in
+Section~\ref{sec:methods-blending}.\label{fig:cnn-arch}}
+\end{figure}
+
+Figure~\ref{fig:stage-demo} shows the effect of the four stages
+on an illustrative 60-day sample, arranged in a $3 \times 3$
+grid. The reference shown in the figure is the CPC-UNI
+calibration target the pipeline acts on; the independent
+out-of-sample validation against 171 BMKG stations is reported
+in Chapter~\ref{chap:results}. The first row walks through the
+early stages on the time-series view and includes a dedicated
+mechanism panel for quantile mapping; the second row collects
+distribution diagnostics across the EQM and GPD stages; the
+third row covers the CNN refinement, the final corrected output,
+and the headline metric summary. The data are synthetic for
+illustration; the empirical numbers for the BMKG validation
+appear in Chapter~\ref{chap:results}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figThreeFourWidth\textwidth]{fig_thesis_03_stage_demonstration.png}
+\caption[Illustrative effect of the LSEQM+DL pipeline stages applied to a synthetic 60-day daily-precipitation sample]{Illustrative effect of the LSEQM+DL pipeline stages
+applied to a synthetic 60-day daily-precipitation sample. The
+reference shown throughout panels (a) through (h) is the CPC-UNI
+calibration target; independent out-of-sample validation against
+171 BMKG stations is reported in Chapter~\ref{chap:results}.
+(a)~Raw IMERG against the CPC-UNI reference: the satellite
+over-detects light rain and under-shoots heavy events.
+(b)~After Stage~1 LS: dekadal means match. (c)~Stage~2 EQM
+mechanism: the LS-source and CPC-UNI target Gamma cumulative
+distribution functions plotted on the same axis, with arrows at
+selected quantiles (0.40, 0.70, 0.92) marking the
+source-to-target value mapping that defines quantile mapping.
+(d)~After Stage~2 EQM applied: the marginal distribution aligns
+with the reference in the time-series view. (e)~Stage~3 GPD:
+wet-day quantile profile showing the EQM-only fit (blue squares)
+staying short of the reference tail and the GPD-lifted profile
+(amber triangles) recovering the upper tail above the
+80th-percentile threshold. (f)~Wet-day empirical cumulative
+distribution functions overlaid across all stages, showing
+convergence toward the CPC-UNI CDF. (g)~Stage~4 CNN refinement
+at extreme pixels (scatter against the LSEQM intermediate value,
+blended at $\alpha = 0.70$). (h)~Final LSEQM+DL output against
+the CPC-UNI reference. (i)~Deviation of relative bias,
+$\mathrm{SDR} - 1$, and $Q_{99}$ ratio $- 1$ from the target
+value of zero at each successive stage. Synthetic data; empirical
+out-of-sample values against BMKG appear in
+Chapter~\ref{chap:results}.\label{fig:stage-demo}}
+\end{figure}
+
+
+% ------------------------------------------------------------
+\section{Station-Density-Aware Blending}\label{sec:methods-blending}
+% ------------------------------------------------------------
+
+The CNN refinement in Stage~4 is trained against CPC-UNI, and
+the quality of CPC-UNI itself depends on the local density of
+contributing gauges. Over Java and southern Sumatra the
+contributing network is dense and CPC-UNI is a well-constrained
+reference. Over Papua, Maluku, and eastern Nusa Tenggara the
+network is sparse and CPC-UNI is essentially a smooth-field
+reconstruction from few stations. Training a CNN to refine
+extremes against such a reference, and then applying the CNN at
+its nominal weight everywhere, would let reference uncertainty
+in sparse regions propagate into the corrected product. The
+blending stage addresses this by making the CNN-versus-LSEQM
+weight depend on local gauge density rather than on a constant.
+This is a design choice introduced to make the framework
+deployable beyond Java without per-region hand-tuning, and is
+not claimed as a key contribution of the present work.
+
+Let $C(x, y) \in [0, 1]$ denote a station-density confidence
+field constructed once for the domain and cached. The final
+corrected value at every pixel above the GPD threshold is the
+density-weighted blend of the LSEQM result and the CNN refinement:
+\begin{equation}
+P_{\text{final}}(x, y, t) =
+\alpha_{\text{eff}}(x, y) \cdot P_{\text{LSEQM}}(x, y, t)
++ (1 - \alpha_{\text{eff}}(x, y)) \cdot P_{\text{CNN}}(x, y, t),
+\label{eq:blend}
+\end{equation}
+where the effective blend weight $\alpha_{\text{eff}}$ modulates
+the nominal value $\alpha = 0.70$ by the confidence field:
+\begin{equation}
+\alpha_{\text{eff}}(x, y) = 1 - C(x, y) \cdot (1 - \alpha).
+\label{eq:alpha-eff}
+\end{equation}
+Equation~\ref{eq:alpha-eff} has the following behaviour across
+the confidence range:
+\begin{itemize}[noitemsep, topsep=0pt]
+    \item $C = 1$ gives $\alpha_{\text{eff}} = 0.70$, the
+    nominal $30\%$ CNN contribution where the reference is
+    well-constrained by the contributing gauge network.
+    \item $C = 0.5$ gives $\alpha_{\text{eff}} = 0.85$, a
+    $15\%$ CNN contribution at intermediate gauge density.
+    \item $C = 0$ gives $\alpha_{\text{eff}} = 1.00$, pure
+    LSEQM with the CNN fully suppressed where the reference is
+    weak.
+\end{itemize}
+The relationship between confidence and effective weight is
+linear and continuous across this range. The blend is applied
+only to pixels above the GPD threshold from
+Section~\ref{sec:methods-gpd}; sub-threshold pixels pass
+through the LSEQM result unchanged.
+
+The confidence field $C(x, y)$ is built in three steps. First,
+the stations that contribute to the CPC-UNI gauge analysis are
+counted within each $0.5^{\circ}$ CPC cell. The relevant
+network is the CPC-UNI contributing-station list, which
+controls how well the reference is constrained at each cell; it
+is not the 171-station BMKG validation network of
+Section~\ref{sec:methods-data}, which serves a separate purpose
+in out-of-sample verification. The two networks overlap
+substantially but are not identical. Second, the count field is smoothed with
+a Gaussian filter of standard deviation $\sigma = 1$ cell, which
+corresponds to an e-folding distance of approximately 55~km at
+0.5$^{\circ}$ resolution. The smoothing scale is matched to the
+CPC-UNI interpolation scale so that the confidence field is
+defined at the spatial frequency at which the reference itself
+is resolved. Third, the smoothed count is divided by a
+saturation parameter and clipped to the unit interval:
+\begin{equation}
+C(x, y) = \min\!\left(
+\frac{(\text{count} \ast G_{\sigma=1})(x, y)}{c_{\text{sat}}},
+\; 1
+\right),
+\label{eq:confidence}
+\end{equation}
+where $G_{\sigma=1}$ is the Gaussian smoothing kernel and
+$c_{\text{sat}} = 2$ is the saturation parameter used in the
+present study. The confidence field is then bilinearly
+interpolated from the 0.5$^{\circ}$ CPC grid to the
+0.1$^{\circ}$ IMERG grid, matching the BCSD strategy applied
+elsewhere in the pipeline. The field is computed once, cached as
+a NetCDF artefact at \texttt{data/output/station\_density/}, and
+reused for every dekadal window and every method.
+
+Both the nominal blend weight $\alpha = 0.70$ and the saturation
+parameter $c_{\text{sat}} = 2$ are sensitivity parameters that
+were not formally optimized. An earlier configuration of the
+pipeline used $c_{\text{sat}} = 3$; qualitative inspection of
+the resulting CNN-active fraction across the domain showed that
+the higher value suppressed CNN refinement almost everywhere
+outside Java and removed the contribution the CNN was designed
+to provide, and the default was therefore reduced to 2 for the
+present study. The other endpoint is similarly avoided: a lower
+parameter (such as $c_{\text{sat}} = 1$) would extend CNN
+influence into regions where the CPC reference is too sparse to
+support training, which is the failure mode the
+station-density-aware blending design is specifically intended
+to avoid. The chosen value of $c_{\text{sat}} = 2$ sits at a
+defensible empirical balance for Indonesia, and
+Section~\ref{sec:results-sensitivity} reports the metric
+response to sweeps across both parameters.
+
+
+% ------------------------------------------------------------
+\section{Reproducible Implementation Design}\label{sec:methods-reproducibility}
+% ------------------------------------------------------------
+
+The first three sections describe the pipeline as an algorithm.
+This section describes it as a software artefact. Reproducibility
+is treated here as a parallel methodological contribution of the
+thesis: every result reported in Chapter~\ref{chap:results} maps
+to a specific function in the source codebase, a specific cell
+in a numbered notebook, and a specific configuration value in
+\texttt{config.yml}. The empirical demonstration of end-to-end
+re-runnability is given in
+Section~\ref{sec:results-reproducibility}; this section
+describes the design that supports it.
+
+\subsection{Module architecture}
+
+The Python implementation is partitioned into ten modules under
+\texttt{src/}, each with a single responsibility:
+\texttt{config} (path and parameter resolution),
+\texttt{io} (NetCDF and CSV input and output),
+\texttt{utility} (land-mask, lat-flip, sentinel handling),
+\texttt{bias\_correction} (LS and EQM stages),
+\texttt{distribution\_fitting} (Gamma and GPD parameter
+estimation via maximum likelihood, with the subsample-averaging
+aggregator for small exceedance samples),
+\texttt{deep\_learning} (CNN architecture, training loop, and
+inference),
+\texttt{station\_density} (confidence-mask construction),
+\texttt{metrics} (the 31-metric verification catalogue),
+\texttt{qa\_framework} (Composite Quality Index assembly), and
+\texttt{station\_validation} (per-station extraction and
+pairing). Each module is importable and exposes a small number
+of named entry points; no inline function definitions appear in
+the notebooks.
+
+\subsection{Configuration-driven design}
+
+All paths and parameters are declared in a single YAML file at
+the project root, \texttt{config.yml}. A loader,
+\texttt{initialize\_config()}, resolves placeholders such as
+\texttt{\{main\_dir\}}, \texttt{\{input\_dir\}}, and
+\texttt{\{output\_dir\}} to absolute paths at run time. The
+sensitivity parameters acknowledged earlier in this chapter
+($\alpha = 0.70$, the 80th-percentile GPD threshold, and
+$c_{\text{sat}} = 2$) are exposed as named entries in
+\texttt{config.yml}, so a sensitivity sweep is a configuration
+edit followed by a re-run, with no code changes. The same
+configuration file controls the dataset paths, the output
+directory layout, the metric pillars, the CNN architecture
+hyperparameters, and the per-method output filenames.
+
+\subsection{Notebook workflow}
+
+The pipeline is exposed through six numbered Jupyter notebooks
+under \texttt{notebooks/}: 01 (data acquisition), 02 (LSEQM+DL
+bias correction), 03 (performance measurement), 04 (QA
+framework), 05 (QA visualisation), and 06 (station validation).
+Each notebook follows a
+consistent style: short Markdown section headers, small code
+cells with a single concern per cell, and calls into the
+\texttt{src/} modules rather than inline implementations. The
+batch-execution cells at the end of each notebook loop over the
+36 dekadal windows with \texttt{try-except} guards so that a
+failure in one window does not interrupt the others. The same
+notebook can be opened in a local Jupyter installation or in
+JupyterLab; the behaviour is the same because the configuration
+file is identical across environments.
+
+\subsection{Documentation site}
+
+The \texttt{docs/} directory is a Quarto project that serves as
+the documentation site for the framework. The site is structured
+into sections that mirror this chapter: \textit{get-started},
+\textit{methodology}, \textit{implementation}, \textit{technical},
+\textit{example (Bali)}, and \textit{FAQ}. Each documentation page
+is cross-linked to the specific notebook cell and source-code
+function it describes, so a reader following the documentation can
+move directly to the runnable artefact and back. The source code,
+notebooks, and documentation are released openly on GitHub under
+the Mozilla Public License 2.0, and the full Indonesia input and
+output data are deposited on Zenodo with a citable DOI
+(Appendix~\ref{app:code}); the documentation site is the
+recommended entry point for any reader who wants to run or extend
+the pipeline.
+
+\subsection{Environment specification}
+
+The Python environment is declared in \texttt{environment.yml}
+with pinned versions for the core scientific packages
+(\texttt{numpy}, \texttt{xarray}, \texttt{scipy},
+\texttt{scikit-learn}, \texttt{tensorflow}, \texttt{keras},
+\texttt{lmoments3}). The environment was tested on a Windows
+local installation with a Conda environment named
+\texttt{climate}. Hardware-dependent paths in the CNN training
+step are auto-detected at runtime.
+
+Together, these five elements (module architecture, configuration
+file, numbered notebooks, documentation site, and
+pinned environment) form the reproducibility design of the
+framework. Section~\ref{sec:results-reproducibility} demonstrates
+that an end-to-end re-run from the published source reproduces
+the headline numbers in Chapter~\ref{chap:results} to within the
+floating-point tolerance of the underlying libraries.
+
+
+% ------------------------------------------------------------
+\section{Validation Framework}\label{sec:methods-validation}
+% ------------------------------------------------------------
+
+\subsection{Two-tier validation}
+
+The corrected satellite product is evaluated at two tiers. The
+first tier compares the corrected satellite against CPC-UNI on
+the native CPC 0.5$^{\circ}$ grid; this is an in-sample comparison
+because CPC-UNI is the correction reference, and it tests
+whether the pipeline successfully matches the training target.
+The second tier compares the corrected satellite against the 171
+BMKG stations on a per-station basis; this is an out-of-sample
+comparison because no BMKG station enters the correction step
+directly. All headline skill numbers in Chapter~\ref{chap:results}
+are computed at the second tier, and the in-sample comparison
+is used only as a sanity check that the pipeline did not fail to
+fit its training target.
+
+The independence framing in Section~\ref{sec:methods-data} carries
+through here: some BMKG stations are present in the CPC-UNI
+contributing list, so the two networks are not statistically
+independent in a strict sense, but the second tier compares
+satellite values extracted at the BMKG station pixel against the
+station's own daily record, bypassing the CPC interpolation
+entirely. The metric is therefore answering whether the
+corrected satellite reproduces the original point observations,
+not whether it reproduces the gridded reference.
+
+\subsection{Dekadal pooling}
+
+The 2001 to 2025 study window is partitioned into 36 dekadal
+windows per calendar year: three windows per month, with the
+first comprising days 1 to 10, the second days 11 to 20, and
+the third days 21 to the end of the month. The 25 years are
+pooled within each dekadal window to give approximately 250
+paired daily observations per pixel and per window. The
+pooling serves two purposes. First, it gives the
+distribution-fitting steps in Stages~2 and 3 a sample size
+above the operational floor for stable Gamma and GPD fits
+\citep{ref:wilks2011, ref:hoskingwallis1997}. Second, it produces
+verification statistics whose noise floor is small enough for
+between-stage differences to be interpretable: with $n \approx
+250$ paired daily observations the Fisher $z$-transform standard
+error on Pearson correlation is approximately $\pm 0.06$, which
+is well below the inter-stage shifts the pipeline is designed to
+produce on the amplitude-related metrics.
+
+Within a dekadal window the partitioning trades inter-annual
+variability against intra-dekad seasonal variability. The
+implicit assumption is that the bias structure within a fixed
+dekadal window is statistically stationary across the 25 years.
+This assumption is examined directly in
+Section~\ref{sec:results-temporal} (temporal stability across
+dekads), which reports the inter-dekad variability of the
+headline metrics.
+
+\subsection{Station-level extraction}
+
+For each BMKG station, the corrected satellite series is
+extracted at the station's reported latitude and longitude on
+the 0.1$^{\circ}$ IMERG grid; no spatial averaging is applied.
+The satellite day~$t$ is paired with the station day~$t$ in
+calendar terms, with no temporal offset beyond the UTC
+aggregation already applied to the native half-hourly IMERG
+inputs. The station daily values are filtered to remove the
+sentinel-coded missing days (Section~\ref{sec:methods-data})
+before pairing. The resulting paired series feeds every
+out-of-sample metric reported in Chapter~\ref{chap:results}.
+
+\subsection{Reporting conventions}
+
+Headline numbers in Chapter~\ref{chap:results} are pooled
+across the 171 stations and the 36 dekadal windows unless stated
+otherwise. Per-region and per-pillar breakdowns are reported in
+the appropriate subsections of Chapter~\ref{chap:results} where
+the spatial or pillar-level pattern is the object of analysis.
+The compact 10-metric subset used for the headline table in
+Section~\ref{sec:results-headline} is described in
+Section~\ref{sec:methods-metrics}; the full 31-metric catalogue
+underlies the Composite Quality Index spatial maps in
+Section~\ref{sec:results-cqi}.
+
+
+% ------------------------------------------------------------
+\section{Verification Metric Catalogue}\label{sec:methods-metrics}
+% ------------------------------------------------------------
+
+The framework computes 31 pixel-level verification metrics
+grouped into four pillars: \textit{value adjustment},
+\textit{distribution alignment}, \textit{extreme preservation},
+and \textit{event detection} \citep{ref:wilks2011, ref:ebert2007}.
+A compact 10-metric subset summarises the headline skill in
+Section~\ref{sec:results-headline}; the full catalogue feeds the
+Composite Quality Index spatial maps in
+Section~\ref{sec:results-cqi}. Pearson correlation between paired
+daily values is reported separately as a temporal-skill
+diagnostic, not as part of the four pillars; the reason for this
+separation becomes the centerpiece of Chapter~\ref{chap:results}
+and Chapter~\ref{chap:discussion}.
+
+\subsection{Value adjustment}
+
+Two metrics test whether the corrected satellite reproduces the
+gauge first and second moments. The relative bias (RB) compares the
+sample means:
+\begin{equation}
+\text{RB} = \frac{\overline{P}_{\text{sat}} - \overline{P}_{\text{obs}}}{\overline{P}_{\text{obs}}},
+\label{eq:rb}
+\end{equation}
+with target value zero. The standard deviation ratio (SDR)
+compares the sample spreads:
+\begin{equation}
+\text{SDR} = \frac{\sigma_{\text{sat}}}{\sigma_{\text{obs}}},
+\label{eq:sdr}
+\end{equation}
+with target value unity. RB is the metric the LS stage is
+designed to move; SDR is the metric the EQM and CNN stages are
+expected to move toward unity.
+
+\subsection{Distribution alignment}
+
+The distribution-alignment pillar tests whether the corrected
+satellite series and the gauge series come from the same
+distribution. The Kolmogorov-Smirnov (KS) test
+\citep{ref:wilks2011} compares the empirical cumulative
+distribution functions $\hat{F}_{\text{sat}}$ and
+$\hat{F}_{\text{obs}}$ through their maximum vertical separation:
+\begin{equation}
+D_{\text{KS}} = \sup_{x}
+\left| \hat{F}_{\text{sat}}(x) - \hat{F}_{\text{obs}}(x) \right|,
+\label{eq:ks}
+\end{equation}
+and the reported value is the associated $p$-value, with the
+convention that a $p$-value above $0.05$ indicates distributions
+that are not statistically distinguishable at the $95\%$
+confidence level. The wet-day frequency ratio (WF) tests whether
+the corrected series reproduces the gauge fraction of rainy days,
+\begin{equation}
+\text{WF} = \frac{f_{\text{wet,sat}}}{f_{\text{wet,obs}}},
+\label{eq:wetfreq}
+\end{equation}
+with target unity, where $f_{\text{wet}}$ is the fraction of days
+exceeding the $1$~mm/day wet-day threshold. The wet-day intensity
+ratio (WI) tests the mean rainfall on wet days,
+\begin{equation}
+\text{WI} = \frac{\overline{I}_{\text{wet,sat}}}
+                 {\overline{I}_{\text{wet,obs}}},
+\label{eq:wetint}
+\end{equation}
+again with target unity, where $\overline{I}_{\text{wet}}$ is the
+mean precipitation over wet days only. Six percentile ratios at
+the 10th, 25th, 50th, 75th, 90th, and 95th wet-day percentiles
+complete the distributional comparison; each is the ratio of the
+corresponding quantile,
+\begin{equation}
+R_q = \frac{Q_q^{\text{sat}}}{Q_q^{\text{obs}}},
+\label{eq:pctlratio}
+\end{equation}
+with target unity at every $q$.
+
+\subsection{Extreme preservation}
+
+The extreme-preservation pillar focuses on the upper tail of the
+distribution, which is the segment that drives flood and drought
+thresholds in operational use. The $Q_{95}$ and $Q_{99}$ ratios
+are the percentile ratio of Equation~\eqref{eq:pctlratio}
+evaluated at $q = 95$ and $q = 99$, with target unity. In
+addition, multi-threshold verification at seven thresholds
+(1, 5, 10, 20, 50, 100, and 150 mm/day) reports the categorical
+skill of the corrected series following the World Meteorological
+Organization (WMO) verification standard TD-1485
+\citep{ref:wmo1485}. At each threshold, hits $H$, false alarms
+$F$, misses $M$, and correct negatives $Z$ are counted from the
+$2 \times 2$ contingency table, from which the threshold-resolved
+probability of detection (POD), critical success index (CSI), and
+false alarm ratio (FAR) follow by Equations~\eqref{eq:pod}--\eqref{eq:far}
+applied at that threshold. The equitable threat score (ETS),
+which removes the hits expected by chance, completes the
+threshold-resolved set:
+\begin{equation}
+\text{ETS} = \frac{H - H_{\text{rand}}}{H + M + F - H_{\text{rand}}},
+\qquad
+H_{\text{rand}} = \frac{(H + M)(H + F)}{N},
+\label{eq:ets}
+\end{equation}
+where $N = H + M + F + Z$ is the total number of day-pixel pairs
+at the threshold and $H_{\text{rand}}$ is the expected hit count
+under random forecasting. ETS has target unity and a no-skill
+value of zero.
+
+\subsection{Event detection}
+
+The event-detection pillar reports the contingency-table-based
+categorical metrics aggregated across all wet days, that is,
+without an explicit threshold dependence:
+\begin{align}
+\text{POD} &= \frac{H}{H + M}, \label{eq:pod} \\
+\text{CSI} &= \frac{H}{H + M + F}, \label{eq:csi} \\
+\text{FAR} &= \frac{F}{H + F}, \label{eq:far}
+\end{align}
+where $H$ is the number of hits, $M$ misses, and $F$ false
+alarms, all counted at the wet-day threshold of the reference.
+Target values are unity for POD and CSI, zero for FAR.
+Threshold-resolved versions of these metrics, reported in
+Section~\ref{sec:results-threshold}, allow the trade-off between
+light-rain and heavy-rain skill to be quantified separately.
+
+\subsection{Composite Quality Index}
+
+The 31-metric catalogue is aggregated into a single per-pixel
+Composite Quality Index (CQI) for spatial mapping and qualitative
+comparison across regions and methods. The CQI used in this
+study is the weighted aggregate of three sub-scores defined in
+the source code (\texttt{src/qa\_framework.py}): a Basic
+Statistical Quality sub-score (BSQS), a Distribution Quality
+sub-score (DQS), and a Temporal Quality sub-score (TQS). Each
+sub-score is a weighted sum of normalised component scores
+(each mapped to the $[0, 1]$ range, with $1$ best):
+\begin{align}
+\text{BSQS} &= 0.30\,S_{\text{RB}} + 0.30\,S_{\text{RMSE}}
+             + 0.40\,S_{\text{NSE}}, \label{eq:bsqs} \\
+\text{DQS}  &= 0.45\,S_{\text{extreme}} + 0.25\,S_{\text{general}}
+             + 0.15\,S_{\text{var}} + 0.15\,S_{\text{KS}},
+             \label{eq:dqs} \\
+\text{TQS}  &= 0.40\,S_{\text{CSI}} + 0.30\,S_{\text{event}}
+             + 0.30\,S_{\text{spell}}, \label{eq:tqs}
+\end{align}
+where $S_{\text{extreme}}$ aggregates the $Q_{90}/Q_{95}/Q_{99}$
+percentile-ratio scores (with $Q_{99}$ weighted most heavily),
+$S_{\text{general}}$ the $Q_{25}/Q_{50}/Q_{75}$ scores,
+$S_{\text{var}}$ the standard-deviation-ratio score,
+$S_{\text{KS}}$ the KS-test score, and $S_{\text{event}}$ is the
+combination $0.6\,\text{POD} + 0.4\,(1 - \text{FAR})$. The three
+sub-scores combine into the CQI with the component weights set in
+\texttt{config.yml}:
+\begin{equation}
+\text{CQI} = 0.40\,\text{BSQS} + 0.30\,\text{DQS}
+           + 0.30\,\text{TQS}.
+\label{eq:cqi}
+\end{equation}
+The CQI construction follows the parallel manuscript
+\citep{ref:istanto2026mdpi}\MDPIstatus and is reused here without
+modification, with the component weights taken from the
+configuration file that the pipeline executes
+($0.40/0.30/0.30$) rather than the bare function-signature
+default.
+
+The three-sub-score CQI and the four-pillar verification
+catalogue serve different purposes and group metrics
+differently. The four-pillar catalogue is a reporting structure:
+it groups metrics by the \textit{bias dimension} each metric
+diagnoses (value adjustment, distribution alignment, extreme
+preservation, event detection) and supports the stage-by-stage
+attribution argument in Chapter~\ref{chap:results}. The CQI is a
+\textit{spatial aggregation} object: its three sub-scores group
+metrics by the type of statistical question each answers (basic
+moments, distributional fit, temporal categorical skill) and
+support the spatial mapping in
+Section~\ref{sec:results-cqi}. The two groupings overlap, for
+example $Q_{99}$ appears in the extreme-preservation pillar and
+in the DQS sub-score, but they are not identical and need not
+be: the headline numbers reported in
+Section~\ref{sec:results-headline} use the four-pillar grouping,
+while the spatial maps in Section~\ref{sec:results-cqi} use the
+three-sub-score CQI.
+
+\subsection{Pearson correlation as a separate diagnostic}
+
+The per-pixel Pearson correlation between the paired daily
+satellite and station observations is reported separately from
+the four pillars. For paired daily values $(x_t, y_t)$ at the
+same pixel,
+\begin{equation}
+r = \frac{\sum_t (x_t - \bar{x})(y_t - \bar{y})}
+         {\sqrt{\sum_t (x_t - \bar{x})^2}\,
+          \sqrt{\sum_t (y_t - \bar{y})^2}},
+\label{eq:pearson}
+\end{equation}
+with target unity. Two further temporal-skill diagnostics
+accompany it: the root mean square error (RMSE),
+\begin{equation}
+\text{RMSE} = \sqrt{\frac{1}{n}\sum_t (x_t - y_t)^2},
+\label{eq:rmse}
+\end{equation}
+with target zero, and the Nash-Sutcliffe efficiency (NSE)
+\citep{ref:nashsutcliffe1970},
+\begin{equation}
+\text{NSE} = 1 - \frac{\sum_t (y_t - x_t)^2}
+                      {\sum_t (y_t - \bar{y})^2},
+\label{eq:nse}
+\end{equation}
+with target unity, where $x_t$ is the corrected satellite value,
+$y_t$ the gauge observation, and $\bar{y}$ the gauge mean. The
+reason for separating these three from the four pillars is
+structural: each measures the day-by-day pairing between two
+series and is therefore a temporal-skill diagnostic, whereas the
+four pillars measure properties of the marginal distribution at
+each pixel without regard to the day-by-day pairing. Because the
+LSEQM+DL pipeline is a marginal-distribution correction, it is
+expected to move the four pillars and to leave Pearson
+correlation bounded by the day-by-day pairing of the raw IMERG
+input. The empirical verification of this expectation is the
+core finding of Chapter~\ref{chap:results}, and its theoretical
+basis is developed in Chapter~\ref{chap:discussion}.
+
+Sampling uncertainty on Pearson correlation is reported using
+the Fisher $z$-transform standard error
+$\text{SE}(z) = 1/\sqrt{n - 3}$, evaluated at $n \approx 250$ to
+give $\pm 0.06$. This uncertainty band frames the inter-stage
+shifts in Pearson correlation reported in
+Section~\ref{sec:results-correlation}.
+
+
+% ------------------------------------------------------------
+\section*{Chapter summary}
+% ------------------------------------------------------------
+
+This chapter described the LSEQM+DL pipeline in algorithmic
+form and as a software artefact. The four-stage pipeline matches
+one correction stage to each of the three marginal-distribution
+bias dimensions (LS for the mean, EQM with Gamma for the bulk,
+GPD for the tail) and adds a spatial-refinement stage (CNN) for
+the extreme pixels. A station-density-aware blending step
+modulates the CNN contribution by local gauge density, so the
+pipeline degrades gracefully to LSEQM in regions where the
+reference is weak. The implementation is partitioned into
+single-responsibility modules, driven by a single configuration
+file, exposed through six numbered notebooks, and documented
+through a Quarto site. Validation against 171 out-of-sample BMKG stations
+pools across 36 dekadal windows and 25 years to give the sample
+size needed for stable distribution fits and small noise floors
+on the headline metrics. The 31-metric verification catalogue is
+grouped into four pillars and a separately-reported temporal-skill
+diagnostic; the four pillars are the metrics the pipeline is
+designed to move, and the temporal-skill diagnostic is the metric
+the pipeline is not designed to move. The Chapter~\ref{chap:results}
+results are organised around this division.
+
+
+
+
+% ============================================================
+% END OF SKELETON
+%
+% Estimated total prose word count when filled: ~4,500-6,500 words
+% Estimated final page count: 15-20 pages
+%
+% Cross-references this chapter creates (Sections that reference it):
+%   - Section 4.1, 4.2, 4.3 (Results, headline skill) <- Section 3.6
+%   - Section 4.8 (Sensitivity analyses) <- Section 3.2 (alpha, GPD),
+%     Section 3.3 (saturation_count)
+%   - Section 4.9 (Reproducibility evaluation) <- Section 3.4
+%   - Section 5.1 (Theoretical bound) <- Section 3.6 (Pearson r as
+%     separate diagnostic, framing it for the paradox)
+%
+% Cross-references this chapter expects from Lit Review:
+%   - Section 2.1 (IMERG products) -> 3.1 (data)
+%   - Section 2.3 (bias correction methods) -> 3.2 (pipeline stages)
+%   - Section 2.5 (reproducibility) -> 3.4 (implementation)
+%
+% ============================================================

@@ -1,0 +1,338 @@
+% ============================================================
+% frontmatter.tex - pages before Chapter 1 (IPB PPKI)
+%
+% Order:  cover -> inner title -> declaration -> copyright -> preface
+%      -> summary (English) -> ringkasan (Indonesian) -> acknowledgements
+%      -> Table of Contents -> List of Tables -> List of Figures
+%      -> List of Appendices.
+% Numbering: roman counter throughout; numbers HIDDEN on cover through
+%            acknowledgements; VISIBLE from Table of Contents onward.
+% Layout:    cover and inner title use a 5 cm top / 3 cm bottom content
+%            box with proportional spacing between blocks.
+% Included by main_thesis.tex via \include{frontmatter}.
+% License:   CC BY 4.0 (see ../LICENSE).
+% ============================================================
+% ============================================================
+\pagenumbering{roman}
+\pagestyle{empty}
+% Cover -> Acknowledgements are single-sided with a fixed 4 cm left margin (no
+% mirror). Explicit left/right (not inner/outer) keeps the margin fixed
+% across all these pages; \restoregeometry before the TOC brings back the
+% two-sided mirror (inner 4 cm / outer 3 cm) for the rest of the thesis.
+\newgeometry{left=4cm, right=3cm, top=3cm, bottom=3cm}
+
+% ----- Page 1: Cover -----
+\thispagestyle{empty}
+\vspace*{1cm}   % 3 cm top margin + 2 cm = 5 cm from the top edge
+\begin{center}
+  {\fontsize{14}{17}\selectfont\bfseries
+   HOW FAR CAN BIAS CORRECTION IMPROVE\\
+   DAILY SATELLITE PRECIPITATION?\par}
+  \vfill
+  {\fontsize{14}{17}\selectfont\bfseries BENNY ISTANTO\par}
+  \vfill
+  \includegraphics[width=2.5cm]{ipb.png}
+  \vfill
+  {\fontsize{14}{17}\selectfont\bfseries
+   APPLIED CLIMATOLOGY STUDY PROGRAM\\
+   FACULTY OF MATHEMATICS AND NATURAL SCIENCES\\
+   BOGOR AGRICULTURAL UNIVERSITY\\
+   BOGOR\\
+   2026\par}
+\end{center}
+\clearpage
+
+% ----- Page 2: one intentional blank leaf after the cover (IPB) -----
+\thispagestyle{empty}\null\clearpage
+
+% ----- Declaration on the thesis and copyright transfer -----
+\thispagestyle{empty}
+\begin{center}
+  {\fontsize{14}{17}\selectfont\bfseries
+   DECLARATION ON THE MASTER'S THESIS AND\\
+   INFORMATION SOURCES AND COPYRIGHT TRANSFER\par}
+\end{center}
+\vspace{\baselineskip}
+
+I declare that the master's thesis with the title ``How Far Can Bias
+Correction Improve Daily Satellite Precipitation?'' is my work under the
+direction of the supervisors and has not been submitted in any form to
+any other university. Sources of information derived from or cited from
+published or unpublished work by other authors have been mentioned in
+the text and included in the References at the end of this thesis.
+
+I hereby transfer the copyright of my writing to Bogor Agricultural
+University.
+
+\vspace{\baselineskip}
+\begin{flushright}
+Bogor, June 2026\\[\baselineskip]
+Benny Istanto\\
+G2501222008
+\end{flushright}
+\clearpage
+
+% ----- Summary (English) -----
+\chapter*{SUMMARY}\thispagestyle{empty}
+\noindent BENNY ISTANTO. How Far Can Bias Correction Improve Daily
+Satellite Precipitation? Supervised by RIZALDI BOER and I PUTU
+SANTIKAYASA.
+
+\medskip
+Daily satellite precipitation underpins flood early warning, drought
+monitoring, and water-budget analysis, but the Integrated Multi-satellitE
+Retrievals for Global Precipitation Measurement (GPM) Late Run (IMERG-L)
+carries systematic biases over the Indonesian Maritime Continent. This thesis evaluates a four-stage hybrid
+bias correction pipeline: Linear Scaling (LS), Empirical Quantile
+Mapping (EQM) with a Gamma fit, Generalized Pareto Distribution (GPD)
+tail adjustment, and a station-density-aware Convolutional Neural
+Network (CNN) refinement, a Deep Learning (DL) architecture, denoted
+LSEQM+DL, applied to IMERG-L over Indonesia for $2001$ to $2025$, with
+gauge validation against $171$ independent stations of Indonesia's
+Meteorological, Climatological, and Geophysical Agency (BMKG).
+
+\medskip
+Against the out-of-sample BMKG network, three of the four verification
+pillars move close to the gauge target. Relative bias drops from
+$-11.4\%$ for the raw Linear-Scaling stage to $-0.6\%$ for LSEQM+DL, the
+standard-deviation ratio moves from $0.71$ to $1.00$, the
+Kolmogorov-Smirnov $p$-value rises from $0.01\%$ to $19\%$, and the
+ratios at the $95$th and $99$th percentiles move from $0.74$ and $0.71$
+to $1.05$ and $1.01$. Event detection shows a designed trade-off: the
+corrected product detects fewer light-rain events than the raw retrieval
+below $10$~mm/day but achieves higher critical success at every threshold
+above $20$~mm/day, with a $57\%$ Critical Success Index (CSI) gain at the $50$~mm/day
+threshold ($0.097$ versus $0.062$), the regime in which BMKG flood
+early-warning advisories operate.
+
+\medskip
+One diagnostic does not move. The Pearson correlation between paired
+daily satellite and gauge values stays near $0.34$ across all four stages
+and stays in the narrow band $[0.332, 0.348]$ across all fifteen settings
+of a Bali sensitivity sweep over the blending weight, the GPD threshold
+percentile, and the station-density saturation count. This is the
+predicted behaviour of marginal bias correction, where rank preservation
+and variance inflation without skill bound the attainable correlation at
+the timing quality of the raw retrieval. The corrected product is
+therefore suitable for applications that depend on the daily distribution
+and not for applications that depend on day-specific timing.
+
+\medskip
+The pipeline is released as an open, configuration-driven
+implementation whose reproducibility is demonstrated by re-executing
+the headline results end-to-end on free cloud infrastructure: the Bali
+subdomain ($9 \times 14$ grid at $0.1^{\circ}$, $80$ land pixels, all
+$36$ dekadal windows of the $2001$ to $2025$ record) completes in
+$72.1$ minutes on a standard Google Colab Central Processing Unit (CPU)
+runtime.
+
+\medskip
+\noindent Keywords: daily satellite precipitation, gauge validation,
+hybrid bias correction, IMERG, reproducibility
+\clearpage
+
+% ----- Ringkasan (Bahasa Indonesia) -----
+\chapter*{RINGKASAN}\thispagestyle{empty}
+\noindent BENNY ISTANTO. Sejauh Mana Koreksi Bias Mampu Memperbaiki Data
+Presipitasi Satelit Harian? Dibimbing oleh RIZALDI BOER dan I PUTU
+SANTIKAYASA.
+
+\medskip
+Produk satelit presipitasi harian menopang peringatan dini banjir,
+pemantauan kekeringan, dan analisis neraca air; namun, \emph{Integrated
+Multi-satellitE Retrievals for Global Precipitation Measurement} (GPM)
+\emph{Late Run} (IMERG-L) mengandung bias sistematis di Benua Maritim
+Indonesia. Penelitian ini mengevaluasi \emph{pipeline} koreksi bias
+hibrida empat tahap: \emph{Linear Scaling} (LS), \emph{Empirical
+Quantile Mapping} (EQM) berbasis sebaran Gamma, penyesuaian ekor
+dengan \emph{Generalized Pareto Distribution} (GPD), dan penyempurnaan
+berbasis \emph{Convolutional Neural Network} (CNN) yang
+mempertimbangkan kerapatan stasiun, sebuah arsitektur \emph{Deep
+Learning} (DL), disingkat LSEQM+DL. \emph{Pipeline} diterapkan pada
+IMERG-L di Indonesia untuk periode $2001$ hingga $2025$, dengan
+validasi terhadap $171$ stasiun Badan Meteorologi, Klimatologi, dan
+Geofisika (BMKG) yang tidak digunakan dalam koreksi.
+
+\medskip
+Terhadap jaringan BMKG yang dipisahkan untuk validasi, tiga dari empat
+pilar verifikasi bergerak mendekati target pengamatan stasiun: bias
+relatif dari $-11{,}4\%$ (LS) menjadi $-0{,}6\%$ (LSEQM+DL), rasio
+simpangan baku dari $0{,}71$ menuju $1{,}00$, nilai-$p$
+Kolmogorov-Smirnov dari $0{,}01\%$ menjadi $19\%$, serta rasio
+persentil ke-$95$ dan ke-$99$ dari $0{,}74$ dan $0{,}71$ menuju
+$1{,}05$ dan $1{,}01$. Pendeteksian kejadian menunjukkan
+\emph{trade-off} yang dirancang: produk terkoreksi mendeteksi lebih
+sedikit kejadian hujan ringan di bawah $10$~mm/hari, namun mencapai
+keberhasilan kritis yang lebih tinggi pada setiap ambang di atas
+$20$~mm/hari, dengan peningkatan \emph{Critical Success Index} (CSI)
+sebesar $57\%$ pada ambang $50$~mm/hari ($0{,}097$ dibanding
+$0{,}062$), yaitu rentang ambang yang relevan dengan peringatan dini
+banjir BMKG.
+
+\medskip
+Satu diagnostik tidak berubah: korelasi Pearson antara nilai harian
+satelit dan stasiun yang dipasangkan tetap pada $0{,}34$ di seluruh
+empat tahap dan dalam pita $[0{,}332;~0{,}348]$ di seluruh lima belas
+pengaturan \emph{sweep} sensitivitas Bali (bobot pencampuran, ambang
+GPD, saturasi kerapatan stasiun). Perilaku ini merupakan prediksi
+teoretis dari koreksi bias berbasis sebaran marginal: pemeliharaan
+peringkat dan inflasi ragam tanpa keterampilan temporal membatasi
+korelasi pada kualitas penentuan waktu \emph{retrieval} satelit
+mentah. Produk terkoreksi karenanya sesuai untuk aplikasi yang
+bergantung pada sifat sebaran, tetapi kurang sesuai untuk aplikasi
+yang bergantung pada ketepatan waktu harian.
+
+\medskip
+\emph{Pipeline} dirilis sebagai implementasi terbuka berbasis berkas
+konfigurasi; reproduktibilitasnya ditunjukkan dengan mengeksekusi
+ulang hasil utama secara menyeluruh pada infrastruktur awan gratis:
+\emph{subdomain} Bali ($9 \times 14$ piksel pada $0{,}1^{\circ}$, $80$
+piksel daratan, $36$ jendela dekadik $2001$-$2025$) selesai dalam
+$72{,}1$ menit pada \emph{Central Processing Unit} (CPU) standar
+Google Colab.
+
+\medskip
+\noindent Kata kunci: presipitasi satelit harian, validasi stasiun,
+koreksi bias hibrida, IMERG, reproduktibilitas
+\clearpage
+
+% ----- Copyright notice (bottom of page; prohibition spans full margin) -----
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+{\fontsize{14}{18}\selectfont\bfseries
+\textcopyright\ Copyright by IPB, 2026\\
+Copyright protected by Law\par}
+\end{center}
+\vspace{\baselineskip}
+\noindent\textit{It is prohibited to quote part or entire report without 
+mentioning or citing the source. The citation is only for the purposes 
+of education, research, writing scientific papers, compiling reports, 
+writing critiques, reviewing a problem, or public dissemination, and 
+the citation does not inflict harm to IPB.}
+\vspace*{2cm}
+\clearpage
+
+% ----- Inner (alternate) title page -----
+\thispagestyle{empty}
+\vspace*{1cm}   % 5 cm from the top edge
+\begin{center}
+  {\fontsize{14}{17}\selectfont\bfseries
+   HOW FAR CAN BIAS CORRECTION IMPROVE\\
+   DAILY SATELLITE PRECIPITATION?\par}
+  \vfill
+  {\fontsize{14}{17}\selectfont\bfseries BENNY ISTANTO\par}
+  \vfill
+  \begin{minipage}{0.75\textwidth}\centering
+  Thesis\\
+  submitted to the Applied Climatology Study Program\\
+  in fulfillment of the requirements\\
+  for the degree of Master of Science
+  \end{minipage}
+  \vfill
+  {\fontsize{14}{17}\selectfont\bfseries
+   APPLIED CLIMATOLOGY STUDY PROGRAM\\
+   FACULTY OF MATHEMATICS AND NATURAL SCIENCES\\
+   BOGOR AGRICULTURAL UNIVERSITY\\
+   BOGOR\\
+   2026\par}
+\end{center}
+\clearpage
+
+% ----- External examiners page (text at the bottom of the page) -----
+\clearpage
+\thispagestyle{empty}
+\vspace*{\fill}
+\noindent External, Non-Supervisory Panel of Examiners in Master's
+Thesis Exam:
+
+\medskip
+\noindent
+\begin{tabular}{@{}p{0.6cm}l@{}}
+1 & [Examiner full name and title] \\[\baselineskip]
+\end{tabular}
+\clearpage
+
+% ----- Validation / approval page -----
+\clearpage
+\thispagestyle{empty}
+\noindent Thesis title: How Far Can Bias Correction Improve Daily
+Satellite Precipitation?\\
+Name: Benny Istanto\\
+Student ID: G2501222008
+
+\vspace{3cm}
+\begin{center}Approved by\end{center}
+
+\noindent Supervisor 1:\\
+Prof. Dr. Ir. Rizaldi Boer, MS. \hfill \rule{4cm}{0.4pt}
+
+\vspace{1cm}
+\noindent Supervisor 2:\\
+Dr. I Putu Santikayasa, S.Si., M.Sc. \hfill \rule{4cm}{0.4pt}
+
+\vspace{2cm}
+\begin{center}Acknowledged by\end{center}
+
+\noindent Head of Study Program:\\
+Dr. I Putu Santikayasa, S.Si., M.Sc.\\
+Staff ID. 19790224 200501 1 002 \hfill \rule{4cm}{0.4pt}
+
+\vspace{1cm}
+\noindent Dean, Faculty of Mathematics and Natural Sciences:\\
+Dr. Berry Juliandi, S.Si., M.Si.\\
+Staff ID. 19780723 200701 1 001 \hfill \rule{4cm}{0.4pt}
+
+\vspace{5cm}
+\noindent Examination date: \rule{3cm}{0.4pt} \hfill
+Completion date: \rule{3cm}{0.4pt}
+\clearpage
+
+% ----- Acknowledgements -----
+\chapter*{ACKNOWLEDGEMENTS}\thispagestyle{empty}
+\textit{Alhamdulillah}, this thesis has been completed.
+
+This thesis grew out of a simple question: how far can bias correction
+actually improve a daily satellite precipitation field? Answering it became a
+study of what statistical correction can and cannot do, together with a
+small open-source pipeline that anyone can re-run. I hope both the finding
+and the code prove useful to others working on satellite precipitation,
+and that they make a modest contribution to science.
+
+I am grateful to Bogor Agricultural University, and to the Applied
+Climatology Study Program of the Faculty of Mathematics and Natural
+Sciences, for the education and the opportunity to carry out this work.
+My deepest thanks go to my supervisors, Prof. Dr. Ir. Rizaldi Boer, MS.
+and Dr. I Putu Santikayasa, S.Si., M.Sc., for their guidance, patience,
+and insight throughout this research. Furthermore, I extend my gratitude 
+to all unnamed individuals who provided direct or indirect assistance 
+throughout the course of this
+
+Finally, my heartfelt thanks to my wife Kiki Kartikasari, and daughter
+Wijanging Ngelmu Dyatmika, for their constant support and patience.
+
+\vspace{\baselineskip}
+\begin{flushright}
+Bogor, June 2026\\[\baselineskip]
+Benny Istanto
+\end{flushright}
+\clearpage
+
+% ----- restore the two-sided mirror geometry for TOC onward -----
+\restoregeometry
+
+% ----- roman page numbers become visible from here (TOC onward) -----
+\pagestyle{fancy}
+
+% ----- Tables of contents / tables / figures / appendices -----
+\tableofcontents
+\clearpage
+\addcontentsline{toc}{chapter}{LIST OF TABLES}
+\listoftables
+\clearpage
+\addcontentsline{toc}{chapter}{LIST OF FIGURES}
+\listoffigures
+\clearpage
+\addcontentsline{toc}{chapter}{LIST OF APPENDICES}
+\listofappx
+\clearpage

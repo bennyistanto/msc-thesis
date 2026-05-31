@@ -1,0 +1,826 @@
+% ============================================================
+% chapter_02_literature_review.tex - Chapter 2, Literature Review
+%
+% Purpose: establishes the scientific context for the LSEQM+DL framework.
+% Sections: 2.1 Satellite-derived Daily Precipitation, 2.2 Bias and
+%           Verification, 2.3 Bias Correction Methods, 2.4 Theoretical
+%           Bounds on Marginal Correction, 2.5 Reproducible Computational
+%           Notebook Workflows, 2.6 Maritime Continent Regional Context.
+% Included by main_thesis.tex.
+% License: CC BY 4.0 (see ../LICENSE).
+% ============================================================
+%
+% Source material:
+%   - paper/draft_literature_review.docx           (existing draft, citation backbone)
+%   - paper/additional_information.md              (technical Q&A entries)
+%   - paper/PPS1691_..._compact_20260526.tex       (compact seminar refs)
+%   - paper/PPS1591_..._mdpi.docx                  (parallel MDPI manuscript)
+%
+% Conventions (per DECISIONS.md):
+%   - No em-dashes; no AI-language watchlist; no overclaim
+%   - Long-form abbreviation on first use, short form after
+%   - Citation keys descriptive: \cite{ref:author2024}
+% ============================================================
+
+\chapter{Literature Review}\label{chap:litreview}
+
+This chapter establishes the scientific context for the
+LSEQM+DL (Linear Scaling (LS), Empirical Quantile Mapping (EQM), Generalized Pareto Distribution (GPD), and Convolutional Neural Network (CNN) refinement, a Deep Learning (DL) architecture) framework introduced in Chapter~\ref{chap:methods}.
+Section~\ref{sec:lit-imerg} reviews satellite-derived daily
+precipitation products, with emphasis on the Integrated
+Multi-satellitE Retrievals for Global Precipitation Measurement
+(IMERG) family that the framework operates on.
+Section~\ref{sec:lit-verification} reviews how bias is decomposed
+into measurable dimensions and the verification standards used
+to assess each dimension. Section~\ref{sec:lit-methods} reviews
+the families of bias correction methods on which the four-stage
+LSEQM+DL pipeline draws. Three further sections complete the
+chapter: Section~\ref{sec:lit-bounds} discusses the theoretical
+limits of marginal-distribution correction methods on
+temporal-skill metrics; Section~\ref{sec:lit-reproducibility}
+reviews the state of reproducibility in climate and hydrology
+software; and Section~\ref{sec:lit-maritime-continent} reviews
+the regional precipitation context of the Indonesian Maritime
+Continent. Together these six sections frame the methodological
+choices in Chapter~\ref{chap:methods}, the empirical findings in
+Chapter~\ref{chap:results}, and the theoretical discussion in
+Chapter~\ref{chap:discussion}.
+
+
+% ============================================================
+\section{Satellite-derived Daily Precipitation}\label{sec:lit-imerg}
+% Target: 3-4 pp
+% ============================================================
+
+Daily precipitation is the basic temporal unit for many
+operational hydrological and agricultural applications:
+flash-flood early warning, reservoir release scheduling,
+drought monitoring, crop water budgeting, and disaster-risk
+insurance all consume one daily value per location per day.
+For most of the global land surface, daily precipitation
+fields at spatially continuous resolution are not available
+from gauge networks alone. The Indonesian archipelago, the
+study domain of the present work, illustrates the gap directly:
+the contributing gauge network is concentrated over Java and
+southern Sumatra and is sparse over Papua, Maluku, and eastern
+Nusa Tenggara~\citep{ref:tan2016, ref:ramadhan2022}. The
+satellite family of precipitation products fills the gap by
+providing daily fields at uniform spatial resolution across the
+domain, though at the cost of systematic biases that the
+present work aims to correct.
+
+\subsection{From TRMM to GPM}
+
+Modern satellite precipitation estimation evolved from the
+Tropical Rainfall Measuring Mission (TRMM) era. TRMM operated
+between 1997 and 2015 and produced the TRMM Multi-satellite
+Precipitation Analysis (TMPA), which blended passive-microwave
+retrievals from the TRMM platform and a constellation of
+partner satellites with geostationary infrared estimates and
+monthly gauge analyses~\citep{ref:huffman2007}. TMPA was the
+backbone of operational satellite precipitation for nearly two
+decades and seeded the verification literature that
+characterised the systematic biases of microwave-plus-infrared
+blends against gauges.
+
+The Global Precipitation Measurement (GPM) mission launched in
+2014 as TRMM's successor, with the Core Observatory carrying a
+dual-frequency precipitation radar and a multi-channel passive
+microwave imager. IMERG~\citep{ref:hou2014, ref:huffman2020} extends the
+TMPA methodology to the GPM constellation and provides a
+quasi-global precipitation product at $0.1^{\circ}$ spatial and
+30-minute temporal resolution from 2000 to the present, with
+TRMM-era retrievals reprocessed under the IMERG framework so
+the product spans a continuous 25-year record.
+
+\subsection{IMERG V07 architecture}
+
+IMERG V07~\citep{ref:huffman2020} merges three input streams.
+Passive-microwave retrievals from the GPM constellation
+(including the GPM Core Observatory's GMI, partner-satellite
+SSMI/S, ATMS, AMSR2, MHS, and SAPHIR instruments) provide the
+direct precipitation observations. The microwave samples are
+sparse in time and space because each instrument visits a given
+location only a few times per day; the gaps are filled by
+geostationary infrared (IR) estimates that have continuous
+temporal coverage but lower direct sensitivity to precipitation.
+The IR estimates are merged with microwave retrievals using a
+morphing scheme that propagates the microwave information
+between successive overpasses, producing a continuous
+half-hourly field at $0.1^{\circ}$ resolution. A final pass
+anchors the monthly accumulations to the Global Precipitation
+Climatology Centre (GPCC) gauge analysis, correcting long-term
+mean biases while preserving the high-frequency variability of
+the merged microwave-plus-IR product.
+
+\subsection{Three latency variants}
+
+IMERG releases three latency variants of the same daily product.
+The \textit{Early Run} is released approximately 4~hours after
+real time and is suitable for nowcasting applications that
+require minimum delay at the cost of reduced accuracy. The
+\textit{Late Run} (IMERG-L) is released approximately 14~hours
+after real time and is the variant operated on in this study;
+the 14-hour latency fits within the same-day decision window of
+operational services such as flood early warning. The
+\textit{Final Run} is released approximately 3.5 months after
+real time and benefits from the monthly gauge anchoring step
+that the Early and Late runs cannot include. The choice between
+variants is a latency-versus-accuracy trade-off: applications
+that can wait for the Final Run gain the gauge-anchored
+adjustment; applications that need timely fields must accept
+the larger biases of the Early and Late runs.
+
+\subsection{Gridded daily precipitation products}
+
+IMERG is one of several global gridded daily precipitation
+products available to operational users; each makes a different
+trade-off between latency, gauge anchoring, and spatial
+resolution. Table~\ref{tab:gridded-products} summarises the
+products most often considered for daily-scale work over the
+tropics. CPC Unified Gauge-Based Analysis of Daily Precipitation (CPC-UNI) \citep{ref:chen2008} interpolates gauge
+observations directly and is therefore the highest-quality
+reference where the contributing network is dense, at the cost
+of a coarse 0.5$^{\circ}$ grid and limited skill where the
+gauge network is sparse. ERA5-Land \citep{ref:munoz2021era5land}
+is a reanalysis product that uses many data streams but does
+not ingest gauges directly; the gauge constraint is therefore
+indirect. The IMERG Early, Late, and Final runs share the same
+0.1$^{\circ}$ grid but differ in latency (about 4 hours, 14
+hours, and 3.5 months respectively) and in whether the monthly
+gauge anchoring step is applied (Final only). The Climate Hazards
+Group InfraRed Precipitation with Stations (CHIRPS)
+\citep{ref:funk2015} provides a higher-resolution gauge-anchored
+product at 0.05$^{\circ}$ with two-day latency. The Precipitation
+Estimation from Remotely Sensed Information using Artificial Neural
+Networks Climate Data Record (PERSIANN-CDR)
+\citep{ref:ashouri2015} provides a long historical record from
+1983 onward with no gauge integration. The Multi-Source Weighted-Ensemble
+Precipitation (MSWEP) \citep{ref:beck2017}
+blends gauges, satellites, and reanalyses into a single product
+at 0.1$^{\circ}$. For the present study, IMERG Late Run was
+selected because its 14-hour latency fits the operational
+decision window while its 0.1$^{\circ}$ resolution and 25-year
+record are both adequate for the verification framework reported
+in Chapter~\ref{chap:results}.
+
+\begin{table}[H]
+\centering
+\caption[Daily gridded precipitation products commonly used for tropical hydrological and operational applications]{Daily gridded precipitation products commonly used for
+tropical hydrological and operational applications. Latency is
+the typical time lag between observation and product release;
+gauge integration describes whether and how gauge data is
+incorporated in the product.\label{tab:gridded-products}}
+\begingroup\footnotesize
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Product & Latency & Range & Gauge integration & Resolution \\
+\midrule
+CPC-UNI                 & 1 day      & 1979 -- present & Full gauge analysis             & 0.5$^{\circ}$ \\
+ERA5-Land               & 2--3 months & 1981 -- present & Reanalysis, no direct gauge     & $\sim$0.1$^{\circ}$ \\
+IMERG Final Run         & 3 months   & 2000 -- present & Ensemble with monthly gauges    & 0.1$^{\circ}$ \\
+IMERG Late Run          & 12--18 h   & 2000 -- present & No gauge integration            & 0.1$^{\circ}$ \\
+IMERG Early Run         & 4--6 h     & 2000 -- present & No gauge integration            & 0.1$^{\circ}$ \\
+CHIRPS                  & 2 days     & 1981 -- present & Ensemble with gauges            & 0.05$^{\circ}$ \\
+PERSIANN-CDR            & 3--5 days  & 1983 -- present & No gauge integration            & 0.25$^{\circ}$ \\
+MSWEP                   & 1--3 days  & 1979 -- present & Ensemble with gauges            & 0.1$^{\circ}$ \\
+\bottomrule
+\end{tabular}
+\endgroup
+\end{table}
+
+\subsection{Known biases against gauges}
+
+Multi-product comparisons of IMERG and its predecessors against
+gauge networks have documented three persistent bias modes:
+over-detection of light rainfall (the satellite reports rain
+when gauges report dry, often associated with sub-pixel cloud
+artefacts or shallow drizzle that the satellite retrieves but
+the gauge misses), under-detection of heavy events (the
+satellite under-estimates extreme rainfall magnitudes, a
+limitation of microwave retrieval at the upper tail of
+precipitation rates), and a full distributional mismatch
+between the satellite and gauge distributions of daily
+precipitation~\citep{ref:maggioni2016, ref:tang2020}. Over the
+tropics specifically, multi-product comparisons report daily
+Pearson correlations between $0.3$ and $0.5$ against gauge
+networks and reanalyses, with skill improving substantially
+only at dekadal or longer aggregation~\cite{ref:tang2020,
+ref:tan2016}. These bias modes motivate the methodological
+families reviewed in Section~\ref{sec:lit-methods}; the
+empirical magnitudes for IMERG-L over Indonesia are reported in
+Chapter~\ref{chap:results}.
+
+
+% ============================================================
+\section{Bias Dimensions and Verification}\label{sec:lit-verification}
+% Target: 2-3 pp
+% ============================================================
+
+A satellite precipitation product has many ways to be wrong, and
+a verification framework that reports a single skill number
+hides the dimension in which the product fails. The verification
+literature has consequently developed a set of pillar-organised
+metrics that target distinct bias dimensions independently, so
+that a product's strengths and weaknesses can be diagnosed
+rather than averaged together.
+
+\subsection{Four-pillar verification framework}
+
+The four-pillar framework used in this thesis groups verification
+metrics into \textit{value adjustment} (mean offset and spread
+ratio), \textit{distribution alignment} (cumulative distribution
+function comparison and wet-day statistics), \textit{extreme
+preservation} (upper-tail percentile ratios and multi-threshold
+detection skill), and \textit{event detection} (contingency-table
+metrics at a wet-day or heavy-rain threshold). The grouping
+follows the conventions in the standard verification references
+\citep{ref:wilks2011, ref:ebert2007} and matches the World
+Meteorological Organization (WMO) verification standards for
+quantitative precipitation forecasts and remotely-sensed
+products~\citep{ref:wmo1485, ref:wmo1317}. The framework allows
+the question \enquote{how well does this product reproduce the
+gauge field?} to be decomposed into four narrower questions,
+each with a measurable answer.
+
+Pearson correlation between paired daily satellite and gauge
+values is reported separately from the four pillars as a
+\textit{temporal-skill diagnostic}: it measures the day-by-day
+pairing between two series rather than a property of their
+marginal distributions. The distinction between
+marginal-distribution metrics and temporal-skill metrics becomes
+the central object of analysis in
+Chapter~\ref{chap:discussion}, and the theoretical basis for
+why marginal-correction methods leave Pearson correlation
+bounded is developed in Section~\ref{sec:lit-bounds}.
+
+\subsection{Multi-threshold verification}
+
+Categorical skill scores at a single wet-day threshold reduce a
+full daily precipitation field to a binary rain-or-no-rain
+contingency table and report a single probability of detection,
+critical success index, false alarm ratio, and equitable threat
+score~\citep{ref:wilks2011}. Single-threshold reporting hides the
+threshold-dependence of skill: a product may detect light rain
+well and heavy rain poorly, and a single number cannot
+distinguish the two regimes. The WMO multi-threshold
+verification standard~\citep{ref:wmo1485} reports categorical
+skill at a series of thresholds spanning the operational range
+(typically 1, 5, 10, 20, 50, 100, and 150~mm/day), exposing the
+threshold-dependence directly. The framework adopted in this
+study uses the seven WMO thresholds and reports separate
+categorical metrics at each.
+
+\subsection{Station-based out-of-sample validation}
+
+The verification reference may itself contain biases. Gauge
+networks have well-documented undercatch behaviour, particularly
+for heavy rainfall and at high-elevation or coastal
+sites~\citep{ref:wmo1485}. Gridded gauge analyses such as the
+CPC Unified Gauge-Based Analysis~\citep{ref:chen2008} interpolate
+station observations onto a regular grid and inherit the
+station-density gradient: cells with many contributing stations
+are well-constrained, cells with few stations are smooth-field
+reconstructions. A verification that compares the corrected
+satellite against the gridded analysis tests the correction's
+ability to match a smoothed product, not its ability to match
+the original point observations. This distinction motivates the
+two-tier validation framework adopted in
+Section~\ref{sec:methods-validation}: in-sample comparison
+against the gridded reference (the calibration target),
+out-of-sample comparison against independent point observations
+(the operational user's perspective).
+
+
+% ============================================================
+\section{Bias Correction Method Families}\label{sec:lit-methods}
+% Target: 4-5 pp
+% ============================================================
+
+The bias correction literature has produced four broad method
+families, each targeting one dimension of the distributional
+mismatch between a satellite and a reference. The four families
+correspond directly to the four stages of the LSEQM+DL pipeline:
+linear scaling for the mean, quantile mapping with a parametric
+fit for the bulk distribution, extreme-value tail correction for
+the upper tail, and deep learning for residual spatial structure.
+Each subsection below reviews the principle of one family, its
+canonical references, and its acknowledged limits. A unifying
+review of the marginal-distribution families is provided by
+\citep{ref:maraun2016}.
+Table~\ref{tab:biascorr-methods} summarises the principal
+strengths and acknowledged weaknesses of the methods considered
+in this review, providing a single-page reference against which
+the LSEQM+DL pipeline of Chapter~\ref{chap:methods} can be
+positioned.
+
+\begin{table}[H]
+\centering
+\caption[Strengths and weaknesses of bias correction methods considered for daily precipitation]{Strengths and weaknesses of bias correction methods
+considered for daily precipitation. The LSEQM+DL pipeline of
+Chapter~\ref{chap:methods} combines the first three rows
+(LS, EQM, and an extreme-value tail correction) into a sequential
+pipeline and adds a deep-learning refinement
+stage.\label{tab:biascorr-methods}}
+\begingroup\footnotesize
+\begin{tabular}{@{}p{3.0cm} p{5.0cm} p{5.0cm}@{}}
+\toprule
+Method & Strengths & Weaknesses \\
+\midrule
+Linear Scaling (LS) &
+Simple, efficient. Corrects the mean by a single
+multiplicative factor. &
+Does not address variability or extremes; preserves all
+higher-order biases of the satellite distribution. \\
+\addlinespace
+Empirical Quantile Mapping (EQM) &
+Corrects the full marginal distribution (mean, variance,
+percentiles) when paired with a parametric fit. &
+Computationally demanding; sensitive to the calibration window;
+may introduce false alarms at low thresholds when wet-day
+matching is misconfigured. \\
+\addlinespace
+Generalized Pareto Distribution (GPD) tail correction &
+Models the upper tail explicitly with extreme-value theory;
+corrects heavy-event magnitudes that Gamma EQM under-shoots. &
+Requires sufficient exceedances per pixel for a stable fit;
+threshold choice is a sensitivity parameter without a single
+correct value. \\
+\addlinespace
+Bias Correction and Spatial Disaggregation (BCSD) &
+Combines bias correction with spatial disaggregation; produces
+high-resolution corrected fields. &
+Computationally expensive; relies on a reference at the
+disaggregation target resolution. \\
+\addlinespace
+Bayesian Model Averaging (BMA) &
+Incorporates model-set uncertainty by weighting an ensemble;
+improves reliability where multiple candidate models exist. &
+Requires multiple models to average; complex implementation;
+computationally intensive. \\
+\addlinespace
+Convolutional Neural Networks (CNN) &
+Uses spatial context that per-pixel methods cannot exploit;
+refines residual spatial structure of extreme pixels. &
+Requires training data; risks amplifying reference uncertainty
+in data-sparse regions unless modulated by a confidence weight. \\
+\addlinespace
+Censored Shifted Mixture Distribution (CSMD) &
+Handles zero-inflated daily precipitation directly; performs
+well on extremes. &
+Complex implementation; computationally intensive; less widely
+adopted in the operational literature. \\
+\bottomrule
+\end{tabular}
+\endgroup
+\end{table}
+
+\subsection{Linear Scaling}\label{sec:lit-ls}
+
+The simplest family of bias correction methods applies a single
+multiplicative or additive factor to the satellite series so
+that its mean matches the reference mean over a calibration
+window. LS of daily precipitation typically
+uses the multiplicative form to preserve non-negativity
+\citep{ref:teutschbein2012}:
+\begin{equation}
+P_{\text{LS}} = P_{\text{sat}} \cdot \frac{\overline{P}_{\text{ref}}}{\overline{P}_{\text{sat}}},
+\label{eq:lit-ls}
+\end{equation}
+where the means are computed over a calibration window matched
+to the temporal scale at which the bias is assumed stationary
+(monthly, dekadal, or seasonal). LS corrects the first moment
+of the marginal distribution by construction but does not change
+the distribution shape, the wet-day frequency, or the rank order
+of values at a given pixel. As a stand-alone method LS leaves
+the higher-order biases of the satellite distribution
+unchanged; as the first stage of a multi-stage pipeline it
+removes the mean offset so that subsequent stages can work on
+the residual distributional mismatch.
+
+\subsection{Quantile Mapping}\label{sec:lit-qm}
+
+Quantile Mapping (QM) corrects the full marginal distribution
+by mapping each value in the satellite distribution onto the
+corresponding quantile of the reference distribution. The
+fundamental relation is the quantile composition
+$P_{\text{QM}} = F_{\text{ref}}^{-1}(F_{\text{sat}}(P_{\text{sat}}))$,
+where $F_{\text{sat}}$ and $F_{\text{ref}}$ are the cumulative
+distribution functions (CDFs) of the satellite and reference
+samples respectively. Two main variants of QM differ in how the
+CDFs are estimated. Empirical QM uses the empirical CDFs
+directly, which is non-parametric and adapts to any
+distribution shape but requires a large sample for stable
+estimation. Parametric QM fits a chosen distribution family
+(typically Gamma for daily precipitation) to each sample,
+estimates the parameters by maximum likelihood, and uses the
+fitted CDFs for the mapping; parametric QM trades flexibility
+for sample-size efficiency.
+
+The Gamma family is the most widely used parametric form for
+daily precipitation on wet days, justified by the heavy-tailed
+shape and non-negative support of the Gamma distribution and by
+empirical fit quality across a wide range of climates
+\citep{ref:wilks2011}. The EQM
+variant with a Gamma fit, adopted in Stage~2 of the LSEQM+DL
+pipeline, traces to the bias correction methodology of
+\citep{ref:gudmundsson2012, ref:themessl2012} and is the
+standard reference implementation for daily precipitation
+correction in climate downscaling contexts.
+
+Quantile mapping methods are known to alter the wet-day
+frequency of the satellite series unless the dry-day handling
+is corrected explicitly. The wet-day-frequency-matching
+correction of \citep{ref:cannon2015} preserves the gauge wet-day
+fraction by reclassifying spurious satellite light-rain events
+as dry. This correction is the source of the event-detection
+trade-off discussed in Chapter~\ref{chap:results}: matching the
+dry-day frequency suppresses spurious wet days at the cost of
+reduced aggregate probability of detection.
+
+\subsection{Extreme-Value Tail Correction}\label{sec:lit-gpd}
+
+The Gamma distribution fitted in standard EQM is a
+two-parameter family whose parameters are dominated by the
+bulk of the wet-day sample. The upper tail, the segment
+operationally meaningful for flood and drought thresholds, is
+fit only as a by-product of forcing the Gamma curve through
+the bulk, and is systematically too short for tropical
+precipitation. Extreme-value theory provides a more appropriate
+parametric form for the tail. The GPD is the canonical extreme-value model in the
+peaks-over-threshold framework: under mild regularity
+conditions the distribution of exceedances above a high
+threshold converges to a GPD with shape and scale parameters
+$(\xi, \sigma)$~\citep{ref:coles2001}. The GPD shape parameter
+$\xi$ controls tail heaviness, with $\xi > 0$ indicating a
+heavy Pareto-like tail typical of tropical convective extremes,
+$\xi = 0$ indicating an exponential tail, and $\xi < 0$ indicating
+a bounded tail.
+
+The hybrid bias correction strategy is to fit the Gamma family
+to the full wet-day sample for the bulk distribution, fit the
+GPD to exceedances above a high threshold for the tail, and use
+the GPD-based quantile to replace the Gamma-based quantile
+above the threshold. The threshold is typically chosen as the
+80th to 95th percentile of the wet-day sample, with the trade-off
+that higher thresholds isolate the extreme tail more cleanly
+but yield fewer exceedances per pixel-dekad and therefore less
+stable GPD fits. Parameter estimation by L-moments
+\citep{ref:hoskingwallis1997} is preferred over maximum
+likelihood for the small exceedance samples typical of
+per-pixel per-dekad fits, because L-moments are less sensitive
+to outliers and converge well in the 30 to 100 exceedance
+range. Stage~3 of the LSEQM+DL pipeline implements this hybrid
+strategy with a fixed 80th-percentile threshold and a
+five-fold cross-validation aggregation to reduce variance on
+the GPD parameter estimates.
+
+\subsection{Deep Learning Approaches}\label{sec:lit-dl}
+
+Statistical bias correction methods operate one pixel at a time
+and cannot use the spatial context of a precipitation field. A
+heavy rainfall event in a single isolated pixel surrounded by
+dry pixels is statistically indistinguishable from a coherent
+heavy event in a cluster of adjacent pixels under a per-pixel
+correction, even though the latter is climatologically more
+plausible. Deep learning approaches address this limitation by
+operating on the spatial neighbourhood of each pixel.
+
+Convolutional Neural Networks (CNNs) have been applied to
+satellite precipitation correction in several recent
+studies~\citep{ref:pan2019, ref:banomedina2020}. The principle
+is to train a network to map the raw satellite field to the
+reference field over a large historical sample, then apply the
+trained network at inference time to produce corrected fields.
+The network architecture is typically a small convolutional
+stack that extracts spatial features at progressively coarser
+scales, followed by a reconstruction head that produces a
+corrected value at each pixel. Training uses standard
+supervised-learning objectives, with mean squared error as the
+typical loss for continuous-valued precipitation.
+
+Two design choices have proved important in the application of
+CNNs to satellite precipitation correction. First, restricting
+the CNN to operate on extreme-pixel values rather than the
+full field reduces the function class the network must
+approximate and improves sample efficiency in the small-sample
+regime typical of per-pixel per-dekad correction. Second,
+blending the CNN output with the statistical-correction
+intermediate at a fixed weight, rather than replacing it,
+preserves the statistical baseline as a fallback in regions
+where the CNN has not been adequately trained. Stage~4 of the
+LSEQM+DL pipeline implements both of these design choices: the
+CNN acts only above the 80th-percentile threshold from Stage~3,
+and its output is blended with the LSEQM intermediate at a
+nominal weight of $\alpha = 0.70$ for the statistical baseline
+and $1 - \alpha = 0.30$ for the CNN.
+
+\subsection{Hybrid Pipelines}\label{sec:lit-hybrid}
+
+The four method families described above target complementary
+bias dimensions, and combining them as sequential stages is a
+common pattern in the bias correction literature
+\citep{ref:maraun2016}. A typical hybrid pipeline applies LS for
+the mean, EQM for the bulk distribution, and either GPD or a
+separate heavy-rain correction for the tail; recent work has
+added deep-learning refinement as a final stage. The pipelines
+differ in the parametric family used for EQM (Gamma, Weibull,
+or non-parametric), the threshold choice for GPD, and the
+deep-learning architecture, but the underlying logic of
+matching one stage to one bias dimension is consistent across
+the literature. The LSEQM+DL pipeline described in
+Chapter~\ref{chap:methods} follows this pattern with a specific
+implementation of each stage and an explicit
+station-density-aware blending design that modulates the deep
+learning contribution by local gauge density.
+
+
+% ============================================================
+\section{Theoretical Bounds on Marginal Correction}\label{sec:lit-bounds}
+% ============================================================
+
+The bias correction families reviewed in
+Section~\ref{sec:lit-methods} share a structural property that
+the verification literature has examined closely: they correct
+the marginal distribution of a series at each location, and they
+do so through transformations that preserve the rank order of
+the values they act on. This property has consequences for what
+such methods can and cannot improve, and those consequences
+frame the central empirical result of the present study. This
+section reviews the two established results that together bound
+the time-dependent skill attainable by any marginal correction.
+
+The first is rank preservation. Quantile mapping, in all of its
+parametric and non-parametric variants, maps each value to the
+reference quantile that matches its rank in the source
+distribution. When the mapping is strictly monotonic, which
+holds for empirical quantile mapping with a continuous reference
+CDF and for parametric mapping through a Gamma or Generalized
+Pareto fit, the rank order of the values at a location is
+preserved exactly: if the source series reports a higher value
+on one day than on another, the corrected series does too
+\citep{ref:cannon2015}. Cannon and colleagues examined this
+property in the context of trend preservation and showed that
+standard quantile mapping can distort climate-change trends
+precisely because it operates on ranks rather than on the
+temporal sequence; the same rank-preservation mechanism that
+distorts trends also fixes the day-by-day ordering of a
+corrected series relative to its source.
+
+The second is variance inflation without time-dependent skill
+gain. \citet{ref:maraun2013} analysed quantile mapping as
+applied to regional climate model output and showed that the
+method inflates or deflates the variance of a series to match
+the reference marginal, but that this spread adjustment does not
+add information about the timing of individual events. The
+adjustment changes the amplitude of the series without changing
+which days are wet and which are dry relative to the source
+ordering. Spread alignment and day-by-day pairing are, in this
+analysis, independent properties of a paired series: a
+correction can move one without moving the other.
+
+Taken together, the two results imply a bound that is directly
+relevant to satellite precipitation correction. The Pearson
+correlation between a corrected satellite series and an external
+gauge series measures the day-by-day pairing of the two series.
+If a marginal correction preserves the rank order of the
+satellite series, it cannot change which satellite day is paired
+with which gauge day, and the correlation is therefore bounded
+above by the correlation between the raw satellite series and the
+gauge. The amplitude correction that moves the standard deviation
+ratio toward unity has no corresponding effect on the
+correlation, because correlation is invariant under the monotone
+rescaling that quantile mapping applies. This is not a deficiency
+of any particular implementation; it is a property of the
+marginal correction family as a whole, and any method built from
+linear scaling, quantile mapping, and tail adjustment inherits
+it.
+
+The empirical magnitude of the bound for daily IMERG over the
+tropics is well documented. Multi-product comparisons of IMERG
+against gauge networks and reanalyses over tropical regions
+report daily correlations in the range of $0.3$ to $0.5$ across
+products and seasons \citep{ref:tang2020}, and evaluations over
+the Indonesian Maritime Continent report daily correlations of
+similar magnitude that rise substantially only when the
+aggregation window is widened to dekadal or monthly scales
+\citep{ref:ramadhan2022}. These values define the empirical
+ceiling within which any corrected daily product over the region
+must operate. The present study tests the rank-preservation
+bound directly by reporting the Pearson correlation at each
+correction stage against independent gauges
+(Chapter~\ref{chap:results}) and develops its structural
+explanation as the central argument of
+Chapter~\ref{chap:discussion}.
+
+
+% ============================================================
+\section{Reproducible Computational Notebook Workflows in Climate and Earth Observation Analytics}\label{sec:lit-reproducibility}
+% ============================================================
+
+The empirical claim of a bias correction study rests on the
+quality of the calibration data and the verification framework,
+but it also rests on the ability of an independent reader to
+re-execute the workflow and arrive at the same numbers. The
+reproducibility discourse in computational science
+\citep{ref:peng2011, ref:stodden2014} and the FAIR (Findable,
+Accessible, Interoperable, Reusable) principles for scientific
+data management \citep{ref:wilkinson2016} have
+made independent verifiability a methodological expectation in
+the broader literature. The bias correction literature has
+adopted these expectations unevenly: many influential studies
+publish methods without releasing the corresponding code or
+data, leaving any claim of reproduction to a reader who must
+re-implement the method from the paper alone. The present study
+adopts an explicit reproducibility design that is reviewed in
+Section~\ref{sec:methods-reproducibility} and demonstrated
+empirically in Section~\ref{sec:results-reproducibility}; the
+present section reviews the supporting literature on
+computational notebook workflows that the design draws on.
+
+\subsection{Computational notebooks in climate and Earth observation analysis}
+
+Computational notebooks have become a standard medium for
+documenting and sharing analytical workflows in climate science
+and Earth observation \cite{ref:perkel2018, ref:beg2021,
+ref:wagemann2022}. A notebook integrates code, results, and
+narrative in a single document, making the analytical process
+transparent and re-runnable on the same data. Jupyter is the
+most widely used implementation in the scientific Python
+ecosystem and is the format adopted in the present study; the
+Jupyter notebook format is portable across execution
+environments, opening in either a local installation or a
+cloud-hosted runtime such as Google Colab with no change to
+the underlying file. For climate science specifically,
+computational notebooks have been used to integrate satellite
+imagery, station records, and model outputs into single
+self-documenting workflows \citep{ref:beg2021, ref:kluyver2016},
+and to teach climate-data analytics in a way that makes the
+underlying processing steps explicit and modifiable
+\citep{ref:wagemann2022, ref:liu2023}. The notebook format
+preserves the connection between the prose claim and the code
+that produced it, which is precisely the connection that a
+peer-reviewed paper without released code cannot guarantee.
+
+The integration of computational notebooks with cloud-based
+geospatial platforms has further lowered the barrier to running
+a published workflow. Google Earth Engine and Microsoft
+Planetary Computer expose their data catalogues through
+notebook-friendly Python libraries such as \texttt{geemap},
+allowing a reader to execute a published analysis in a browser
+without local installation \cite{ref:kamelboulos2023,
+ref:gorelick2017, ref:wu2020}. Google Colab itself
+provides a no-installation execution environment for the same
+notebook files that run locally under Jupyter, with the cloud
+runtime additionally providing free Graphics Processing Unit (GPU)
+access for the deep learning step of the present study. These platforms make
+geospatial and machine-learning computation accessible to
+readers without high-performance local infrastructure and have
+been argued to democratise access to the satellite data
+archives the bias correction literature draws on
+\citep{ref:gentemann2021, ref:yin2019}. The combination of
+computational notebooks and cloud platforms is also a teaching
+aid: \citep{ref:haedrich2023} use notebook-based tutorials in the
+Geographic Resources Analysis Support System (GRASS) Geographic
+Information System (GIS) to teach advanced geospatial modelling,
+and \citep{ref:boeing2021} argue that the notebook format makes
+geographic analysis more nimble and extensible than conventional
+Graphical User Interface (GUI)-driven workflows.
+
+For the reproducibility design adopted in this thesis, two
+properties of the computational notebook format are decisive.
+First, the six numbered notebooks of the LSEQM+DL workflow
+expose every correction stage and every verification step as a
+runnable artefact tied to specific functions in the source
+codebase, so a reader following the documentation can move
+directly to the runnable cell and back \cite{ref:perkel2018,
+ref:granger2021}. Second, the notebooks can be opened in either
+a local Jupyter installation or a cloud-hosted Google Colab
+session, which means the workflow is portable across the local
+development environment the author used and the browser-hosted
+environment a reader is likely to start with. The empirical
+demonstration of this portability is reported in
+Section~\ref{sec:results-reproducibility}.
+
+\subsection{Notebook-based workflows in bias correction}
+
+Within the bias correction literature specifically,
+notebook-based release remains the exception rather than the
+rule. A reader who wishes to compare the LSEQM+DL pipeline of
+Chapter~\ref{chap:methods} against a published alternative is
+typically able to find the method description but not the code.
+This gap between method documentation and runnable artefact is
+the methodological position that the present study takes a
+deliberate stance against: the chapter argues that the empirical
+claim of a bias correction study should be re-executable by an
+independent reader, and the implementation reported in
+Section~\ref{sec:methods-reproducibility} is structured to make
+that claim verifiable rather than aspirational. The wider
+literature on open scientific workflows
+\citep{ref:wilkinson2016, ref:giuliani2019} supports this stance,
+though it has not yet become a community norm in the bias
+correction sub-literature.
+
+
+% ============================================================
+\section{Maritime Continent Precipitation Context}\label{sec:lit-maritime-continent}
+% Target: 2-3 pp
+% Status: SKELETON - drafted in LitRev v2
+% ============================================================
+
+The Indonesian Maritime Continent presents a precipitation
+regime that is among the most challenging in the world for
+satellite estimation, and several of its features bear directly
+on the verification and correction problem this study addresses.
+
+Rainfall over the archipelago is dominated by deep convection
+organised by the interaction between the large-scale monsoon
+circulation and intense local land-sea breeze systems
+\citep{ref:ramadhan2022}. Two monsoon phases set the seasonal
+cycle: the northwest monsoon (roughly November to March) brings
+the primary wet season to most of the archipelago, while the
+southeast monsoon (roughly May to September) brings the dry
+season to the south and a secondary regime to the north. The
+seasonal migration of the Inter-Tropical Convergence Zone and
+the influence of the Madden-Julian Oscillation add intraseasonal
+variability on top of the monsoon cycle. The result is a daily
+precipitation field with a heavy convective tail and strong
+spatial heterogeneity, which is the regime the Generalized
+Pareto tail adjustment and the station-density-aware blending of
+Chapter~\ref{chap:methods} are designed to handle.
+
+The diurnal cycle is the feature most consequential for daily
+verification. Convection over the large islands peaks in the
+local afternoon, typically between 14:00 and 17:00 local time,
+driven by daytime heating and the sea-breeze convergence over
+land \citep{ref:ramadhan2022}. Indonesia spans three standard
+time zones, from UTC+7 in the west (Sumatra, Java) through UTC+8
+(Bali, Kalimantan, Sulawesi) to UTC+9 in the east (Maluku,
+Papua). The IMERG product is accumulated on a UTC calendar day,
+so the local convective afternoon falls in the UTC 07:00 to
+10:00 band for the western archipelago and earlier in UTC terms
+for the east. A daily aggregation window aligned to UTC
+therefore splits the local convective afternoon across two
+calendar days for stations away from the UTC meridian, which
+degrades the day-by-day pairing between a UTC-day satellite
+total and a local-day gauge total by construction. This calendar
+artefact is one contributor to the daily correlation ceiling
+discussed in Section~\ref{sec:lit-bounds}, and it motivates the
+local-day re-aggregation path that Chapter~\ref{chap:discussion}
+identifies as the most actionable next step for the region.
+
+The gauge network that anchors both the CPC-UNI reference and
+the independent validation is strongly heterogeneous in space.
+The Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) station network is dense over Java and southern
+Sumatra, where population and agricultural value are
+concentrated, and progressively sparser eastward into Maluku,
+Nusa Tenggara, and Papua \citep{ref:chen2008}. Because CPC-UNI is
+a gauge-interpolated analysis, its quality follows the same
+gradient: the reference is well constrained in the west and
+weakly constrained in the east. This spatial gradient in
+reference quality is the reason the present study introduces a
+station-density-aware blending design rather than applying a
+uniform deep-learning correction across the domain
+(Section~\ref{sec:methods-blending}); it lets the framework
+revert to the purely statistical correction where the reference
+cannot support a learned refinement.
+
+Geostationary observation provides the diurnal-cycle reference
+that any future local-day re-aggregation would need. The
+Himawari-9 platform covers the Maritime Continent at high
+temporal cadence (on the order of ten minutes) and
+kilometre-scale spatial resolution, which is sufficient to track
+the convective afternoon and to align a re-aggregated daily
+window to the local cycle. The present study does not perform
+this re-aggregation, but the regional context established here
+frames it as the natural extension that
+Chapter~\ref{chap:discussion} proposes.
+
+
+% ============================================================
+\section*{Chapter summary}
+% Status: SKELETON - drafted in LitRev v2 once all six sections are filled
+% ============================================================
+
+This review has established the foundations on which the present
+study builds. The satellite precipitation products of
+Section~\ref{sec:lit-imerg} define the input to be corrected and
+its known error structure; the bias dimensions and verification
+standards of Section~\ref{sec:lit-verification} define the
+four-pillar framework against which the correction is judged; and
+the bias correction families of Section~\ref{sec:lit-methods}
+define the four stages that the LSEQM+DL pipeline composes. The
+theoretical bounds of Section~\ref{sec:lit-bounds} establish, in
+advance of any result, what a marginal correction can and cannot
+move: it can align the marginal distribution but cannot lift the
+day-by-day correlation above the ceiling set by the raw
+satellite pairing. The reproducibility literature of
+Section~\ref{sec:lit-reproducibility} establishes the
+methodological expectation of independent verifiability that the
+study's open pipeline is designed to meet, and the regional
+context of Section~\ref{sec:lit-maritime-continent} establishes
+the convective regime, the UTC calendar artefact, and the gauge
+density gradient that shape both the correction design and its
+interpretation. Chapter~\ref{chap:methods} now describes the
+pipeline, the blending design, the reproducible implementation,
+and the verification framework in full.

@@ -1,0 +1,69 @@
+# Compile the thesis PDF on every push to main, every pull request, and
+# on manual dispatch. The PDF is uploaded as a build artifact so it can
+# be downloaded from the workflow run page; tagged releases also attach
+# the PDF as a release asset.
+#
+# Why this exists: the thesis is built locally via build.sh. CI gives us
+# (1) a third-party verification that the LaTeX sources compile cleanly,
+# (2) a one-click downloadable PDF for collaborators who do not have a
+# local TeX install, and (3) early warning of broken references or
+# missing figures.
+
+name: Build thesis PDF
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**.tex"
+      - "**.bib"
+      - "**.bst"
+      - "build.sh"
+      - "figures/**"
+      - ".github/workflows/build.yml"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Compile the thesis (pdflatex + bibtex + et-al post-fix)
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main_thesis.tex
+          latexmk_use_xelatex: false
+          # build.sh does the three-pass cycle plus the .bbl sed pass;
+          # invoke it directly so the workflow mirrors local builds.
+          pre_compile: |
+            chmod +x ./build.sh
+            ./build.sh
+          # Skip latex-action's own compile step (build.sh did everything).
+          compile_command: "true"
+
+      - name: Sanity-check the build
+        run: |
+          test -f main_thesis.pdf || { echo "::error::main_thesis.pdf missing"; exit 1; }
+          pages=$(pdfinfo main_thesis.pdf | awk '/^Pages:/ {print $2}')
+          echo "PDF compiled: $pages pages"
+
+      - name: Upload PDF as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: main_thesis-pdf
+          path: main_thesis.pdf
+          retention-days: 30
+
+      - name: Attach PDF to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: main_thesis.pdf

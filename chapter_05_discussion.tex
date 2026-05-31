@@ -1,0 +1,756 @@
+% ============================================================
+% chapter_05_discussion.tex - Chapter 5, Discussion
+%
+% Purpose: theoretical interpretation of the Chapter 4 results, the
+%          predicted Pearson-r bound under marginal correction, and
+%          the operational + reproducibility implications.
+% Sections: 5.1 Theoretical Bound on Pearson Correlation,
+%           5.2 Operational Implications, 5.3 Reproducibility
+%           Implications, 5.4 Paths Forward, 5.5 Limitations.
+% Included by main_thesis.tex.
+% License: CC BY 4.0 (see ../LICENSE).
+% ============================================================
+%
+% Source material:
+%   - paper/PPS1691_..._compact_20260526.tex  (compact seminar §4.1, §4.2, §4.3, §4.4)
+%   - paper/PPS1591_..._mdpi.docx              (parallel manuscript discussion)
+%   - paper/additional_information.md          (§7.4, §7.5, §7.7 limitations)
+%
+% Conventions: no em-dashes; no AI-language; no overclaim;
+%              sensitivity caveats preserved on alpha, GPD threshold,
+%              and saturation_count; reproducibility positioned as
+%              parallel contribution rather than supplementary feature.
+% ============================================================
+
+\chapter{Discussion}\label{chap:discussion}
+
+The results in Chapter~\ref{chap:results} reveal a structural
+pattern under marginal bias correction: the four-pillar metrics
+move close to the gauge target while the temporal-skill
+diagnostics stay flat. This chapter argues that the pattern is
+the predicted behaviour of any marginal correction family when
+scored against an external paired-time-series reference, not a
+failure of the correction stages. The four pillars (value
+adjustment, distribution alignment, extreme preservation, event
+detection) all move close to the gauge target, with several
+metrics matching to two decimal places against the independent
+Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) network. The temporal-skill diagnostics (Pearson $r$, Root Mean Square Error (RMSE),
+Nash-Sutcliffe Efficiency (NSE)) stay flat: $r$ near $0.34$ across all three corrected stages,
+RMSE rising slightly, NSE drifting further from unity. The chapter
+explains why this is structural, what it implies for users, what
+the open release of the framework code enables in terms of
+independent re-verification and extension, where the next
+methodological frontiers lie, and where the present work is
+bounded.
+
+The argument has five parts.
+Section~\ref{sec:discussion-bound} states the theoretical bound on
+Pearson $r$ under marginal correction and locates the observed
+value of $r \approx 0.34$ inside the empirical band reported for
+daily Integrated Multi-satellitE Retrievals for Global Precipitation Measurement (IMERG) over the tropics.
+Section~\ref{sec:discussion-ops} translates the bound into
+operational guidance, distinguishing applications that depend on
+distributional properties from those that depend on day-specific
+timing.
+Section~\ref{sec:discussion-reproducibility} discusses the
+implications of the parallel reproducibility contribution: an
+open-source pipeline with notebook-level provenance that enables
+re-verification, regional extension, and parameter tuning by
+independent users.
+Section~\ref{sec:discussion-paths} surveys the methodological
+paths forward that fall outside the marginal correction family
+and could raise the temporal skill ceiling.
+Section~\ref{sec:discussion-limitations} catalogues the
+limitations and constraints, preserving the not-formally-optimised
+caveats on the three sensitivity parameters identified in
+Chapter~\ref{chap:methods}.
+
+
+% ============================================================
+\section{Theoretical Bound on Pearson Correlation}\label{sec:discussion-bound}
+% ============================================================
+
+The visual asymmetry between the four-pillar pattern and the
+temporal skill pattern in Chapter~\ref{chap:results} is not a
+verification quirk and not a failure of the correction stages. It
+is the predicted behaviour of any marginal correction family when
+its outputs are scored against an independent paired-time-series
+reference. The argument has two components, both established in
+the earlier literature on quantile-mapping bias correction, and
+both of which apply to the LSEQM+DL (Linear Scaling (LS), Empirical Quantile Mapping (EQM), Generalized Pareto Distribution (GPD), and Convolutional Neural Network (CNN) refinement, a Deep Learning (DL) architecture) pipeline as constructed
+in Chapter~\ref{chap:methods}.
+Figure~\ref{fig:bound-schematic} states the argument in two
+panels: panel~(a) illustrates the rank-preservation mechanism on
+a synthetic single-pixel paired series, and panel~(b) shows the
+two-track bound on the headline numbers reported in
+Table~\ref{tab:headline}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFiveOneWidth\textwidth]{fig_thesis_05_bound_schematic.png}
+\caption[Schematic of the theoretical bound on Pearson $r$ under marginal correction]{Schematic of the theoretical bound on Pearson $r$ under
+marginal correction. (a)~Synthetic gauge series (blue) and the
+corresponding raw IMERG Late Run (IMERG-L) series (red) at one pixel over $30$
+days, together with the rank-preserving LSEQM+DL corrected series
+(green). The corrected series follows the same day-by-day
+ordering as the raw series but matches the gauge spread; the
+day-by-day pairing against the gauge is unchanged. (b)~Empirical
+expression of the bound on the headline numbers. Pearson $r$
+(red bars, left axis) stays near $0.34$ across the three stages,
+while Standard Deviation Ratio (SDR) (green bars, right axis) moves from $0.71$ to
+$1.0$.\label{fig:bound-schematic}}
+\end{figure}
+
+The first component is rank preservation. Strictly monotonic
+quantile mapping, the family to which empirical quantile mapping
+with Gamma kernels and GPD tail adjustment both belong, preserves the rank order of values at each
+location \citep{ref:cannon2015}. If the satellite reports a higher
+value on day $i$ than on day $j$ before correction, it will report
+a higher value on day $i$ than on day $j$ after correction. The
+day-by-day pairing of satellite values to gauge values is fixed by
+the satellite product itself; no operation in a marginal correction
+pipeline can move a value from one day to its neighbour. The CNN
+refinement stage relaxes the strict rank-preservation property at
+each pixel because the $3 \times 3$ convolution mixes information
+from neighbouring pixels at the same timestep, but it does not
+reorder the time series at a single pixel beyond the small
+residual it learns to add on top of LSEQM. Because the residual
+training target is the LSEQM-to-Climate Prediction Center (CPC) Unified Gauge-Based Analysis of Daily Precipitation (CPC-UNI) difference rather than
+a free reconstruction, the temporal ordering at each pixel after
+the CNN refinement remains a small perturbation of the LSEQM
+ordering. The rank-preservation argument therefore carries through
+to the full pipeline at the level of pixel-wise paired time series,
+which is the level at which Pearson $r$ against an external gauge
+is computed.
+
+The second component is variance inflation without skill gain.
+A pointed critique of quantile mapping in regional climate
+applications \citep{ref:maraun2013} established that quantile
+mapping widens spread to match the marginal target without
+improving time-dependent skill, because spread alignment and
+day-by-day pairing are independent properties of a paired
+series. The Pearson correlation is invariant under monotone
+affine rescaling of either series, so even a perfect spread
+match has no purchase on $r$. The combination of rank
+preservation and spread-without-skill yields the headline
+proposition of this chapter:
+
+% Keep the indented proposition together on one page: ~7 lines of
+% quote text + small breathing room. If less than that remains on the
+% current page, force a break so the whole block lives on the next.
+\needspace{8\baselineskip}
+\begin{quote}
+\emph{Under any strictly monotonic marginal correction, the
+Pearson correlation between the corrected satellite series and an
+external paired gauge series is bounded above by the Pearson
+correlation between the raw satellite series and the same gauge
+series, up to the small rank-changing contribution of the
+spatial CNN refinement.}
+\end{quote}
+
+\noindent The proposition is what the four-pillar pattern and the
+flat $r$ pattern are jointly expressing.
+
+The bound is empirically supported by two lines of evidence that
+locate $r \approx 0.34$ inside the expected range for daily IMERG
+over tropical regions. A multi-product comparison of IMERG
+against gauge networks and reanalyses over the tropics
+\citep{ref:tang2020} reported daily correlations between $0.3$
+and $0.5$ across products, seasons, and gauge densities. An
+evaluation over the Indonesian Maritime Continent at multiple
+time scales \citep{ref:ramadhan2022} reported daily correlations
+of similar magnitude, with skill rising substantially only at
+dekadal or monthly aggregation. The corrected LSEQM+DL value of
+$0.348$ sits inside this empirical band. The ceiling has two
+contributors: the timing accuracy of the underlying retrieval,
+which lies upstream of every step in the pipeline and is the
+dominant component; and the UTC-aligned daily aggregation window,
+which splits the local convective afternoon across two calendar
+days for stations east of UTC+7 and is therefore a fixable
+calendar artefact rather than a fundamental satellite limit.
+Section~\ref{sec:discussion-ops} returns to the operational
+significance of this split, and Section~\ref{sec:discussion-paths}
+proposes local-day re-aggregation as the most actionable next
+step for users in the affected longitude band. The pattern is
+also stable across the calendar year:
+Figure~\ref{fig:taylor-monthly} aggregates the BMKG Taylor
+analysis by month and shows that the angular position of the
+three method symbols, which encodes correlation, sits at the
+same place in every month, while the radial position, which
+encodes the standard deviation ratio, sits near unity for LSEQM
+and LSEQM+DL and short for LS. The bound is therefore not a
+seasonal artefact and does not depend on the wet- or dry-season
+sample composition.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFiveTwoWidth\textwidth]{fig_thesis_05_taylor_monthly.png}
+\caption[Monthly Taylor diagram aggregated across the $171$ BMKG validation stations]{Monthly Taylor diagram aggregated across the $171$ BMKG
+validation stations. One panel per month from January to
+December. The three method symbols (triangle for LS, square for
+LSEQM, star for LSEQM+DL) sit at similar angular positions in
+every month, indicating that the flat-correlation pattern is
+stable across the seasonal cycle. Radial positions move toward the
+reference radius for LSEQM and LSEQM+DL, confirming the spread
+correction is stable month-by-month.\label{fig:taylor-monthly}}
+\end{figure}
+
+A complementary reading uses the canonical decomposition of the
+mean squared error into bias, spread, and covariance components
+\citep{ref:nashsutcliffe1970}. The bias component is moved cleanly
+by the Linear Scaling stage, and the spread component is moved
+toward unity by the EQM stage acting on the daily distribution.
+The covariance component, proportional to
+$r \times \sigma_{\text{sat}} \times \sigma_{\text{gauge}}$, is
+the mechanism through which the RMSE actually increases between
+LS ($13.1$ mm per day) and LSEQM+DL ($14.1$ mm per day): once the
+satellite spread is inflated to match the gauge spread without
+any improvement in $r$, the covariance term grows in absolute
+magnitude because $\sigma_{\text{sat}}$ has grown, while the
+spread-mismatch term shrinks toward zero. This is the
+variance-inflation-without-skill effect identified for quantile
+mapping in regional climate applications \citep{ref:maraun2013}:
+matching the spread without matching the timing increases the
+squared error at the corrected stage relative to the
+under-spread raw stage. NSE follows the same logic by
+construction. The fact that three temporal-skill diagnostics
+fail to improve and one improves only mildly does not indicate
+failure; it indicates that the pipeline is doing exactly what
+marginal correction can do, and not what it cannot.
+
+The framing of this pattern matters for the wider field. In the
+absence of stage-resolved attribution, a study that reported only
+the aggregate $r$ would conclude that the LSEQM+DL framework
+delivers little improvement over raw IMERG-L, and the substantial
+movement in the value, distribution, extreme, and detection
+pillars would be invisible. The four-pillar verification framework
+of Section~\ref{sec:methods-metrics}, paired with Pearson $r$ as a
+separate temporal-skill diagnostic rather than as an
+all-encompassing skill score, lets the structural limit and the
+methodological improvement appear in the same report. This is the
+verification posture the present work argues for, and it is a
+posture that the parallel reproducibility contribution
+(Section~\ref{sec:discussion-reproducibility}) lets any reader
+independently reconstruct on their own data.
+
+
+% ============================================================
+\section{Operational Implications}\label{sec:discussion-ops}
+% ============================================================
+
+The split between four-pillar improvement and flat temporal skill
+translates directly into operational guidance for users of the
+corrected IMERG-L product. The pipeline corrects what marginal
+correction can correct; users should match their application to
+the metrics that moved, not to the ones that did not. The
+guidance organises around the question of whether the application
+depends on the daily distribution or on the day-by-day pairing of
+satellite values to a specific calendar day.
+Table~\ref{tab:app-classes} summarises the resulting split into
+two application classes, with example applications, the
+dominant skill dimension each one needs, and the
+relevant headline metric from Table~\ref{tab:headline}.
+
+\begin{table}[H]
+\centering
+\caption[Application classes for corrected IMERG-L over Indonesia]{Application classes for corrected IMERG-L over
+Indonesia. The split tracks whether the application depends on
+the daily distribution (well-served) or on day-by-day timing
+(poorly-served). The relevant headline metrics are the ones
+listed in the corresponding rows of Table~\ref{tab:headline}.\label{tab:app-classes}}
+\begingroup\small
+\begin{tabular}{@{}p{2cm}p{5.5cm}p{2.5cm}p{2.5cm}@{}}
+\toprule
+Class & Example applications & Dominant
+skill dimension & Relevant headline metrics \\
+\midrule
+Well-served &
+SPI/SPEI drought monitoring, flood-frequency analysis,
+threshold-exceedance climatology, hydrological model calibration
+against multi-year statistics, climate-risk insurance pricing,
+agricultural dekadal water balance &
+Distributional &
+SDR, KS $p$, $Q_{95}$/$Q_{99}$ ratios, wet-day frequency \\
+\addlinespace
+Poorly-served &
+Real-time flood-event nowcasting, single-event forecasting,
+day-1 hydrological model initialisation, day-specific field
+operations &
+Day-by-day timing &
+Pearson $r$, RMSE, NSE (all bounded by raw satellite) \\
+\bottomrule
+\end{tabular}
+\endgroup
+\end{table}
+
+The well-served class includes water-budget calculations at
+dekadal-to-monthly aggregation, drought indicator computation
+including the Standardized Precipitation Index (SPI) and the
+Standardized Precipitation Evapotranspiration Index (SPEI),
+extreme-event frequency analysis, threshold-exceedance
+climatology, hydrological model calibration against multi-year
+statistics, and climate risk assessment for agricultural and
+infrastructure planning. All depend on distributional properties:
+the wet-day frequency, the daily intensity distribution, the
+upper percentiles, and the multi-year statistics that aggregate
+across many days. The four-pillar results in
+Chapter~\ref{chap:results} establish that the corrected product
+reproduces all of these properties close to the gauge target,
+typically to within $1\%$ to $5\%$ at the headline metrics.
+
+The poorly-served class includes single-event nowcasting,
+real-time flood-event prediction at a specific date, day-1
+hydrological model initialisation, and any application that
+requires the corrected product to identify the precise calendar
+day of a heavy rain event. These applications depend on
+day-by-day timing that the corrected product inherits unchanged
+from raw IMERG-L. The Pearson $r$ ceiling at $0.34$ is the
+operational expression of this limit: on a randomly chosen day,
+the corrected product carries the same timing information as the
+raw retrieval, and no marginal correction can add the timing
+information that the satellite did not measure.
+
+The split tracks day-specific timing, not topic. Flood-related
+applications fall on both sides of the line: flood-frequency
+analysis from a $25$-year corrected record, flood-threshold
+climatology against the $99$th percentile of the gauge-aligned
+daily distribution, and flood-risk insurance pricing all depend
+on the daily distribution and are well-served. Real-time
+flood-event prediction at a specific date, in contrast, depends
+on day-by-day timing and is not. Hydrological applications split
+similarly. Multi-year model calibration against gauge-aligned
+statistics is well-served; day-1 forecast initialisation is not.
+Agricultural applications split on the same axis. Dekadal water
+balance and SPI-based drought monitoring are well-served;
+single-day field operation scheduling based on a predicted heavy
+rain event is not.
+
+The corrective work at the daily scale is not optional for the
+well-served class. Dekadal, monthly, and seasonal aggregates
+inherit the bias structure of the daily fields they sum over. A
+daily product with a $20\%$ wet-day over-count produces a
+dekadal aggregate with the same fractional over-count in
+wet-day-day counts and a similarly biased dekadal mean intensity.
+The pipeline corrects the daily fields so that the downstream
+aggregates derived from them inherit a bias-free input. The
+operational guidance is not to skip daily correction and aggregate
+the raw product, but to use the corrected daily product for
+applications matched to its design and to recognise the daily
+timing ceiling as a structural feature inherited from the
+satellite retrieval, not a methodological gap to be closed by a
+better correction.
+
+A specific caveat applies in the Maritime Continent. The
+convective diurnal cycle over Indonesia peaks at local 14:00 to
+17:00, which falls in the UTC 07:00 to 10:00 band for the western
+archipelago and the UTC 06:00 to 09:00 band for the eastern
+archipelago. The daily aggregation window used by the present
+pipeline is aligned to UTC and therefore splits the local
+convective afternoon across two calendar days for stations east
+of UTC+7. The Pearson $r$ ceiling reported in
+Chapter~\ref{chap:results} mixes the underlying satellite timing
+accuracy with this calendar artefact. The implication for
+operational users is that the $r \approx 0.34$ figure should be
+read as a lower bound on what a locally-aligned daily product
+might achieve, and that the gap between the lower bound and the
+locally-aligned value is recoverable by re-aggregation rather
+than by a fundamentally different correction.
+Section~\ref{sec:discussion-paths} returns to this point as the
+most operationally actionable next step for users in the UTC+7
+to UTC+9 band.
+
+
+% ============================================================
+\section{Reproducibility Implications}\label{sec:discussion-reproducibility}
+% ============================================================
+
+The scientific result of Chapter~\ref{chap:results} and the
+theoretical bound of Section~\ref{sec:discussion-bound} are
+methodologically interesting only if a second reader can
+reconstruct the same numbers from the same inputs and verify the
+claim independently. The parallel methodological contribution of
+the present work is a reproducible end-to-end pipeline designed so
+that the verification posture argued for in
+Section~\ref{sec:discussion-bound} is not a one-off result of the
+present analysis but a procedure that any reader can apply to
+their own region, their own satellite product, or their own
+question. This section discusses what the open release enables, in
+the categories that the literature on reproducible computational
+research identifies as the substantive contributions of public
+code and notebook artefacts \citep{ref:stodden2014,ref:peng2011}.
+
+The first category is independent re-verification. The
+four-pillar headline numbers in Table~\ref{tab:headline} are
+generated by a specific sequence of notebook cells from a specific
+set of input files. An independent reader can re-run the
+notebooks against the same inputs and confirm that the reported
+numbers come out of the pipeline, not out of selective reporting
+or post-hoc parameter tuning. The random seeds, dependency
+versions, and dekad-by-dekad runtimes needed for an independent
+reconstruction of the headline table to the third decimal place
+are recorded with the source release. The notebook-level
+provenance,
+combined with the dual local-and-Colab execution model described
+in Section~\ref{sec:methods-reproducibility}, lets the
+verification proceed on commodity hardware without the
+institutional access barriers that the FAIR (Findable, Accessible,
+Interoperable, Reusable) data principles
+\citep{ref:wilkinson2016} were formulated to remove. The
+verification budget for one dekad is on the order of minutes on
+the Colab free tier, which makes spot-checking a feasible
+classroom exercise rather than a major undertaking.
+
+The second category is regional and product extension. The
+pipeline does not encode the choice of CPC-UNI as a reference, the
+choice of Indonesia as a domain, or the choice of $171$ BMKG
+stations as a validation set. All three are configurable through
+the \texttt{config.yml} file described in
+Section~\ref{sec:methods-reproducibility}. A user in West Africa
+who wishes to apply the same framework to IMERG-L over Senegal
+against a local gauge network can do so by changing input paths
+and domain boundaries in the configuration, without modifying the
+source code. A user who wishes to substitute the Climate Hazards
+Group InfraRed Precipitation with Stations (CHIRPS)
+\citep{ref:funk2015} or the PERSIANN Climate Data Record
+(PERSIANN-CDR) \citep{ref:ashouri2015} as the reference, or the
+Multi-Source Weighted-Ensemble Precipitation (MSWEP)
+\citep{ref:beck2017} as the satellite
+input, can do so by changing the precipitation-variable names in
+the configuration. The framework does not guarantee that the
+resulting bias correction will be skilful in those settings; the
+sensitivity of the GPD shape parameter to small samples, the
+calibration of $\alpha$ for blending, and the appropriateness of
+the saturation count for the local gauge network all require
+local revisiting. What the open release does enable is that the
+revisiting can be done by domain scientists rather than by the
+original authors, and that the verification of any resulting
+claim is reproducible by a third party.
+
+The third category is parameter tuning by independent users. The
+three sensitivity parameters acknowledged in
+Section~\ref{sec:methods-reproducibility} as not formally
+optimised, namely the CNN blending weight $\alpha = 0.70$, the GPD
+threshold percentile at the $80$th, and the density saturation
+count at $2$, are exposed in the configuration file and can be
+swept by a user who has a specific application target in mind.
+A user can run the same sensitivity sweep on their own region
+with the notebooks provided. This shifts the work of optimisation
+from a
+single best-guess setting in the original paper to a tunable
+artefact whose default values are documented and whose tuning
+procedure is reproducible. The tuning is not free: each
+parameter sweep multiplies the runtime by the number of values
+in the sweep grid. A full three-parameter sweep at five values
+per parameter is $125$ end-to-end runs, which is feasible on a
+small compute cluster but not on a single workstation. The
+open release lowers the entry cost of tuning from re-implementing
+the pipeline to changing a configuration line.
+
+A tangible example of what the open release supports is the
+station-density confidence mask itself: it is published as a
+NetCDF file alongside the corrected product and the source code,
+so an independent user can inspect the spatial distribution of
+correction confidence directly and verify that the CNN
+contribution is suppressed in their region of interest if the
+local gauge density is below the saturation threshold.
+Figure~\ref{fig:confmask} shows the confidence mask and its
+operational consequence on Composite Quality Index (CQI) improvement.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFiveThreeWidth\textwidth]{fig_thesis_05_confidence_mask.png}
+\caption[Station-density confidence mask]{Station-density confidence mask. (a) Spatial
+distribution of the confidence value $C(x,y)$ across Indonesia,
+from $0$ where no contributing gauges fall within the smoothing
+neighbourhood (red) to $1$ where the gauge density saturates the
+design threshold (yellow). (b) Box-and-whisker distribution of
+CQI improvement from LSEQM to LSEQM+DL, stratified by confidence
+quintile. The CQI gain is concentrated in the highest-confidence
+regions; the lowest quintile shows a near-zero median
+improvement, by design, because the framework reverts to LSEQM
+where the reference cannot support CNN
+refinement.\label{fig:confmask}}
+\end{figure}
+
+The fourth category combines comparison studies and training
+use. The notebook structure separates correction from
+verification, so the four-pillar verification report can be run
+on any pair of satellite and reference fields without re-running
+the correction; this lets independent groups compare IMERG Final
+Run against IMERG Late Run, or a bias-corrected output from a
+different pipeline against the same BMKG validation set, against
+a numerically comparable baseline. The same structure, combined
+with the free-tier Colab runtime in the order of minutes per
+dekad, supports use as a graduate-level training resource on
+satellite precipitation bias correction
+\citep{ref:perkel2018,ref:beg2021}. This is not the central
+scientific contribution of the present work, but it is a
+substantive secondary benefit of the open release.
+
+The reproducibility contribution carries its own limitations,
+which Section~\ref{sec:discussion-limitations} catalogues. The
+pinned dependency versions will drift, the Colab environment will
+evolve, and the input data archives at the National Aeronautics
+and Space Administration (NASA) Goddard Earth Sciences Data and
+Information Services Center (GES DISC) and National Oceanic and
+Atmospheric Administration (NOAA) CPC have their own retention and
+re-processing policies that the
+present work cannot control. The reproducibility claim is
+therefore scoped: it holds against the specific versions and
+archive states recorded at the time of release, and it requires
+the dependency snapshot to be maintained for the verification
+exercise to remain reproducible in the long term. The discussion
+returns to this scope in Section~\ref{sec:discussion-limitations}.
+
+
+% ============================================================
+\section{Paths Forward}\label{sec:discussion-paths}
+% ============================================================
+
+Raising the temporal-skill ceiling beyond $r \approx 0.34$
+requires methods outside the marginal correction family. This
+section surveys four paths and assesses their feasibility for the
+Indonesian domain, the data products available, and the
+infrastructure costs they impose on operational users. The order
+reflects increasing methodological distance from the present
+pipeline. Table~\ref{tab:paths-forward} summarises the four
+paths against three criteria: the methodological distance from
+the LSEQM+DL pipeline, the infrastructure cost they impose, and
+their effect on the temporal-skill ceiling for the Maritime
+Continent setting.
+
+\begin{table}[H]
+\centering
+\caption[Four paths for raising the temporal-skill ceiling beyond $r \approx 0.34$]{Four paths for raising the temporal-skill ceiling
+beyond $r \approx 0.34$. Methodological distance ranks
+the path against the LSEQM+DL pipeline of
+Chapter~\ref{chap:methods}; infrastructure cost is the
+incremental dependency and runtime burden on operational
+users; ceiling effect names the qualitative potential to lift
+$r$ above the retrieval bound in the Indonesian Maritime
+Continent setting.\label{tab:paths-forward}}
+\begingroup\small
+% Use tabular* so the table fills \textwidth exactly: keep the original
+% 3.0/2.0/2.5/4.5 cm p-column widths (sum 12 cm) and let
+% \extracolsep{\fill} absorb the ~2 cm of slack into the inter-column
+% gaps. Previous attempt scaled the p widths to 14 cm but forgot the
+% three 12 pt inter-column paddings (~1.3 cm), pushing the table past
+% the right margin.
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}p{3.0cm}p{2.0cm}p{2.5cm}p{4.5cm}@{}}
+\toprule
+Path & Methodological distance & Infrastructure cost & Ceiling effect \\
+\midrule
+Multivariate QM &
+Moderate (replace univariate marginal with joint mapping) &
+Larger calibration samples; tens of times more compute &
+Open question; depends on joint structure of the reference \\
+\addlinespace
+Sub-daily disaggregation &
+Moderate (add a step after daily correction) &
+Half-hourly archive + geostationary IR &
+Moderate; recovers within-day timing only \\
+\addlinespace
+Stochastic disaggregation &
+Large (deterministic $\to$ ensemble) &
+Ensemble verification stack on the downstream side &
+Reframes timing as uncertainty rather than removing it \\
+\addlinespace
+Local-day re-aggregation (with Himawari-9) &
+Small (re-aggregate input before pipeline) &
+Re-run of pipeline on re-aggregated archive &
+Targets the UTC-vs-local-day calendar artefact; most actionable for UTC+7--9 \\
+\bottomrule
+\end{tabular*}
+\endgroup
+\end{table}
+
+The first path is multivariate quantile mapping. The univariate
+methods used throughout the present pipeline correct the marginal
+distribution at each pixel and each dekad independently.
+Multivariate methods correct the joint distribution across pixels,
+across pairs of variables, or across time lags, and can in
+principle restore some of the day-by-day pairing that the
+univariate methods leave untouched. The rank preservation
+argument of Section~\ref{sec:discussion-bound} is specifically a
+property of marginal mapping, so a multivariate method is not
+bound by it. The trade-off is that multivariate methods require
+substantially larger calibration samples and substantially more
+computation, and the quality of the joint structure they recover
+is bounded by the joint structure of the calibration reference.
+For a regional pipeline calibrated against a $0.5^{\circ}$ gauge
+analysis with $171$ validation stations, the joint structure
+recoverable is limited, and the gain in temporal skill that a
+multivariate method can deliver in this setting is an open
+question that the present work does not resolve.
+
+The second path is sub-daily disaggregation. The IMERG product
+family is natively half-hourly, and the daily aggregation step
+applied in the present pipeline discards the within-day timing
+information. Sub-daily disaggregation, in which the corrected
+daily total is redistributed across the day using a
+cloud-tracking algorithm against half-hourly imagery, recovers
+the within-day timing at the cost of additional dependencies on
+geostationary infrared and visible channels. For the Maritime
+Continent, the Himawari-9 geostationary platform provides
+$10$-minute cadence at $2$~km resolution and is the natural
+candidate for the cloud-tracking input. This path retains the
+distributional correction at the daily scale and adds a
+within-day timing signal on top, so the bias-free distributional
+properties of the present pipeline are preserved while the
+day-by-day timing is recovered.
+
+The third path is stochastic disaggregation. Rather than
+producing a single corrected daily field, a stochastic
+disaggregation step samples from an ensemble of plausible daily
+timings consistent with the corrected distributional properties.
+The verification posture shifts from deterministic point-by-point
+scoring to ensemble metrics: the Continuous Ranked Probability
+Score for ensembles, the rank histogram for calibration, and
+threshold reliability diagrams for event detection. The path is
+attractive because it acknowledges the timing uncertainty
+explicitly rather than burying it in a flat $r$ value. The cost
+is that downstream operational users need to ingest ensemble
+inputs, which not all hydrological models or drought-monitoring
+applications are equipped to handle. The path is therefore most
+useful for applications that are already ensemble-aware.
+
+The fourth path, and the most operationally actionable for users
+in the UTC+7 to UTC+9 band, is local-day re-aggregation. The
+calendar artefact discussed in
+Section~\ref{sec:discussion-ops} is a fixable mismatch between
+the UTC-aligned daily window and the local convective
+afternoon. Re-aggregating the native half-hourly IMERG fields
+to a local-day window aligned to the convective cycle, before
+applying the LSEQM+DL correction, would remove the artefact
+without changing the correction methodology. The cost is a
+re-run of the entire pipeline against a re-aggregated input
+archive, which is computationally modest but archive-intensive.
+The Himawari-9 cloud-tracking reference makes the diurnal cycle
+visible at $10$-minute resolution and would let an analyst
+verify the local-day alignment against the satellite-observed
+peak in convective cloud cover. This is the path most directly
+enabled by the parallel reproducibility contribution: the
+configurable daily-aggregation step is exposed in the pipeline,
+the re-aggregated archive can be substituted at the input layer,
+and the four-pillar verification report on the re-aggregated
+pipeline against the same BMKG validation set is reproducible by
+any independent user.
+
+A common feature of all four paths is that they leave the
+LSEQM+DL pipeline as constructed in Chapter~\ref{chap:methods}
+intact for the well-served application class identified in
+Section~\ref{sec:discussion-ops}. Users who do not need
+day-specific timing receive the corrected daily product as is;
+users who need timing receive an upstream re-aggregation, an
+add-on disaggregation, or a shift to an ensemble representation.
+The marginal correction component remains the right tool for the
+distribution-alignment work, and the four paths above add
+capability rather than replace existing capability.
+
+
+% ============================================================
+\section{Limitations and Constraints}\label{sec:discussion-limitations}
+% ============================================================
+
+The present work has five limitations that bound the strength of
+its conclusions. They are catalogued here so that the
+operational guidance in Section~\ref{sec:discussion-ops} and the
+reproducibility claim in
+Section~\ref{sec:discussion-reproducibility} can be read at the
+right level of confidence.
+
+\textbf{Sensitivity parameters not formally optimised.} Three
+parameters in the pipeline carry the not-formally-optimised
+status declared in Section~\ref{sec:methods-reproducibility}: the
+CNN blending weight $\alpha = 0.70$, the GPD threshold at the
+$80$th percentile of wet-day exceedances, and the density
+saturation count at $2$ (lowered from an initial $3$ after
+qualitative inspection showed that $3$ suppressed the CNN almost
+everywhere outside Java). Each was chosen by domain reasoning,
+each is exposed in the configuration file, and each is acknowledged
+as a sensitivity parameter rather than an optimum. The headline
+numbers in Chapter~\ref{chap:results} are conditional on these
+choices. A one-at-a-time sweep over five values per parameter on
+the Bali reproducibility subdomain
+(Section~\ref{sec:results-sensitivity}) confirms that each
+parameter response is monotone and locally smooth and that the
+four-pillar pattern does not reverse across the explored ranges; a
+full Cartesian grid search with a strict temporal hold-out remains
+future work. Users who care about the precise headline value
+should re-run the pipeline with their own preferred settings;
+users who care about the four-pillar pattern can rely on the
+empirical robustness demonstrated by the Bali sweep.
+
+\textbf{CPC-UNI reference quality bound.} The framework
+calibrates against CPC-UNI \citep{ref:chen2008}, which is itself
+a gauge-based analysis with known undercatch of heavy rainfall in
+sparse-gauge regions and known smoothing at the $0.5^{\circ}$
+analysis resolution. The corrected satellite product cannot be
+better than the reference it is calibrated against, except where
+the BMKG out-of-sample validation reveals that the corrected
+product matches the BMKG distribution more closely than CPC-UNI
+does, as discussed in Section~\ref{sec:results-headline}. The
+strongest claim the present work supports is that the corrected
+product is bias-free at the four pillars when scored against an
+independent gauge network, conditional on the CPC-UNI reference
+defining the correction target. Replacement of CPC-UNI by a
+higher-resolution or denser-gauge analysis remains an extension
+within the same pipeline architecture.
+
+\textbf{CNN training-data limits at the network edges.} The CNN
+refinement stage uses dekadal pooling of approximately $250$
+paired daily observations per pixel over $25$ years. In regions
+of very sparse gauge coverage, the station-density confidence
+mask formula in Section~\ref{sec:methods-blending} drives
+$\alpha_{\text{eff}}$ toward $1$, which restricts the CNN
+contribution to areas where the calibration sample is large
+enough to support the residual learning target. This is graceful
+degradation rather than failure: in low-confidence regions the
+pipeline collapses to LSEQM, and the four-pillar performance in
+those regions is the LSEQM column of Table~\ref{tab:headline}
+rather than the LSEQM+DL column. The implication for users in
+Papua and parts of Maluku is that the headline LSEQM+DL numbers
+do not apply uniformly across the archipelago; in those regions
+the LSEQM column of Table~\ref{tab:headline} is the relevant
+performance baseline.
+
+\textbf{Conditional bias not removable by univariate quantile
+mapping.} The Pearson $r$ ceiling discussed in
+Section~\ref{sec:discussion-bound} is one expression of a more
+general limit: conditional biases, in which the satellite error
+depends on the precipitation amount in a way that the univariate
+mapping cannot capture, are not removable by the present
+pipeline. The four paths in Section~\ref{sec:discussion-paths}
+all address this limit at different points in the pipeline. The
+present work does not claim to remove conditional bias; it
+claims to remove the marginal bias and to acknowledge the
+conditional component as the structural ceiling.
+
+\textbf{Reproducibility scope is version-bounded.} The
+dependencies pinned at release time will drift as the Python
+ecosystem evolves and as cloud-platform defaults change. The
+reproducibility claim is therefore scoped to the dependency
+snapshot recorded in the requirements file at release. A long-term
+reproducibility commitment requires either a containerised
+distribution (which the present release does not provide) or an
+ongoing maintenance commitment to track upstream changes (which
+the present author cannot offer beyond the thesis defence
+horizon). The verification exercises that
+Section~\ref{sec:discussion-reproducibility} discusses should
+therefore be undertaken with the recorded dependency snapshot,
+not with a current environment, until a containerised release is
+prepared.
+
+The combined effect of these five limitations leaves the central
+claim of the chapter intact: marginal bias correction moves the
+four pillars cleanly toward the gauge target and cannot move the
+temporal-skill diagnostics, because rank preservation and variance
+inflation without skill jointly bound Pearson $r$ at the timing
+quality of the underlying satellite retrieval. The four-pillar
+improvement is the contribution that the framework delivers; the
+flat $r$ is the structural property of the method family rather
+than a failure of the implementation. The reproducibility
+contribution lowers the cost of testing this proposition on other
+products, other references, and other regions; the transferability
+of the proposition itself is an empirical question that the open
+release lets the field answer one re-application at a time.

@@ -1,0 +1,900 @@
+% ============================================================
+% chapter_04_results.tex - Chapter 4, Results
+%
+% Purpose: reports the empirical performance of the LSEQM+DL framework
+%          against 171 independent BMKG stations across the four
+%          verification pillars + temporal-skill diagnostics.
+% Sections: 4.1 Headline Numbers, 4.2 Stage-wise Attribution,
+%           4.3 Threshold-stratified Verification, 4.4 Pearson r and
+%           the Paradox, 4.5 Spatial Skill Distribution (CQI),
+%           4.6 Per-station Taylor Diagnostics, 4.7 Temporal Stability,
+%           4.8 Bali Sensitivity Sweep, 4.9 Reproducibility Evaluation.
+% Included by main_thesis.tex.
+% License: CC BY 4.0 (see ../LICENSE).
+% ============================================================
+%
+% Source material:
+%   - paper/PPS1691_..._compact_20260526.tex  (compact seminar §3 + §4.1)
+%   - paper/PPS1691_..._20260522_seminar.tex  (master seminar, CQI/Taylor figs)
+%   - paper/PPS1591_..._mdpi.docx              (parallel MDPI manuscript)
+%   - paper/additional_information.md          (§4.2 CQI, §5 detailed analyses)
+%
+% Figures to reuse:
+%   - fig_compact_stage_skill.png (Figure 4.2, headline 4-panel)
+%   - fig_compact_paradox.png     (Figure 4.4, paradox 4-panel)
+%
+% Conventions: no em-dashes; no AI-language; no overclaim;
+%              sensitivity caveats preserved; numerical consistency.
+% ============================================================
+
+\chapter{Results}\label{chap:results}
+
+This chapter reports the empirical performance of the LSEQM+DL (Linear Scaling (LS), Empirical Quantile Mapping (EQM), Generalized Pareto Distribution (GPD), and Convolutional Neural Network (CNN) refinement, a Deep Learning (DL) architecture)
+framework against 171 independent Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) stations, pooled across
+the 36 dekadal windows of 2001 to 2025. The results are organised
+around the four-pillar verification framework introduced in
+Section~\ref{sec:methods-metrics}, with the temporal-skill
+diagnostic of Pearson correlation reported separately because of
+the structural distinction that
+Chapter~\ref{chap:discussion} develops.
+Section~\ref{sec:results-headline} presents the headline
+stage-wise skill across the four pillars.
+Section~\ref{sec:results-stages} attributes each metric movement
+to the pipeline stage that produced it.
+Section~\ref{sec:results-threshold} reports the
+threshold-dependent detection results that the aggregate
+event-detection numbers in
+Section~\ref{sec:results-headline} mask.
+Section~\ref{sec:results-correlation} reports the Pearson
+correlation across stages and the paradox at the centre of the
+discussion. The remaining sections cover the spatial skill
+distribution (Section~\ref{sec:results-cqi}), per-station Taylor
+analysis (Section~\ref{sec:results-taylor}), temporal stability
+across dekads (Section~\ref{sec:results-temporal}), sensitivity
+analyses on the framework parameters
+(Section~\ref{sec:results-sensitivity}), and the reproducibility
+evaluation that demonstrates end-to-end re-runnability
+(Section~\ref{sec:results-reproducibility}).
+
+
+% ============================================================
+\section{Stage-wise Headline Skill}\label{sec:results-headline}
+% ============================================================
+
+Each correction stage was designed to address a distinct bias
+dimension, and the verification organises around the same
+taxonomy. Ten metrics in Table~\ref{tab:headline} group into the
+four pillars introduced in Section~\ref{sec:methods-metrics}:
+\textit{value adjustment} (relative bias (RB), standard deviation
+ratio (SDR)), \textit{distribution alignment} (Kolmogorov-Smirnov (KS) $p$-value, wet-day
+frequency, wet-day intensity), \textit{extreme preservation}
+($Q_{95}$ and $Q_{99}$ ratios), and \textit{event detection}
+(Probability of Detection (POD), Critical Success Index (CSI), False Alarm Ratio (FAR)). Reading down a column gives the per-stage
+performance; reading across pillars gives the design coverage of
+the framework. The table is reported stage-by-stage rather than
+only as raw-versus-corrected so that each column can be audited
+against the bias dimension its stage was designed to address. If
+LS over-corrects the mean, the LS column will reveal it; if EQM
+under-aligns the bulk distribution, the LSEQM column will too;
+and if the CNN distorts a metric outside its operating range,
+the LSEQM+DL column will show that as well. All numbers are
+pooled across the 36 dekadal windows of 2001 to 2025 at the 171
+BMKG stations not used in any correction step, so the comparison
+tests whether the corrections generalise beyond the Climate
+Prediction Center (CPC) Unified Gauge-Based Analysis of Daily
+Precipitation (CPC-UNI) training reference.
+
+\begin{table}[H]
+\centering
+\caption[Stage-wise skill against 171 independent BMKG stations, pooled across all 36 dekads (2001 to]{Stage-wise skill against 171 independent BMKG stations,
+pooled across all 36 dekads (2001 to 2025). Bold values mark the
+best performance per row. The target column gives the value for
+perfect agreement with observations.\label{tab:headline}}
+\begingroup\small
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+Pillar & Metric & LS & LSEQM & LSEQM+DL & Target \\
+\midrule
+Value Adjustment
+  & Relative Bias        & $-$0.114 & \textbf{0.009} & $-$0.006 & 0 \\
+  & SDR                  & 0.71 & 1.03 & \textbf{1.00} & 1.0 \\
+Distribution Alignment
+  & KS $p$-value (\%)    & 0.01 & \textbf{19.07} & \textbf{19.07} & 100 \\
+  & Wet-Day Freq.\ Ratio & 1.21 & \textbf{0.96} & 0.95 & 1.0 \\
+  & Wet-Day Int.\ Ratio  & 0.71 & \textbf{1.06} & 1.05 & 1.0 \\
+Extreme Preservation
+  & $Q_{95}$ Ratio       & 0.74 & 1.07 & \textbf{1.05} & 1.0 \\
+  & $Q_{99}$ Ratio       & 0.71 & 1.05 & \textbf{1.01} & 1.0 \\
+Event Detection
+  & POD                  & \textbf{0.78} & 0.65 & 0.65 & 1.0 \\
+  & CSI                  & \textbf{0.53} & 0.49 & 0.49 & 1.0 \\
+  & FAR                  & 0.36 & \textbf{0.32} & \textbf{0.32} & 0 \\
+\bottomrule
+\end{tabular}
+\endgroup
+\end{table}
+
+Table~\ref{tab:headline} reports the out-of-sample skill against
+the 171 BMKG validation stations, which is the strongest claim
+the framework supports because the BMKG network is independent
+of the correction reference. The parallel manuscript
+\citep{ref:istanto2026mdpi}\MDPIstatus reports a companion table
+of in-sample skill against the CPC-UNI calibration target;
+Table~\ref{tab:headline-cpc} reproduces those values here so the
+two-tier validation framework of
+Section~\ref{sec:methods-validation} can be read in full.
+
+\begin{table}[H]
+\centering
+\caption[In-sample skill against the CPC-UNI calibration target, pooled across all 36 dekads (2001 to]{In-sample skill against the CPC-UNI calibration target,
+pooled across all 36 dekads (2001 to 2025). Values reproduced from
+the parallel MDPI manuscript
+\citep{ref:istanto2026mdpi}\MDPIstatus. Compared with
+Table~\ref{tab:headline}, the CPC-UNI in-sample comparison shows
+LS at zero relative bias by construction (LS is calibrated against
+CPC-UNI dekadal means) and Q$_{95}$/Q$_{99}$ ratios that overshoot
+slightly against CPC-UNI; the BMKG out-of-sample comparison reveals
+that the overshoot against CPC-UNI is a shift toward the true gauge
+distribution. Temporal-skill row labels: RMSE = root mean square error,
+NSE = Nash-Sutcliffe efficiency.\label{tab:headline-cpc}}
+\begingroup\small
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+Pillar & Metric & LS & LSEQM & LSEQM+DL & Target \\
+\midrule
+Value Adjustment
+  & Relative Bias        & \textbf{0.000} & 0.070 & 0.065 & 0 \\
+  & SDR                  & \textbf{0.971} & 1.159 & 1.148 & 1.0 \\
+Distribution Alignment
+  & KS $p$-value (\%)    & \textbf{6.56} & 0.00 & 0.00 & 100 \\
+  & Wet-Day Freq.\ Ratio & \textbf{1.040} & 0.947 & 0.946 & 1.0 \\
+  & Wet-Day Int.\ Ratio  & \textbf{0.961} & 1.157 & 1.152 & 1.0 \\
+Extreme Preservation
+  & $Q_{95}$ Ratio       & \textbf{0.946} & 1.171 & 1.163 & 1.0 \\
+  & $Q_{99}$ Ratio       & \textbf{0.967} & 1.212 & 1.196 & 1.0 \\
+Event Detection
+  & POD                  & \textbf{0.767} & 0.707 & 0.707 & 1.0 \\
+  & CSI                  & \textbf{0.589} & 0.572 & 0.572 & 1.0 \\
+  & FAR                  & 0.271 & 0.248 & \textbf{0.248} & 0 \\
+\midrule
+Temporal Skill
+  & Pearson $r$          & 0.343 & 0.345 & \textbf{0.348} & 1.0 \\
+  & RMSE (mm/day)        & \textbf{13.10} & 14.18 & 14.07 & 0 \\
+  & NSE                  & \textbf{$-$0.273} & $-$0.548 & $-$0.524 & 1.0 \\
+\bottomrule
+\end{tabular}
+\endgroup
+\end{table}
+
+The two tables tell a complementary story. Against CPC-UNI
+(Table~\ref{tab:headline-cpc}), LS has zero relative bias by
+construction and the LSEQM/LSEQM+DL stages overshoot the
+reference distribution slightly at the upper percentiles. Against
+BMKG (Table~\ref{tab:headline}), LS retains a residual bias of
+$-11.4\%$ that reflects the gauge-to-gauge offset between CPC-UNI
+and BMKG, and the LSEQM/LSEQM+DL stages move the corrected
+product close to unity at every pillar. The apparent overshoot
+of LSEQM+DL Q$_{99}$ ratio against CPC-UNI ($1.20$) becomes a
+near-perfect match against BMKG ($1.01$): the framework was
+calibrated to CPC-UNI but reproduces BMKG more accurately because
+CPC-UNI itself under-catches heavy rain. The Temporal Skill
+section of Table~\ref{tab:headline-cpc} is the basis for the
+Pearson correlation analysis in
+Section~\ref{sec:results-correlation}.
+
+Reading across the four pillars, the framework moves three
+pillars cleanly toward the gauge target and produces a designed
+trade-off in the fourth. The value-adjustment pillar shows
+LSEQM and LSEQM+DL essentially eliminating the LS residual:
+relative bias moves from $-11.4\%$ under LS to $+0.9\%$ under
+LSEQM and $-0.6\%$ under LSEQM+DL, with the latter falling
+inside the station-representativeness uncertainty band reported
+for CPC-UNI over Indonesia \citep{ref:chen2008}. The standard
+deviation ratio (SDR) tracks the same path, from $0.71$ (a $29\%$
+spread compression under LS) through $1.03$ (slight over-spread
+under LSEQM) to exactly $1.00$ under LSEQM+DL, where the CNN
+refinement pulls the EQM overshoot back to the gauge target.
+
+The distribution-alignment pillar shifts from rejection at the
+$99.99\%$ level under LS ($p = 0.01\%$) to acceptance at
+conventional confidence levels under LSEQM and LSEQM+DL ($p =
+19.1\%$), meaning the corrected daily distributions are no
+longer statistically distinguishable from the gauge reference.
+The wet-day frequency ratio echoes the move, from $1.21$ (a
+$21\%$ over-count of rainy days under LS, consistent with the
+Integrated Multi-satellitE Retrievals for Global Precipitation Measurement (IMERG) tendency to over-detect drizzle and light rain) to $0.96$
+and $0.95$ under LSEQM and LSEQM+DL respectively, indicating
+that the dry-day-matching mechanism has done its work without
+introducing a counter-bias. The wet-day intensity ratio moves
+in parallel from $0.71$ under LS to $1.06$ under LSEQM and
+$1.05$ under LSEQM+DL, confirming that the mean rainfall on wet
+days now matches the gauge magnitude after the bulk-distribution
+correction.
+
+The extreme-preservation pillar recovers the upper tail that LS
+truncates by construction. $Q_{99}$ moves from $0.71$ (a $29\%$
+under-prediction of heavy-rain magnitude) through $1.05$ under
+LSEQM (a slight overshoot from the EQM tail extrapolation) to
+$1.01$ after CNN refinement, and $Q_{95}$ follows the same arc
+($0.74 \rightarrow 1.07 \rightarrow 1.05$). The CNN stage acts
+as a tail trim, pulling the EQM overshoot back toward unity
+rather than amplifying it.
+
+The event-detection pillar reveals the expected trade-off.
+Matching the dry-day frequency suppresses spurious light-rain
+events, which lowers aggregate POD from $0.78$ to $0.65$ and
+CSI from $0.53$ to $0.49$ but also reduces FAR from $0.36$ to
+$0.32$. The aggregate numbers in
+Table~\ref{tab:headline} mask a threshold-dependent reversal
+that Section~\ref{sec:results-threshold} details: skill loss
+is concentrated at light-rain thresholds where false alarms
+drive the count, while skill at heavy-rain thresholds improves
+substantially. Figure~\ref{fig:headline-bars} presents one
+representative metric per pillar in bar form, with LS, LSEQM,
+and LSEQM+DL side-by-side and the perfect-agreement target
+marked.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourOneWidth\textwidth]{fig_thesis_04_headline_bars.png}
+\caption[Stage-wise skill at 171 independent BMKG stations for four representative metrics drawn from Table~\ref{tab:headline}]{Stage-wise skill at 171 independent BMKG stations for
+four representative metrics drawn from
+Table~\ref{tab:headline}. Bars show LS (blue), LSEQM (orange),
+and LSEQM+DL (red); dashed line marks the target value for
+perfect agreement.\label{fig:headline-bars}}
+\end{figure}
+
+A single-day spatial example of all six products on $1$~January~$2025$,
+including the raw IMERG-L, the three correction stages, the IMERG
+Final Run (IMERG-F) independent benchmark, and the CPC-UNI gauge
+reference, is in
+Appendix~\ref{app:atlas}~Figure~\ref{fig:atlas-six}.
+
+
+% ============================================================
+\section{Stage-wise Attribution}\label{sec:results-stages}
+% ============================================================
+
+The three correction stages can be read as an additive sequence,
+each addressing a residual that the previous stage cannot reach.
+This section walks through the stages in order and reports, for
+each, the evaluation metrics that shift and the magnitude of the
+shift, before the threshold-stratified detection analysis in
+Section~\ref{sec:results-threshold} unpacks the apparent
+event-detection regression seen in the aggregate.
+
+\subsection*{What Linear Scaling Achieves}
+
+Linear Scaling is the simplest correction in the pipeline, and
+its performance against BMKG reflects what a single
+mean-rescaling step can and cannot do. The relative bias against
+BMKG of the LS-corrected field is $-11.4\%$. LS was designed to
+match the dekadal mean against CPC-UNI, not against BMKG, so its
+BMKG-side residual reflects two contributions: the limited
+correction (a single multiplicative factor that does not adjust
+distribution shape) and the gauge-to-gauge offset between the
+CPC-UNI gridded analysis and BMKG point measurements
+\citep{ref:chen2008}. The decomposition between these two
+contributions can be inferred from the next subsection: the
+LSEQM stage uses the same CPC-UNI training and brings the BMKG
+residual to $+0.9\%$, indicating that the correction-side
+contribution dominates and that the residual is not a pure
+reference offset.
+
+The standard deviation ratio against BMKG sits at $0.71$,
+indicating that the corrected satellite field still varies less
+than the gauge observations. The distribution shape is
+essentially unchanged: the Kolmogorov-Smirnov test against the
+BMKG distribution returns $p = 0.01\%$, far below conventional
+acceptance thresholds. The wet-day frequency ratio of $1.21$
+confirms that LS retains the IMERG Late Run (IMERG-L) tendency to over-detect
+light rain. LS also leaves the upper tail truncated: $Q_{99}$
+stands at $0.71$, indicating that the satellite under-predicts
+the heaviest events by a factor of about $0.71$. The qualitative
+picture is consistent with what LS was designed for: it adjusts
+the mean of the dekadal field but does not modify day-by-day
+distributional structure. Stages 2 and 3 of the pipeline are
+introduced precisely to address this gap.
+
+\subsection*{What LSEQM Adds: the Largest Single Jump}
+
+The LS-to-LSEQM transition produces the largest single
+improvement in the framework across all three pillars except
+event detection. The standard deviation ratio moves from $0.71$
+to $1.03$, correcting a $29\%$ underestimation of observed
+variability. The Kolmogorov-Smirnov $p$-value rises from
+$0.01\%$ to $19.1\%$, so the corrected and BMKG distributions
+can no longer be rejected as different populations at
+conventional confidence levels \cite{ref:wilks2011,
+ref:ebert2007}. The wet-day frequency ratio drops from $1.21$ to
+$0.96$, removing nearly all of the $21\%$ overestimation of
+wet-day occurrence through the dry-day frequency matching
+scheme. The $Q_{99}$ ratio improves from $0.71$ to $1.05$ and
+the $Q_{95}$ ratio from $0.74$ to $1.07$, recovering the heavy
+tail that LS truncates by construction. The relative bias
+against BMKG flips sign and shrinks to $+0.9\%$, because gamma
+EQM rescales the full distribution rather than only the mean.
+
+Two costs accompany these gains. The probability of detection
+(POD) drops from $0.78$ to $0.65$ and the critical success
+index (CSI) from $0.53$ to $0.49$. Both follow from the dry-day
+frequency matching design: when the corrected wet-day frequency
+falls toward unity, a fraction of IMERG-L light-rain events
+previously counted as hits are reclassified as dry. The
+reclassification reduces over-detection and improves the false
+alarm ratio (FAR) from $0.36$ to $0.32$, at the price of a
+lower hit rate at low thresholds \citep{ref:maggioni2016}. The
+trade-off is the intended outcome of the design choice;
+Section~\ref{sec:results-threshold} shows where it is
+favourable and where it is not.
+
+\subsection*{What LSEQM+DL Adds: Tail Refinement}
+
+The contribution of Stages~3 and 4 over the LSEQM baseline is
+concentrated in the extreme tail. The $Q_{99}$ ratio sharpens
+from $1.05$ to $1.01$, pulling the upper tail to within $1\%$
+of the BMKG target; the $Q_{95}$ ratio tightens from $1.07$ to
+$1.05$; and the SDR moves from $1.03$ to exactly $1.00$.
+Distribution-alignment metrics (KS $p$-value, wet-day frequency
+and intensity ratios) and event-detection metrics (POD, CSI,
+FAR) are essentially unchanged because the CNN refinement
+operates only above the $80$th-percentile threshold and does not
+touch the bulk of the distribution. LSEQM+DL is therefore not a
+wholesale further correction but a targeted tail refinement,
+consistent with placing DL at the end of the pipeline where the
+CNN sees a field that has already had its bulk bias removed by
+Stages~1 to 3. The stage-resolved attribution is therefore
+complete: each stage moves the metrics matched to its design
+dimension and leaves the others alone.
+Appendix~\ref{app:atlas}~Figure~\ref{fig:atlas-diff} maps the
+per-pixel residual on the same representative day, locating
+where in the archipelago the correction is doing the most work.
+
+
+% ============================================================
+\section{Threshold-Dependent Detection}\label{sec:results-threshold}
+% ============================================================
+
+The aggregate event-detection metrics in
+Table~\ref{tab:headline} mask a threshold-dependent reversal in
+detection skill. Skill is broken out at the seven World Meteorological Organization (WMO) multi-threshold
+verification thresholds (1, 5, 10, 20, 50, 100, and
+150~mm/day) in Figure~\ref{fig:threshold-skill}. At the
+$1$ and $5~\mathrm{mm/day}$ thresholds LS retains a higher POD
+than LSEQM+DL, consistent with LS preserving the IMERG-L tendency
+to over-detect light rain and therefore scoring more hits at the
+low thresholds. Above $20~\mathrm{mm/day}$ the pattern reverses:
+LSEQM+DL achieves higher CSI than LS at every higher threshold.
+At $50~\mathrm{mm/day}$ the median CSI is $0.097$ for LSEQM+DL
+against $0.062$ for LS, a $57\%$ improvement, and the equitable
+threat score (ETS), which removes the chance-hit contribution,
+shows the same ordering. At the $100$ and $150~\mathrm{mm/day}$
+thresholds the absolute CSI values are small for both methods,
+reflecting the difficulty of detecting individual
+heavy-rain events at the daily scale, but the LSEQM+DL advantage
+is consistent across thresholds.
+
+The crossover threshold near $20~\mathrm{mm/day}$ matches the
+lower edge of the heavy-rain range used by BMKG flood
+early-warning advisories, so the regime where LSEQM+DL overtakes
+LS is also the regime where detection skill carries operational
+weight. The LSEQM+DL pipeline is more skillful exactly where
+operational users care: at the moderate-to-heavy thresholds that
+drive flood and drought decisions
+\citep{ref:tan2016, ref:ramadhan2022}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourTwoWidth\textwidth]{fig_thesis_04_multi_threshold.png}
+\caption[Threshold-stratified verification at the $171$ BMKG station locations]{Threshold-stratified verification at the $171$ BMKG
+station locations. (a)~POD, (b)~CSI, and (c)~Equitable Threat
+Score (ETS) as functions of precipitation threshold for LS
+(blue), LSEQM (orange), and LSEQM+DL (red). Lines show the
+median across stations; shading indicates the
+$25$--$75$ percentile range. Thresholds follow WMO
+classifications \citep{ref:wmo1317}: $1$~mm (measurable), $5$~mm
+(light), $10$~mm (moderate), $20$~mm (moderate-heavy), $50$~mm
+(heavy), and $100$~mm (very heavy). The crossover near
+$20$~mm/day is the threshold above which LSEQM+DL is the more
+skilful method.\label{fig:threshold-skill}}
+\end{figure}
+
+
+% ============================================================
+\section{Pearson Correlation Across Stages}\label{sec:results-correlation}
+% ============================================================
+
+One metric does not move across the four stages. The Pearson
+correlation between paired daily satellite and CPC-UNI values,
+computed at each pixel and pooled across the dekad, is $0.343$
+for LS, $0.345$ for LSEQM, and $0.348$ for LSEQM+DL. The total
+shift across stages is approximately $+0.005$, well within the
+single-pixel sampling uncertainty of $\pm 0.06$ implied by the
+Fisher $z$-transform standard error at $n = 250$
+\citep{ref:wilks2011}.
+
+Figure~\ref{fig:paradox} states the central observation of this
+chapter in four panels. Pearson $r$, root mean square error
+(RMSE), and Nash-Sutcliffe efficiency (NSE)
+\citep{ref:nashsutcliffe1970} are temporal-skill diagnostics that
+do not improve across the four correction stages: $r$ stays near
+$0.34$ across all stages, RMSE rises from $13.1$ to $14.1$~mm/day
+because the correction widens spread without re-aligning timing,
+and NSE moves from $-0.27$ to $-0.52$. The standard deviation
+ratio, an amplitude diagnostic, moves from $0.71$ to $1.00$
+across the same stages. One amplitude metric improves
+substantially toward the gauge target; three temporal-skill
+metrics do not move or get worse.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourThreeWidth\textwidth]{fig_thesis_04_paradox.png}
+\caption[What does and does not improve under marginal bias correction]{What does and does not improve under marginal bias
+correction. (a)~Pearson $r$ stays essentially flat across stages.
+(b)~RMSE rises slightly. (c)~NSE moves further from unity.
+(d)~Standard deviation ratio moves to the target. The first
+three are temporal-skill diagnostics; the fourth is the
+amplitude diagnostic the framework explicitly
+targets.\label{fig:paradox}}
+\end{figure}
+
+The contrast is not a verification quirk; it is what the
+framework should do given how each metric is built. The SDR
+depends only on the marginal variance of the two series and is
+therefore moved directly by the EQM stage acting on the daily
+distribution. Pearson $r$, RMSE, and NSE depend on the
+day-by-day pairing of satellite and gauge values and inherit
+whatever timing offset the satellite product carries from its
+half-hourly inputs and the daily aggregation window. The
+marginal correction has no mechanism to shift a value from one
+day to its neighbour, so by construction it cannot lift the
+three temporal-skill metrics. The visual asymmetry between the
+amplitude-pillar improvement and the temporal-skill diagnostics
+is the central observation of this paper;
+Section~\ref{sec:discussion-bound} develops the theoretical
+basis for the bound, and the empirical value $r \approx 0.348$
+sits inside the $0.3$ to $0.5$ band reported for daily IMERG
+over tropical regions \citep{ref:tang2020, ref:tan2016}.
+
+
+% ============================================================
+\section{Spatial Skill Distribution}\label{sec:results-cqi}
+% ============================================================
+
+The headline numbers in Section~\ref{sec:results-headline} pool
+across the full Indonesian domain and so average over the
+regional heterogeneity of Java-Sumatra-Bali gauge density against
+the sparse network in Maluku and Papua. The Composite Quality
+Index (CQI) defined in Section~\ref{sec:methods-metrics}
+collapses the per-pixel performance across the three sub-scores
+(Basic Statistical Quality sub-score (BSQS), Distribution Quality sub-score (DQS), Temporal Quality sub-score (TQS)) and lets the spatial distribution of skill be
+read as a single map. Figure~\ref{fig:cqi-spatial} shows the
+CQI for the three correction stages.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourFourWidth\textwidth]{fig_thesis_04_cqi_spatial.png}
+\caption[CQI maps for (left) Linear Scaling, (centre) LSEQM, and (right) LSEQM+DL,]{CQI maps for (left) Linear Scaling, (centre) LSEQM, and (right) LSEQM+DL, computed
+pixel-wise against CPC-UNI and averaged across all $36$ dekadal
+windows. Higher values (green) indicate closer agreement with
+the reference; lower values (red) indicate poorer agreement.
+The Indonesian gauge network used by CPC-UNI is concentrated in
+Java and southern Sumatra, which is reflected in the higher CQI
+values for those regions across all three
+stages.\label{fig:cqi-spatial}}
+\end{figure}
+
+The map view makes the regional heterogeneity visible: high
+quality across Java and southern Sumatra where the gauge network
+is dense, progressively lower quality eastward into Maluku and
+Papua where the reference dataset itself is poorly constrained.
+The differences between LSEQM and LSEQM+DL are concentrated in
+the densely gauged regions, where the CNN refinement contributes
+through the station-density-aware blending of
+Section~\ref{sec:methods-blending}; in sparsely gauged regions
+the framework reverts toward the LSEQM result by design, so the
+LSEQM and LSEQM+DL maps are nearly indistinguishable there.
+
+Figure~\ref{fig:cqi-improvement} isolates the LSEQM+DL
+contribution by mapping the per-pixel CQI change from LSEQM to
+LSEQM+DL (left panel) and classifying the LSEQM+DL CQI into six
+quality tiers (right panel). The LSEQM+DL improvement is
+positive and modest over most of the domain, with the largest
+gains concentrated in the densely gauged western islands where
+the CNN refinement is most active. The categorical view shows
+that the LSEQM+DL product reaches the Good or Excellent tier
+across roughly half of the Indonesian land mass, while sparsely
+gauged eastern regions sit in the Fair-Low to Marginal tiers,
+consistent with the framework's documented graceful degradation
+under the confidence-mask design.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourFiveWidth\textwidth]{fig_thesis_04_cqi_improvement.png}
+\caption[(a) Per-pixel CQI change from LSEQM to LSEQM+DL, smoothed spatially for clarity]{(a) Per-pixel CQI change from LSEQM to LSEQM+DL,
+smoothed spatially for clarity. Positive values (blue) indicate
+where the CNN refinement improved over LSEQM. (b) Categorical
+quality classification of the final LSEQM+DL CQI into six tiers
+from Poor ($<0.3$) to Excellent ($\geq 0.7$). The domain median
+sits in the Fair-Low tier; densely gauged western Indonesia
+reaches Good and Excellent.\label{fig:cqi-improvement}}
+\end{figure}
+
+The spatial pattern carries an important operational reading.
+The headline LSEQM+DL numbers reported in
+Table~\ref{tab:headline} apply with full strength in the
+densely gauged west; in the eastern sparsely gauged regions the
+relevant performance baseline is the LSEQM column rather than
+the LSEQM+DL column, because the blending formula in
+Section~\ref{sec:methods-blending} suppresses the CNN
+contribution there. Users in Java, Sumatra, and Bali receive
+the full benefit of the four-stage pipeline; users in Maluku
+and Papua receive the LSEQM result with a thin and locally
+variable CNN residual on top. The framework therefore does not
+over-claim accuracy in regions where the reference dataset
+itself cannot support refinement, which is the operational
+expression of the design choice to make the CNN density-aware
+rather than uniform. Pillar-by-pillar climatological metric maps
+for each correction stage, on the same Indonesian domain, are in
+Appendix~\ref{app:atlas}~Figure~\ref{fig:atlas-pillars}.
+
+
+% ============================================================
+\section{Per-Station Taylor Diagram Analysis}\label{sec:results-taylor}
+% ============================================================
+
+The aggregate pattern reported in
+Sections~\ref{sec:results-headline} and
+\ref{sec:results-correlation} can be cross-checked at the level
+of individual BMKG stations using a Taylor diagram, which plots
+each station as a point whose angular position encodes the
+Pearson correlation against the gauge series and whose radial
+position encodes the standard deviation ratio relative to the
+gauge target. Figure~\ref{fig:taylor-station} shows the
+station-level diagram broken out by season: the wet season
+(November to April) and the dry season (May to October), which
+are the operationally meaningful periods for Indonesian
+agriculture and water management.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourSixWidth\textwidth]{fig_thesis_04_taylor_by_station.png}
+\caption[Station-level Taylor diagram of BMKG validation by season]{Station-level Taylor diagram of BMKG validation by
+season. Each marker is one of the $171$ validation stations;
+triangles mark LS, squares mark LSEQM, stars mark LSEQM+DL.
+The three method symbols sit at similar angular positions in
+both panels, indicating that Pearson correlation does not differ
+meaningfully across the three stages at the station level. The
+radial positions differ substantially, indicating that the
+standard deviation ratio does improve toward unity across
+stages.\label{fig:taylor-station}}
+\end{figure}
+
+The Taylor diagram resolves the headline pattern across
+individual stations: the three method symbols cluster at the
+same angular position (correlation) while their radial positions
+(standard deviation) differ substantially, with LSEQM and
+LSEQM+DL sitting close to the reference radius and LS sitting
+short. The pattern is conserved across both seasons, so the
+flat-correlation observation is not driven by either the
+convective wet season or the gauge-sparse dry season alone but
+holds station-by-station and season-by-season across the
+archipelago. This per-station visual evidence anticipates the
+theoretical argument in Section~\ref{sec:discussion-bound}:
+correlation is bounded by the underlying retrieval timing,
+which is a property of the satellite product at each pixel and
+each day, and is not lifted by the marginal correction at any
+of the $171$ validation stations.
+Appendix~\ref{app:atlas}~Figure~\ref{fig:atlas-stations}
+places the validation stations directly on dekadal-mean
+precipitation maps of the four products as a visual spatial
+agreement check.
+
+
+% ============================================================
+\section{Temporal Stability Across Dekads}\label{sec:results-temporal}
+% ============================================================
+
+The dekadal pooling design of
+Section~\ref{sec:methods-validation} aggregates each of the
+$36$ dekadal windows into a single metric value, which masks
+the within-year variability that drives operational use across
+the Indonesian wet and dry seasons. This section recovers the
+monthly view by re-aggregating the dekadal metrics to a
+calendar-month axis and reports four representative metrics
+(SDR, RMSE, KS $p$-value, CSI) across the three correction
+stages.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourSevenWidth\textwidth]{fig_thesis_04_temporal_stability.png}
+\caption[Monthly temporal stability of four representative metrics across the three correction stages]{Monthly temporal stability of four representative
+metrics across the three correction stages. (a)~Standard
+deviation ratio, (b)~root mean square error, (c)~Kolmogorov-Smirnov
+$p$-value, (d)~CSI. The seasonal cycle
+visible in RMSE and CSI reflects the wet-season convective
+rainfall regime over Indonesia; the method-ordering across
+stages is conserved across all $12$
+months.\label{fig:temporal-stability}}
+\end{figure}
+
+The SDR stays near $1.0$ for LSEQM and LSEQM+DL across all
+months, indicating that the spread correction is stable across
+the seasonal cycle and does not require season-specific
+calibration. RMSE rises during the peak wet season (December
+to February) when absolute precipitation magnitudes are
+largest, which is a property of any squared-error metric on a
+distribution with a wet-season fat tail rather than a
+correction artefact. The KS $p$-value remains above the
+$10\%$ acceptance threshold for both LSEQM and LSEQM+DL across
+all months except the deepest wet-season months, where the
+high counts of heavy-rain days reduce the test power. CSI
+shows a modest seasonal cycle but the method ordering
+(LSEQM+DL $\geq$ LSEQM $>$ LS at moderate to heavy thresholds,
+reversed at light thresholds) is conserved month-by-month.
+A daily-scale spatial example of the day-to-day variation across
+three contrasting days in the same dekad is in
+Appendix~\ref{app:atlas}~Figure~\ref{fig:atlas-threedays}.
+
+The monthly view confirms that the pooled headline numbers in
+Table~\ref{tab:headline} are not driven by a small subset of
+dekads. The pattern of stage-wise attribution is consistent across
+the seasonal cycle: each stage moves the metrics matched to
+its design dimension in every month, and the temporal-skill
+ceiling on Pearson $r$ persists in every month. The dekadal
+pooling design is therefore a legitimate way to aggregate
+results across years for the comparison framework of
+Section~\ref{sec:results-headline}, because the underlying
+pattern does not change qualitatively from month to month.
+
+
+% ============================================================
+\section{Sensitivity Analyses}\label{sec:results-sensitivity}
+% Target: 2-3 pp
+% Status: SKELETON
+% ============================================================
+
+Three parameters in the pipeline were set by domain reasoning
+rather than by a formal cross-validated search: the CNN blending
+weight $\alpha = 0.70$, the GPD threshold at the $80$th wet-day
+percentile, and the station-density saturation count
+$c_{\text{sat}} = 2$. This section states the expected
+direction of effect of each, drawn from the design reasoning in
+Chapter~\ref{chap:methods}, then reports a parameter sweep over
+the Bali reproducibility subdomain
+(Section~\ref{sec:results-reproducibility}) that tests those
+predictions empirically. A full-domain sweep with a strict
+temporal hold-out remains future work.
+
+The blending weight $\alpha$ sets the maximum CNN contribution
+in fully gauge-supported pixels through
+Equation~\eqref{eq:alpha-eff}: a larger $\alpha$ moves the
+blend toward pure LSEQM and reduces the CNN influence, while a
+smaller $\alpha$ admits more of the learned residual. The
+operating value $0.70$ caps the CNN at a $30\%$ contribution
+where confidence is full, a deliberately conservative setting
+that limits the spatial refinement to a correction rather than
+a replacement. The GPD threshold percentile trades sample size
+against tail purity: lowering it from the $80$th toward the
+$70$th admits more exceedances and stabilises the maximum-likelihood
+fit but conflates the extreme regime with moderate rain that the
+Gamma EQM already handles, while raising it toward the $90$th
+sharpens the extreme regime at the cost of falling below the
+exceedance count needed for a stable fit in dry pixels
+(Section~\ref{sec:methods-gpd}). The saturation count
+$c_{\text{sat}}$ sets how many contributing gauges per CPC cell
+are needed for full confidence: a larger value is more
+conservative and suppresses the CNN across more of the domain,
+while a smaller value admits the CNN more widely; the value $2$
+was chosen after an initial setting of $3$ was found to suppress
+the CNN almost everywhere outside Java. The sweep varies each parameter through five values while
+holding the other two at their operating defaults, runs the full
+LSEQM+DL pipeline end-to-end on the Bali subdomain for all $36$
+dekadal windows of the $2001$ to $2025$ record, and pools the
+resulting per-pixel metrics.
+Table~\ref{tab:sensitivity-bali} reports the fifteen settings.
+
+\begin{table}[H]
+\centering
+\caption[Bali sensitivity sweep over the three configuration parameters]{Bali sensitivity sweep over the three configuration
+parameters identified in Chapter~\ref{chap:methods}. Each row
+pools metrics across all $36$ dekadal windows of the $2001$ to
+$2025$ record on the Bali subdomain, with the two other
+parameters held at their operating defaults (bold). $r$: Pearson
+correlation; RB: relative bias (\%); SDR: standard-deviation
+ratio; RMSE: root mean square error (mm/day); NSE: Nash-Sutcliffe
+Efficiency.\label{tab:sensitivity-bali}}
+\begingroup\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc@{}}
+\toprule
+Parameter & Value & $r$ & RB (\%) & SDR & RMSE & NSE \\
+\midrule
+\multicolumn{7}{l}{\textit{Blending weight} $\alpha$} \\
+$\alpha$ & $0.50$ & $0.344$ & $-14.5$ & $0.910$ & $5.88$ & $-0.40$ \\
+         & $0.60$ & $0.343$ & $-14.9$ & $0.907$ & $5.89$ & $-0.40$ \\
+         & $\mathbf{0.70}$ & $\mathbf{0.340}$ & $\mathbf{-15.0}$ & $\mathbf{0.905}$ & $\mathbf{5.89}$ & $\mathbf{-0.41}$ \\
+         & $0.80$ & $0.336$ & $-15.2$ & $0.903$ & $5.90$ & $-0.41$ \\
+         & $0.90$ & $0.332$ & $-15.5$ & $0.900$ & $5.91$ & $-0.41$ \\
+\midrule
+\multicolumn{7}{l}{\textit{GPD threshold percentile}} \\
+Pctl     & $70$ & $0.345$ & $-13.0$ & $0.923$ & $5.96$ & $-0.42$ \\
+         & $75$ & $0.342$ & $-13.7$ & $0.919$ & $5.96$ & $-0.41$ \\
+         & $\mathbf{80}$ & $\mathbf{0.339}$ & $\mathbf{-15.0}$ & $\mathbf{0.904}$ & $\mathbf{5.89}$ & $\mathbf{-0.41}$ \\
+         & $85$ & $0.337$ & $-16.2$ & $0.891$ & $5.82$ & $-0.40$ \\
+         & $90$ & $0.335$ & $-18.0$ & $0.867$ & $5.72$ & $-0.39$ \\
+\midrule
+\multicolumn{7}{l}{\textit{Density saturation count} $c_{\text{sat}}$} \\
+$c_{\text{sat}}$ & $1$ & $0.348$ & $-14.7$ & $0.911$ & $5.88$ & $-0.40$ \\
+                 & $\mathbf{2}$ & $\mathbf{0.340}$ & $\mathbf{-15.0}$ & $\mathbf{0.905}$ & $\mathbf{5.89}$ & $\mathbf{-0.41}$ \\
+                 & $3$ & $0.336$ & $-15.3$ & $0.903$ & $5.90$ & $-0.41$ \\
+                 & $4$ & $0.334$ & $-15.3$ & $0.902$ & $5.90$ & $-0.41$ \\
+                 & $5$ & $0.333$ & $-15.4$ & $0.901$ & $5.91$ & $-0.41$ \\
+\bottomrule
+\end{tabular*}
+\endgroup
+\end{table}
+
+Three findings follow. First, every parameter produces a
+monotone, locally smooth response across the explored range, and
+none of the fifteen settings reverses the headline pattern of
+Section~\ref{sec:results-headline} that LSEQM+DL moves value
+adjustment, distribution alignment, and tail preservation toward
+the gauge target. Second, the Pearson correlation stays in the
+narrow band $[0.332, 0.348]$ across all fifteen settings, a
+spread of $0.015$. No setting shifts the daily correlation by
+more than this amount, consistent with the interpretation of
+Section~\ref{sec:results-correlation} that the daily correlation
+is bounded by the timing skill of the raw retrieval rather than
+by the choice of correction parameter \citep{ref:maraun2013}.
+Third, the GPD threshold percentile dominates the dispersion:
+raising the percentile from the $70$th to the $90$th narrows
+the corrected distribution (SDR falls from $0.923$ to $0.867$)
+and shifts relative bias more negative (from $-13.0\%$ to
+$-18.0\%$), while RMSE falls modestly (from $5.96$ to
+$5.72$~mm/day). The blending weight and the saturation count
+each move bias by less than one percentage point and SDR by less
+than $0.012$ across their full sweep range. The operating choice
+therefore sits inside a flat region for two of the three
+parameters, with the GPD threshold the single setting at which a
+downstream user would most need to revisit the trade-off.
+
+The sweep harness that produced Table~\ref{tab:sensitivity-bali}
+accompanies the released code, so the same fifteen-setting table
+can be regenerated by an independent user without modifying the
+pipeline.
+
+
+% ============================================================
+\section{Reproducibility Evaluation}\label{sec:results-reproducibility}
+% Target: 1-2 pp
+% Status: SKELETON
+% ============================================================
+
+The reproducibility design described in
+Section~\ref{sec:methods-reproducibility} is only meaningful if
+the pipeline runs end-to-end on commodity hardware. To
+demonstrate this, the full numbered-notebook sequence was
+re-executed on a free-tier Google Colab instance for a
+province-scale subdomain of Bali (a $9 \times 14$ pixel grid at
+$0.1^{\circ}$, spanning $114.4$ to $115.8^{\circ}$E and $-8.85$
+to $-8.05^{\circ}$N), processing all $36$ dekadal windows of the
+$2001$ to $2025$ record. Bali was chosen because it is small
+enough to run within the free-tier session limits while
+exercising every stage of the pipeline, from LSEQM+DL correction
+through metrics, quality assessment, station validation, and
+visualisation. Figure~\ref{fig:bali-coverage} shows the
+subdomain and its data coverage.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourEightWidth\textwidth]{fig_thesis_04_bali_coverage.png}
+\caption[The Bali reproducibility subdomain]{The Bali reproducibility subdomain. The $9 \times 14$
+grid at $0.1^{\circ}$ spans $114.45$ to $115.75^{\circ}$E and
+$-8.85$ to $-8.05^{\circ}$N; of its $126$ cells, $80$ are land
+pixels (shaded by long-term mean IMERG-L daily precipitation) and
+$46$ are ocean-masked. The four BMKG validation stations on Bali
+are marked, and the provincial coastline is drawn from the
+Indonesia administrative boundaries. This self-contained domain
+is the one timed in Table~\ref{tab:colab-runtime}.\label{fig:bali-coverage}}
+\end{figure}
+
+Table~\ref{tab:colab-runtime} reports the measured wall-clock
+time for the all-dekad batch in each notebook, recorded from the
+Colab cell-execution metadata. The end-to-end sequence over the
+Bali subdomain completed in $72.1$ minutes on a standard Central
+Processing Unit (CPU) runtime with no hardware accelerator, well
+within a single
+free-tier session. This $72.1$-minute figure is the cost of all
+$36$ dekads for the $126$-pixel Bali grid; it is not the cost of
+the full Indonesian domain, which contains on the order of
+$10^{4}$ to $10^{5}$ land pixels and would scale up roughly in
+proportion to the pixel count for the per-pixel stages. The Bali
+run is a demonstration that the pipeline executes end-to-end on
+free-tier infrastructure for a self-contained region, not a
+timing estimate for a national run. Within that run, the metrics
+notebook dominates the budget because it computes the full
+$31$-metric catalogue at every pixel and dekad; the correction
+notebook, which trains a per-dekad CNN, is the second largest.
+The two heaviest notebooks were run on the high Random Access
+Memory (RAM) runtime option that Colab offers without charge.
+
+\begin{table}[H]
+\centering
+\caption[Measured end-to-end wall-clock runtime of the LSEQM+DL pipeline on a free-tier Google Colab CPU]{Measured end-to-end wall-clock runtime of the LSEQM+DL
+pipeline on a free-tier Google Colab CPU instance, for the Bali
+subdomain across all $36$ dekadal windows. Times are taken from
+the all-dekad batch cell of each numbered notebook. The sequence
+runs without a hardware accelerator.\label{tab:colab-runtime}}
+\begingroup\small
+\begin{tabular}{@{}llc@{}}
+\toprule
+Notebook & Stage & Batch runtime (min) \\
+\midrule
+02 & LSEQM+DL bias correction (per-dekad CNN training) & 16.3 \\
+03 & Verification metric computation ($31$ metrics)    & 45.5 \\
+04 & Quality assessment (CQI sub-scores)               &  6.9 \\
+05 & Station validation against BMKG                   &  0.5 \\
+06 & Visualisation                                     &  3.0 \\
+\midrule
+\multicolumn{2}{@{}l}{End-to-end total}                & 72.1 \\
+\bottomrule
+\end{tabular}
+\endgroup
+\end{table}
+
+The execution environment was Python $3.12$ on the Colab default
+image, with TensorFlow $2.20.0$, NumPy $2.0.2$, and netCDF4
+$1.7.4$ among the libraries reported by the run; no pinned
+requirements file beyond a single supplementary install was
+needed because the remaining dependencies are pre-installed in
+the Colab image. The run was a single-pass execution on shared
+Colab hardware, so the timings are indicative rather than
+benchmarked: the absolute numbers will vary with the runtime
+allocation Colab assigns, but the order of magnitude (around an
+hour for the Bali subdomain across all dekads, scaling with
+pixel count for larger domains) is the operationally relevant
+figure.
+
+The present run does not include a formal bit-equivalence test
+against the local outputs, so the strongest reproducibility
+claim it supports is structural rather than numerical: the
+pipeline completes every stage on the free-tier environment and
+produces outputs of the expected shape and coverage (for the
+Bali grid, $80$ of $126$ land pixels corrected with the
+remainder masked as ocean, and $24$ of $24$ contributing CPC
+cells fitted). A bit-for-bit comparison cell that asserts
+equality of the Colab and local corrected fields within
+floating-point tolerance is a small addition that would upgrade
+the claim from structural completion to numerical reproduction,
+and it is identified here as the next reproducibility deliverable.
+
+
+% ============================================================
+\section*{Chapter summary}
+% Status: SKELETON - draft when all sections are filled
+% ============================================================
+
+This chapter reported the empirical performance of the LSEQM+DL
+framework against $171$ independent BMKG stations. Across the
+four verification pillars, the framework moves three pillars
+cleanly toward the gauge target and produces a designed
+trade-off in the fourth: value adjustment, distribution
+alignment, and extreme preservation all reach near-unity ratios,
+while aggregate event detection trades light-rain hits for a
+lower false-alarm ratio, a trade that reverses in favour of
+LSEQM+DL above the $20$~mm/day threshold that matters
+operationally. The stage-wise attribution confirms that each
+stage moves the metrics matched to its design dimension. One
+diagnostic does not move: the Pearson correlation between paired
+daily values stays near $0.34$ across all stages, a result that
+holds station-by-station in the Taylor analysis and month-by-month
+in the temporal-stability analysis. The spatial CQI maps show the
+skill concentrated in the densely gauged west, with graceful
+degradation to the LSEQM baseline in the sparsely gauged east,
+and the reproducibility evaluation demonstrates that the full
+pipeline runs end-to-end on a free Colab instance in $72.1$
+minutes for the Bali subdomain across all dekads. The flat correlation
+is the empirical observation that
+Chapter~\ref{chap:discussion} now explains as a structural
+property of marginal correction rather than a failure of the
+framework.

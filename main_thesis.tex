@@ -1,0 +1,310 @@
+% ============================================================
+% main_thesis.tex - Master document
+%
+% Thesis : How Far Can Bias Correction Improve Daily Satellite Precipitation?
+% Author : Benny Istanto (IPB University, Applied Climatology, 2026)
+% Format : IPB PPKI (margins 4/3/3/3 cm, single spacing, 1 cm first-line
+%          indent, Roman chapter numbers, Arabic sub-numbering, roman
+%          front matter / arabic body).
+% Font   : Times New Roman via mathptmx (text + math), pdfLaTeX-compatible.
+% Build  : ./build.sh   (three-pass pdflatex + bibtex + et-al italic post-fix)
+% Inputs : frontmatter.tex, chapter_01..06_*.tex, chapter_99_appendices.tex,
+%          biography.tex, references.bib, ipb.bst, figures/, scripts/.
+% License: CC BY 4.0 for the text and figures (see ./LICENSE);
+%          MIT for the build script and figure-generator code.
+% ============================================================
+\documentclass[12pt, a4paper, twoside]{report}  % double-sided, mirror margins (inner 4cm)
+
+% ============================================================
+% BIBLIOGRAPHY-STYLE TOGGLE (single line to swap)
+%   - Uncommented (default): IPB author-year style for the print thesis.
+%     Citations as (Author Year), surname+initials list, IPB PPKI conventions.
+%   - Comment out to switch to MDPI numeric style for .docx export to
+%     supervisor / Zotero re-linking. Citations as [N], in citation order.
+% ============================================================
+\newif\ifAPAcite
+\APAcitetrue
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{mathptmx}          % Times New Roman for text and math (PPKI)
+\usepackage[english]{babel}
+\usepackage{csquotes}
+\usepackage{etoolbox}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{xcolor}
+\usepackage{xurl}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{caption}
+% IPB caption style: bold label ("Figure 4.1." / "Table 4.1"), normal-weight
+% title, 10pt (= \footnotesize in a 12pt document). Figure label ends with a
+% period; table label separated by a space.
+\captionsetup[figure]{labelfont=bf, textfont=normalfont, labelsep=period,
+                      font=footnotesize, justification=justified,
+                      singlelinecheck=false}
+\captionsetup[table]{labelfont=bf, textfont=normalfont, labelsep=space,
+                     font=footnotesize, justification=justified,
+                     singlelinecheck=false}
+% Uniform 6pt spacing around floats (after tables, after figures) and
+% caption skips, matching the 6pt used around headings.
+\setlength{\textfloatsep}{6pt plus 1pt minus 1pt}
+\setlength{\intextsep}{6pt plus 1pt minus 1pt}
+\setlength{\floatsep}{6pt plus 1pt minus 1pt}
+\setlength{\abovecaptionskip}{6pt}
+\setlength{\belowcaptionskip}{6pt}
+\setlength{\parskip}{0pt}
+
+% --- IPB margins: left/inner 4 cm, right/outer 3 cm, top/bottom 3 cm,
+%     page-number header band ~2 cm from the top edge (mirror) ---
+\usepackage[a4paper, inner=4cm, outer=3cm, top=3cm, bottom=3cm,
+            headsep=1cm, headheight=15pt]{geometry}
+
+% natbib loaded before hyperref. Options chosen by the APAcite toggle above.
+\ifAPAcite
+  \usepackage[authoryear,round]{natbib}   % IPB / APA mode: (Author Year)
+\else
+  \usepackage[numbers]{natbib}             % MDPI mode: [N], in citation order
+\fi
+
+\usepackage[hidelinks]{hyperref}  % black, box-free links (print thesis)
+\setcounter{secnumdepth}{2}  % number to subsection (3 levels: I, 1.1, 1.1.1)
+\setcounter{tocdepth}{2}
+
+% --- display equations at 11pt (inline math stays at body size) ---
+\AtBeginEnvironment{equation}{\fontsize{11}{13}\selectfont}
+\AtBeginEnvironment{align}{\fontsize{11}{13}\selectfont}
+\AtBeginEnvironment{equation*}{\fontsize{11}{13}\selectfont}
+\AtBeginEnvironment{align*}{\fontsize{11}{13}\selectfont}
+
+% --- single line spacing (IPB) ---
+\singlespacing
+% Let pages end naturally instead of stretching vertical glue to the
+% bottom margin (prevents large blank gaps above/below floats). Matches
+% the official IPB template.
+\raggedbottom
+
+% --- first line of every paragraph (incl. first after a heading) indents
+%     1 cm, justified (PPKI) ---
+\usepackage{indentfirst}
+\setlength{\parindent}{1cm}
+
+% Let long monospace identifiers (e.g. distribution\_fitting,
+% station\_validation) break at underscores so they never overrun the
+% right margin in justified text. Plus a little emergency stretch.
+\renewcommand{\_}{\textunderscore\allowbreak}
+\setlength{\emergencystretch}{1em}
+
+% Single-spaced reference list: remove the extra vertical gap between
+% entries, AND pin the bibliography's left margin to the body text margin
+% so the first reference page is not visually shifted relative to the
+% continuation pages (this otherwise happens because natbib's \list
+% inherits a leftmargin that interacts with the chapter-opening layout).
+% Bibliography environment: emit the REFERENCES heading ourselves, then
+% set up a \list with explicit geometry. This avoids natbib's interaction
+% with \indentfirst + \titleformat[hang] that was visibly shifting the
+% first refs page by ~2 character columns relative to continuation pages.
+% IPB PPKI bibliography indent: first line flush with body margin, continuation
+% lines indented 1cm. natbib's \bibhang controls the hanging indent depth, and
+% \bibsep controls vertical spacing between entries.
+\setlength{\bibhang}{1cm}%
+\setlength{\bibsep}{0pt plus 0.3ex}%
+% Italic "et al." in citations and references is applied as a post-
+% processing pass on main_thesis.bbl in build.sh (see comment there).
+% bibtex writes the literal "et~al." into the .bbl bracket label and
+% the entry body; natbib then prints both verbatim, so a single sed
+% on the .bbl covers inline citations and the references list.
+
+% --- TOC / List of Tables / List of Figures styling (IPB PPKI):
+%     centred 14pt bold titles, NO dot leaders, chapter entries not bold.
+%     (Adopted from the official IPB LaTeX template, tocloft block.) ---
+\usepackage{tocloft}
+\renewcommand{\cfttoctitlefont}{\hfill\fontsize{14}{17}\selectfont\bfseries}
+\renewcommand{\cftaftertoctitle}{\hfill}
+\renewcommand{\cftlottitlefont}{\hfill\fontsize{14}{17}\selectfont\bfseries}
+\renewcommand{\cftafterlottitle}{\hfill}
+\renewcommand{\cftloftitlefont}{\hfill\fontsize{14}{17}\selectfont\bfseries}
+\renewcommand{\cftafterloftitle}{\hfill}
+\renewcommand{\cftchapleader}{\hfill}
+\renewcommand{\cftsecleader}{\hfill}
+\renewcommand{\cftsubsecleader}{\hfill}
+\renewcommand{\cfttableader}{\hfill}
+\renewcommand{\cftfigleader}{\hfill}
+\renewcommand{\cftchapfont}{\normalfont}
+\renewcommand{\cftchappagefont}{\normalfont}
+\setlength{\cftchapindent}{0pt}
+\setlength{\cftchapnumwidth}{2.5em}
+\setlength{\cftsecindent}{2.5em}
+\setlength{\cftsecnumwidth}{2.5em}
+\setlength{\cftsubsecindent}{5em}
+\renewcommand{\cftchapaftersnum}{\enspace}
+% Single-spaced TOC entries with 6pt above each chapter entry (PPKI).
+\setlength{\cftbeforechapskip}{6pt}
+\setlength{\cftbeforesecskip}{0pt}
+\setlength{\cftbeforesubsecskip}{0pt}
+% Place the list titles at the top text margin (3 cm), not pushed down.
+\setlength{\cftbeforetoctitleskip}{0pt}
+\setlength{\cftbeforelottitleskip}{0pt}
+\setlength{\cftbeforeloftitleskip}{0pt}
+\setlength{\cftaftertoctitleskip}{12pt}
+\setlength{\cftafterlottitleskip}{12pt}
+\setlength{\cftafterloftitleskip}{12pt}
+% IPB English list titles. Use \AtBeginDocument because babel's English
+% hook resets these names at \begin{document}, overriding a plain
+% preamble \renewcommand. \bibname becomes REFERENCES (not BIBLIOGRAPHY).
+\AtBeginDocument{%
+  \renewcommand{\contentsname}{TABLE OF CONTENTS}%
+  \renewcommand{\listtablename}{LIST OF TABLES}%
+  \renewcommand{\listfigurename}{LIST OF FIGURES}%
+  \renewcommand{\bibname}{REFERENCES}%
+}
+
+% --- List of Appendices (custom list, IPB style) ---
+% Appendices are chapters A-F; each registers itself in this list via
+% \addcontentsline{apx}{appx}{...} in chapter_99_appendices.tex.
+\newlistof{appx}{apx}{LIST OF APPENDICES}
+\renewcommand{\cftapxtitlefont}{\hfill\fontsize{14}{17}\selectfont\bfseries}
+\renewcommand{\cftafterapxtitle}{\hfill}
+\renewcommand{\cftappxleader}{\hfill}
+\setlength{\cftappxindent}{0pt}
+\setlength{\cftappxnumwidth}{6.5em}
+\setlength{\cftbeforeapxtitleskip}{0pt}   % LoA title at the top margin
+\setlength{\cftafterapxtitleskip}{12pt}
+
+% --- IPB numbering: chapter title shows ROMAN; sub-numbering uses the
+%     ARABIC chapter index (so sections read 1.1, 2.1, 3.3.1 while the
+%     chapter heading reads I, II, III). ---
+\renewcommand{\thechapter}{\Roman{chapter}}
+\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
+\renewcommand{\thesubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}}
+% Figures, tables, equations: per-chapter Arabic numbering (4.1, 4.2, ...),
+% not the Roman chapter prefix that \thechapter would otherwise give.
+\renewcommand{\thefigure}{\arabic{chapter}.\arabic{figure}}
+\renewcommand{\thetable}{\arabic{chapter}.\arabic{table}}
+\renewcommand{\theequation}{\arabic{chapter}.\arabic{equation}}
+
+% --- chapter title: 14pt, bold, CAPS, centred, Roman number, no period ---
+\titleformat{\chapter}[hang]
+  {\normalfont\fontsize{14}{17}\bfseries\filcenter}
+  {\thechapter}{1ex}{\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{0pt}{2\baselineskip}
+
+% --- subchapter (section): 12pt, bold, Title Case, left.
+%     6pt space above (from the preceding paragraph) and 6pt below. ---
+\titleformat{\section}
+  {\normalfont\normalsize\bfseries}{\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{6pt}{6pt}
+
+% --- sub-subchapter (subsection): 12pt, NOT bold, Title Case, left.
+%     6pt above and 6pt below. ---
+\titleformat{\subsection}
+  {\normalfont\normalsize}{\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{6pt}{6pt}
+
+% --- page numbers: top outer corner (mirror), nothing in footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[OR]{\thepage}
+\fancyhead[EL]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+% chapter-opening pages use 'plain'; keep the number in the same place
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyhead[OR]{\thepage}%
+  \fancyhead[EL]{\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+}
+
+% Figure search paths - thesis is self-contained
+\graphicspath{{figures/}}
+
+% ----- Per-figure width scaling macros (body chapters) ---------------
+% Each body figure has a width-scale macro defaulting to 1.0 (no change).
+% Reduce a value (e.g. 0.85) to shrink one specific figure without
+% touching its LaTeX block - useful for fixing layout drift on print.
+% For rotated figures (3.2, 3.3) the scale multiplies \textheight,
+% for all others it multiplies \textwidth.
+% Atlas figures G.1-G.5 have their own \atlasG*Width macros in the
+% appendix file; this block covers chapters 3, 4, 5 only.
+% ---------------------------------------------------------------------
+% Chapter 3: Methods
+\newcommand{\figThreeOneWidth}{1.0}    % Fig 3.1 station map
+\newcommand{\figThreeTwoWidth}{0.92}   % Fig 3.2 pipeline (rotated, x textheight)
+\newcommand{\figThreeThreeWidth}{0.92} % Fig 3.3 CNN workflow (rotated)
+\newcommand{\figThreeFourWidth}{1.0}   % Fig 3.4 stage demonstration
+% Chapter 4: Results
+\newcommand{\figFourOneWidth}{1.0}     % Fig 4.1 headline bars
+\newcommand{\figFourTwoWidth}{1.0}     % Fig 4.2 multi-threshold
+\newcommand{\figFourThreeWidth}{1.0}   % Fig 4.3 paradox
+\newcommand{\figFourFourWidth}{0.9}    % Fig 4.4 CQI spatial
+\newcommand{\figFourFiveWidth}{0.92}    % Fig 4.5 CQI improvement
+\newcommand{\figFourSixWidth}{1.0}     % Fig 4.6 Taylor by station
+\newcommand{\figFourSevenWidth}{1.0}   % Fig 4.7 temporal stability
+\newcommand{\figFourEightWidth}{0.92}  % Fig 4.8 Bali coverage
+% Chapter 5: Discussion
+\newcommand{\figFiveOneWidth}{1.0}     % Fig 5.1 bound schematic
+\newcommand{\figFiveTwoWidth}{1.0}     % Fig 5.2 Taylor monthly
+\newcommand{\figFiveThreeWidth}{1.0}   % Fig 5.3 confidence mask
+
+% MDPI parallel-manuscript status macro. \xspace adds a trailing
+% space when followed by a letter (e.g. "...Remote Sensing) and is...")
+% and skips it when followed by punctuation (";", "."), avoiding the
+% LaTeX rule that swallows whitespace right after a control word.
+\usepackage{xspace}
+\newcommand{\MDPIstatus}{ (under review at Remote Sensing)\xspace}
+
+% needspace: keep a block of N \baselineskip together; if N lines do
+% not fit on the current page, break the page now. Used for the
+% indented headline-proposition quote in section 5.1 (and any future
+% similar cases) to prevent mid-block page splits.
+\usepackage{needspace}
+
+\begin{document}
+
+% ============================================================
+% FRONT MATTER (roman page numbers)
+% ============================================================
+\input{frontmatter.tex}
+
+% ============================================================
+% MAIN MATTER (arabic page numbers, from Chapter 1)
+% Force Introduction onto a recto so page 1 is a right-hand (odd) page
+% with the 4 cm binding margin on the left; this is the only place a
+% blank leaf may be inserted, to keep double-sided pagination aligned.
+% ============================================================
+\cleardoublepage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\input{chapter_01_introduction.tex}
+\input{chapter_02_literature_review.tex}
+\input{chapter_03_methods.tex}
+\input{chapter_04_results.tex}
+\input{chapter_05_discussion.tex}
+\input{chapter_06_conclusion.tex}
+
+% --- References ---
+\clearpage
+\addcontentsline{toc}{chapter}{REFERENCES}
+\ifAPAcite
+  \bibliographystyle{ipb}        % IPB English author-year (./ipb.bst)
+\else
+  \bibliographystyle{unsrtnat}   % MDPI numeric, natbib-compatible
+\fi
+\bibliography{references}
+
+% --- Appendices ---
+\input{chapter_99_appendices.tex}
+
+% --- Biography (last page) ---
+\input{biography.tex}
+
+\end{document}

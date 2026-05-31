@@ -1,0 +1,276 @@
+% ============================================================
+% chapter_01_introduction.tex - Chapter 1, Introduction
+%
+% Purpose: motivates the thesis (satellite-precipitation biases over the
+%          Indonesian Maritime Continent, the verification-decomposition
+%          gap, the reproducibility gap) and states the research question.
+% Sections: 1.1 Background and Motivation, 1.2 Problem Statement,
+%           1.3 Research Question, 1.4 Objectives, 1.5 Scope and Limits,
+%           1.6 Thesis Outline.
+% Included by main_thesis.tex.
+% License: CC BY 4.0 (see ../LICENSE).
+% ============================================================
+%   - paper/additional_information.md (§1 scope, §7.7 limitations)
+%   - paper/thesis_outline.md (§1.1-§1.6 mapping)
+%
+% Conventions: no em-dashes; no AI-language; no overclaim;
+%              dual contribution (scientific + reproducibility) seeded here;
+%              sensitivity parameters acknowledged as not formally optimised.
+% ============================================================
+
+\chapter{Introduction}\label{chap:introduction}
+
+% ============================================================
+\section{Background}\label{sec:intro-background}
+% ============================================================
+
+Daily-scale precipitation estimates underpin flash-flood early
+warning, reservoir release scheduling, drought monitoring, crop
+water budgeting, and disaster risk assessment. For most of the
+global land surface, the only source of spatially continuous
+daily precipitation is the satellite family of products. The
+Integrated Multi-satellitE Retrievals for the Global
+Precipitation Measurement mission (IMERG), in its version 7
+release, has become the de facto reference for this class of
+data \citep{ref:hou2014, ref:huffman2020}. Among its variants,
+the Late Run (IMERG-L) is the one suited to near-real-time use:
+its latency of approximately 14 hours fits within the same-day
+decision window of operational flood and drought services, where
+the gauge-merged Final Run, released months later, is not yet
+available. Because IMERG-L relies on satellite observations
+without gauge assimilation, it also provides an uncontaminated
+baseline against which a bias correction can be evaluated.
+
+IMERG-L carries systematic biases against gauge observations.
+Three modes recur across validation studies: over-detection of
+light rain, in which the satellite reports drizzle on days the
+gauge records as dry; under-detection of heavy events, in which
+the satellite truncates the upper tail that drives flood
+thresholds; and a full distributional mismatch in which the
+shape of the daily rainfall distribution departs from the gauge
+distribution \citep{ref:maggioni2016, ref:tang2020}. These biases
+are consequential everywhere, but they are acute over the
+tropical Maritime Continent, where convective rainfall dominates
+the seasonal cycle and the contributing gauge network is dense
+only over Java and southern Sumatra, thinning sharply toward
+Maluku and Papua \citep{ref:ramadhan2022, ref:chen2008}.
+
+Four families of statistical and machine-learning methods have
+been developed to correct these biases, each addressing a
+distinct dimension. Linear Scaling corrects the mean through a
+single multiplicative factor \citep{ref:teutschbein2012};
+Empirical Quantile Mapping with a parametric fit aligns the full
+marginal distribution \citep{ref:gudmundsson2012, ref:themessl2012};
+Generalized Pareto Distribution tail adjustment grafts an
+extreme-value model onto the upper tail \citep{ref:coles2001};
+and Convolutional Neural Networks refine the residual spatial
+structure of extreme pixels \citep{ref:pan2019, ref:banomedina2020}.
+A hybrid pipeline that integrates all four in sequence, denoted
+LSEQM+DL (Linear Scaling (LS), Empirical Quantile Mapping (EQM), 
+Generalized Pareto Distribution (GPD), and Convolutional Neural Network 
+(CNN) refinement, a Deep Learning (DL) architecture), has been applied 
+to IMERG-L over Indonesia in a parallel manuscript \citep{ref:istanto2026mdpi}\MDPIstatus 
+and is the subject of this thesis. The detailed review of these method
+families and their known limits is given in
+Chapter~\ref{chap:litreview}.
+
+Two gaps in the bias correction literature motivate the present
+study. The first is a verification gap. Most bias correction
+studies report an aggregate skill improvement and stop there,
+without attributing the movement of individual metrics to the
+specific correction stage responsible, and without testing the
+result against gauges that are independent of the correction
+reference. As a consequence, it is often unclear which bias
+dimension a given pipeline actually corrects, and whether the
+reported skill survives a comparison against truly out-of-sample
+observations. The second is a reproducibility gap. The
+reproducibility discourse in computational science and the FAIR
+(Findable, Accessible, Interoperable, Reusable) principles for
+scientific data have made independent
+verifiability a methodological expectation
+\citep{ref:peng2011, ref:stodden2014, ref:wilkinson2016}, yet
+the bias correction literature has adopted it unevenly: many
+influential studies publish a method without releasing the code
+or data, leaving any claim of reproduction to a reader who must
+re-implement the method from the paper alone. This thesis is
+organised around closing both gaps at once.
+
+
+% ============================================================
+\section{Problem Statement}\label{sec:intro-problem}
+% ============================================================
+
+The two gaps combine into a single problem with two faces. On
+the scientific side, the question is not whether a hybrid bias
+correction pipeline improves daily satellite precipitation in
+aggregate, which the literature already establishes, but which
+bias dimension each stage corrects, and how far the correction
+can reach along each dimension when judged against independent
+gauges. A pipeline can report a high aggregate score while
+leaving a specific operationally important dimension unmoved, and
+only a stage-resolved verification against out-of-sample stations
+can reveal this. The day-by-day temporal pairing between
+satellite and gauge is the dimension most at risk of being
+obscured by an aggregate score, because it is bounded by the raw
+retrieval and cannot be lifted by a marginal correction, yet it
+is the dimension that timing-sensitive applications depend on.
+
+On the methodological side, the problem is that a verification
+result of this kind is only credible if an independent reader can
+reconstruct it. A claim that a particular stage moves a
+particular metric, or that a particular metric cannot be moved,
+is a claim about a specific pipeline applied to specific data,
+and it is verifiable only if the pipeline and its configuration
+are available to re-run. The problem this thesis addresses is
+therefore to deliver a stage-resolved, out-of-sample verification
+of a hybrid bias correction pipeline, and to deliver it as a
+reproducible artefact that an independent reader can re-execute.
+
+
+% ============================================================
+\section{Objectives and Benefits}\label{sec:intro-objectives}
+% ============================================================
+
+The study pursues four objectives:
+
+\begin{enumerate}[noitemsep, topsep=2pt]
+    \item To attribute the skill of the LSEQM+DL pipeline
+    stage-by-stage against 171 independent Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) stations,
+    establishing which bias dimension each of the four stages
+    corrects and by how much.
+    \item To test, empirically and theoretically, the bound on
+    the Pearson correlation between corrected daily satellite and
+    gauge values under marginal correction, and to locate the
+    observed value within the empirical band reported for daily
+    IMERG over the tropics.
+    \item To deliver the pipeline as a reproducible, open,
+    configuration-driven implementation that an independent reader
+    can re-execute end-to-end on commodity hardware.
+    \item To document the operational implications of the result,
+    distinguishing the application classes the corrected product
+    serves well from those it does not.
+\end{enumerate}
+
+The benefits follow the objectives. The scientific benefit is
+attribution clarity: a verification posture that separates a
+structural limit of a method from a failure of a method, so that
+the corrected product is neither over-trusted nor dismissed. The
+operational benefit is guidance: a clear statement of which
+applications the corrected daily product supports and which it
+does not. The open-science benefit is independent verifiability:
+a released pipeline that lets any reader reproduce the result,
+extend it to another region or product, or challenge it on its
+own terms.
+
+
+% ============================================================
+\section{Scope, Limitations, and Constraint}\label{sec:intro-scope}
+% ============================================================
+
+\medskip\noindent\textbf{Scope.}
+The study corrects IMERG-L over the Indonesian domain
+($95$ to $141^{\circ}$E, $11^{\circ}$S to $6^{\circ}$N) at the
+native $0.1^{\circ}$ daily resolution, calibrated against the
+Climate Prediction Center (CPC) Unified Gauge-Based Analysis of Daily
+Precipitation (CPC-UNI) gauge analysis and validated against 171 BMKG stations.
+The temporal unit is the dekad (the three 10-day periods within
+each month), and statistics are pooled across the 36 dekadal
+windows of the 2001 to 2025 record. The four-stage LSEQM+DL
+pipeline and its station-density-aware blending are taken as the
+object of study; the contribution is the verification and the
+reproducible implementation, not a new correction algorithm.
+
+\medskip\noindent\textbf{Limitations.}
+Three parameters in the pipeline were set by domain reasoning
+rather than by a formal optimisation: the CNN blending weight
+($\alpha = 0.70$), the GPD threshold (the $80$th wet-day
+percentile), and the station-density saturation count
+($c_{\text{sat}} = 2$). Their values are defensible and their
+direction of effect is understood, but a formal grid search with
+a strict temporal hold-out has not been performed and is
+identified as future work. The validation is value-independent
+but not strictly location-disjoint: the BMKG station values do
+not enter the correction, but BMKG station locations contribute
+to the density mask through the CPC-UNI network.
+
+\medskip\noindent\textbf{Constraint.}
+The strongest constraint on the attainable result is the quality
+of the reference. The pipeline calibrates against CPC-UNI, which
+is itself a gauge-interpolated analysis with known undercatch of
+heavy rainfall in sparse-gauge regions and smoothing at its
+$0.5^{\circ}$ resolution. The corrected product cannot be better
+than the reference it is calibrated against, except where the
+independent BMKG comparison reveals that the correction has moved
+the product closer to the true gauge distribution than CPC-UNI
+itself. This constraint, and the upstream timing accuracy of the
+raw retrieval, bound the result in ways no post-processing can
+remove.
+
+
+% ============================================================
+\section{Novelty}\label{sec:intro-novelty}
+% ============================================================
+
+The novelty of the thesis is dual. The scientific novelty is the
+explicit, stage-resolved demonstration, both empirical and
+theoretical, that the Pearson correlation between corrected daily
+satellite and gauge values is bounded by the raw satellite timing
+rather than by the correction method, paired with the
+demonstration that the same pipeline moves every marginal-distribution
+metric to the gauge target. Reporting the unchanged correlation
+alongside the corrected distribution, and explaining the contrast
+as structural rather than as failure, is the verification
+contribution. The methodological novelty is the delivery of the
+entire result as a reproducible, open, end-to-end pipeline that
+an independent reader can re-execute on free cloud infrastructure,
+which closes the reproducibility gap for this class of study and
+makes the scientific claim independently checkable.
+
+
+% ============================================================
+\section{Hypotheses}\label{sec:intro-hypotheses}
+% ============================================================
+
+The study tests two hypotheses:
+
+\begin{description}[noitemsep, topsep=2pt]
+    \item[H1.] Each correction stage moves the verification
+    metric matched to its design dimension toward the gauge
+    target: Linear Scaling moves the mean, Empirical Quantile
+    Mapping moves the distribution shape, the Generalized Pareto
+    adjustment moves the upper tail, and the Convolutional Neural
+    Network refines the spatial structure of the extremes.
+    \item[H2.] The Pearson correlation between corrected daily
+    satellite and gauge values does not improve across the
+    correction stages by a margin exceeding the single-pixel
+    sampling uncertainty, because marginal correction preserves
+    the rank order of the satellite series and is bounded by the
+    day-by-day pairing quality of the raw retrieval.
+\end{description}
+
+
+% ============================================================
+\section{Thesis Structure}\label{sec:intro-structure}
+% ============================================================
+
+The remainder of the thesis is organised as follows.
+Chapter~\ref{chap:litreview} reviews the satellite precipitation
+products, the bias dimensions and verification standards, the
+bias correction method families, the theoretical bounds on
+marginal correction, the reproducible-research literature, and
+the Maritime Continent context.
+Chapter~\ref{chap:methods} describes the study area and data, the
+four-stage LSEQM+DL pipeline, the station-density-aware blending,
+the reproducible implementation, the validation framework, and
+the verification metric catalogue.
+Chapter~\ref{chap:results} reports the stage-wise headline skill,
+the stage attribution, the threshold-dependent detection, the
+correlation result, the spatial skill distribution, the
+per-station Taylor analysis, the temporal stability, the
+sensitivity discussion, and the reproducibility evaluation.
+Chapter~\ref{chap:discussion} develops the theoretical bound on
+the correlation, the operational implications, the
+reproducibility implications, the paths forward, and the
+limitations.
+Chapter~\ref{chap:conclusion} returns to the title question and
+states the recommendations.

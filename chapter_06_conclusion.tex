@@ -1,0 +1,173 @@
+% ============================================================
+% chapter_06_conclusion.tex - Chapter 6, Conclusion
+%
+% Purpose: summarises the empirical findings, the methodological
+%          finding (full reproducibility on free cloud infrastructure),
+%          and the recommendations for the wider research community.
+% Sections: 6.1 Summary of Findings, 6.2 Implications,
+%           6.3 Recommendations.
+% Included by main_thesis.tex.
+% License: CC BY 4.0 (see ../LICENSE).
+% ============================================================
+%
+% Source material:
+%   - paper/PPS1691_..._compact_20260526.tex  (conclusion)
+%   - paper/thesis_outline.md                  (§6.1-§6.3 mapping)
+%
+% Conventions: no em-dashes; no AI-language; no overclaim;
+%              dual-contribution framing (scientific + reproducibility).
+% ============================================================
+
+\chapter{Conclusion}\label{chap:conclusion}
+
+This thesis asked how far a marginal-correction bias correction
+framework can take a daily satellite precipitation field, and it
+answered the question in two registers: what the framework
+delivers as a scientific result, and what it delivers as a
+reproducible methodological artefact. This chapter summarises
+the findings, states their implications, and sets out
+recommendations for users, researchers, and the institutions that
+maintain the underlying data.
+
+
+% ============================================================
+\section{Summary of Findings}\label{sec:conclusion-summary}
+% ============================================================
+
+The scientific finding is a stage-resolved account of what the
+LSEQM+DL (Linear Scaling, Empirical Quantile Mapping, Generalized
+Pareto Distribution tail correction, and Deep Learning refinement
+through a Convolutional Neural Network) pipeline can and cannot
+do. Applied to the Integrated Multi-satellitE Retrievals for
+Global Precipitation Measurement (GPM) Late Run (IMERG-L) over
+Indonesia for 2001 to 2025 and validated against 171 independent
+Meteorological, Climatological, and Geophysical Agency (BMKG)
+stations, the pipeline moves three of the four verification
+pillars cleanly toward the gauge target. The value-adjustment
+pillar reaches a relative bias near zero and a standard deviation
+ratio of unity; the distribution-alignment pillar reaches a
+Kolmogorov-Smirnov $p$-value at which the corrected and gauge
+distributions are no longer statistically distinguishable; and
+the extreme-preservation pillar reaches $Q_{99}$ within one
+percent of the gauge target. The fourth pillar, event detection,
+shows a designed trade-off: the aggregate probability of
+detection falls as the dry-day-matching mechanism suppresses
+spurious light rain, but the threshold-stratified view shows the
+LSEQM+DL pipeline overtaking Linear Scaling above the
+$20$~mm/day threshold that drives flood and drought decisions.
+Each stage moves the metrics matched to its design dimension and
+leaves the others alone.
+
+The result that gives the thesis its title is the one metric that
+does not move. The Pearson correlation between paired daily
+satellite and gauge values stays near $0.34$ across all three
+corrected stages, a shift smaller than the single-pixel sampling
+uncertainty, and the same flat pattern holds station-by-station
+in the Taylor analysis and month-by-month across the seasonal
+cycle. This is not a failure of the implementation. It is the
+predicted behaviour of any marginal correction family: rank
+preservation and variance inflation without time-dependent skill
+together bound the attainable correlation at the day-by-day
+pairing quality of the raw satellite retrieval, which lies
+upstream of every step in the pipeline. The corrected value of
+$0.348$ sits inside the empirical band of $0.3$ to $0.5$ reported
+for daily IMERG over tropical regions. The answer to the title
+question is therefore precise: a marginal-correction framework
+can take a daily field all the way to the gauge marginal
+distribution at every percentile, and no distance at all along
+the axis of day-by-day timing.
+
+The methodological finding is that this entire account is
+independently reproducible. The pipeline is released as a
+configuration-driven set of source modules and numbered
+notebooks that run unchanged in a local environment or on a
+free-tier cloud instance. The end-to-end sequence was re-executed
+on a free Google Colab instance for the Bali subdomain across all
+36 dekadal windows in 72.1 minutes on a standard Central
+Processing Unit (CPU) runtime,
+which establishes that an independent reader can reconstruct the
+results for a self-contained region without institutional compute
+access; the full Indonesian domain scales up with pixel count and
+is correspondingly longer. The two findings are of equal
+weight: the scientific result is credible because it is
+reproducible, and the reproducible artefact is worth releasing
+because it carries a result worth re-verifying.
+
+
+% ============================================================
+\section{Implications}\label{sec:conclusion-implications}
+% ============================================================
+
+For operational use, the central implication is that the
+corrected product should be matched to the metrics that moved.
+The corrected daily IMERG-L is suitable for the broad class of
+applications that depend on distributional properties:
+dekadal-to-monthly water budgets, drought indicators such as the
+Standardized Precipitation Index and its evapotranspiration
+variant, extreme-event frequency analysis, threshold-exceedance
+climatology, and hydrological model calibration against multi-year
+statistics. It is not suitable, on its own, for applications that
+depend on the precise calendar day of an event: real-time
+flood-event nowcasting, single-event forecasting, and day-1
+hydrological initialisation inherit the timing ceiling of the raw
+retrieval and must combine the corrected product with sub-daily
+disaggregation, move to ensemble methods, or accept the timing
+limitation. Correcting at the daily scale remains necessary so
+that the dekadal, monthly, and seasonal aggregates derived from
+the daily field are bias-free.
+
+For the open-science contribution, the implication is that the
+verification posture argued for in this thesis can be applied by
+others. The four-pillar framework with Pearson correlation
+reported as a separate temporal-skill diagnostic, rather than
+folded into a single skill score, lets a structural limit and a
+methodological improvement appear in the same report. An
+independent group can apply the same verification scaffolding to
+a different product, a different reference, or a different region,
+and can reproduce or challenge the present result on its own
+terms.
+
+
+% ============================================================
+\section{Recommendations}\label{sec:conclusion-recommendations}
+% ============================================================
+
+\medskip\noindent\textbf{For users of corrected satellite
+precipitation.}
+Read the verification report before choosing an application.
+A product that matches the gauge distribution is the right input
+for distributional questions and the wrong input for
+day-specific timing questions, and the two cases cannot be told
+apart from an aggregate skill score alone. Where the application
+is timing-sensitive and operates over the Maritime Continent, the
+UTC-aligned daily window is a known contributor to the timing
+ceiling, and a locally-aligned re-aggregation should be
+considered before the product is rejected as unskilful.
+
+\medskip\noindent\textbf{For researchers extending the method.}
+The temporal-skill ceiling is set by the raw retrieval, not by
+the post-processing, so raising it requires methods outside the
+marginal correction family: multivariate quantile mapping,
+sub-daily disaggregation against the native half-hourly product,
+stochastic disaggregation with ensemble verification, or
+local-day re-aggregation with a geostationary diurnal-cycle
+reference. The three sensitivity parameters explored one-at-a-time in
+Section~\ref{sec:results-sensitivity} but not jointly optimised
+(the blending weight, the GPD threshold, and the density
+saturation count) are exposed in the configuration and are the
+natural target of a full Cartesian grid search with a strict
+temporal hold-out. A transfer experiment to a second tropical
+region would test the portability that the framework's design
+allows but does not by itself establish.
+
+\medskip\noindent\textbf{For BMKG, CPC, and Institut Pertanian Bogor (IPB).}
+The reproducibility contribution depends on continued access to
+the underlying archives and on the maintenance of the released
+code against dependency drift. A containerised distribution and a
+versioned data snapshot would make the reproducibility claim
+durable beyond the dependency state recorded at release. More
+broadly, the gap this thesis addresses, namely the rarity of
+released code in the bias correction literature, is one that
+institutional data-sharing and reproducibility standards are well
+placed to close, and the framework released here is offered as a
+concrete example of what such standards can produce.

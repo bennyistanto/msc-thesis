@@ -1,0 +1,45 @@
+# Citation metadata for this thesis.
+# Renders as a "Cite this repository" button on GitHub.
+# Add the Zenodo DOI to the `doi:` field below once the release is published.
+
+cff-version: 1.2.0
+message: "If you reference this thesis, please cite it as below."
+type: thesis
+title: "How Far Can Bias Correction Improve Daily Satellite Precipitation?"
+authors:
+  - family-names: "Istanto"
+    given-names: "Benny"
+    affiliation: "IPB University, Applied Climatology Study Program"
+    orcid: "https://orcid.org/0000-0001-6436-8574"
+year: 2026
+month: 6
+thesis-type: "Master's thesis"
+institution:
+  name: "IPB University"
+  city: "Bogor"
+  country: "ID"
+keywords:
+  - daily satellite precipitation
+  - gauge validation
+  - hybrid bias correction
+  - reproducibility
+  - IMERG
+license: "CC-BY-4.0"
+# doi: "10.5281/zenodo.XXXXXXX"   # TODO: add after Zenodo release
+repository-code: "https://github.com/bennyistanto/msc-thesis"
+url: "https://github.com/bennyistanto/hybrid-bias-correction"
+
+# Companion outputs (parent code repository, data archive):
+references:
+  - type: software
+    title: "hybrid-bias-correction: LSEQM+DL pipeline source code"
+    authors:
+      - family-names: "Istanto"
+        given-names: "Benny"
+    repository-code: "https://github.com/bennyistanto/hybrid-bias-correction"
+  - type: data
+    title: "Hybrid Bias Correction of IMERG Late Run V07 over Indonesia (2001-2025): Input Data, Land-Sea Masks, and Corrected Products"
+    authors:
+      - family-names: "Istanto"
+        given-names: "Benny"
+    doi: "10.5281/zenodo.20287847"
