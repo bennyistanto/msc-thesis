@@ -1,9 +1,6 @@
 # How Far Can Bias Correction Improve Daily Satellite Precipitation?
 
-Master's thesis (IPB University, 2026) on the hybrid LSEQM+DL bias
-correction framework for daily Integrated Multi-satellitE Retrievals
-for GPM Late Run (IMERG-L) precipitation over Indonesia, with gauge
-validation against 171 independent BMKG stations.
+Master's thesis (Bogor Agricultural University, 2026) on the hybrid LSEQM+DL bias correction framework for daily Integrated Multi-satellitE Retrievals for GPM Late Run (IMERG-L) precipitation over Indonesia, with gauge validation against 171 independent BMKG stations.
 
 > **Status:** final draft submitted to the IPB Applied Climatology
 > programme. See the parent code repository for the implementation
@@ -11,18 +8,17 @@ validation against 171 independent BMKG stations.
 
 ## Author
 
-**Benny Istanto** (G2501222008)
-Applied Climatology Study Program
-Faculty of Mathematics and Natural Sciences
-IPB University, Bogor, Indonesia
+**Benny Istanto** (G2501222008)</br>
+Applied Climatology Study Program</br>
+Faculty of Mathematics and Natural Sciences</br>
+Bogor Agricultural University</br>
+Bogor, Indonesia
 
 Supervised by Prof. Dr. Ir. Rizaldi Boer, M.S. and Dr. I Putu Santikayasa.
 
 ## What this repository contains
 
-This repository holds the LaTeX sources, figures, and figure-generator
-scripts for the thesis. The corresponding code, data pipeline, and
-validation framework live in the parent repository:
+This repository holds the LaTeX sources, figures, and figure-generator scripts for the thesis. The corresponding code, data pipeline, and validation framework live in the parent repository:
 
 - Parent code repository: <https://github.com/bennyistanto/hybrid-bias-correction>
 - Data archive: deposited on Zenodo (DOI in Appendix B of the thesis)
@@ -104,6 +100,6 @@ See [`LICENSE`](LICENSE) for the full text of both.
 
 ## Acknowledgments
 
-Built on the IPB PPKI thesis format, customised for English-language
-submission. Supervisors and data providers are credited in the front
-matter of the thesis.
+Built on the IPB [PPKI](https://kmm.ipb.ac.id/ppki-edisi4-eng/) thesis format, customised for English-language submission. And the [modified](https://gist.github.com/bennyistanto/ef6b1a2bb1ed303a7832f789ac7e7a70) IPB CSL for English version.
+
+Supervisors and data providers are credited in the front matter of the thesis.
