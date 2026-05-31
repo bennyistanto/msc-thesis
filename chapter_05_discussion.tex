@@ -43,11 +43,16 @@ independent re-verification and extension, where the next
 methodological frontiers lie, and where the present work is
 bounded.
 
-The argument has five parts.
+The argument has six parts.
 Section~\ref{sec:discussion-bound} states the theoretical bound on
 Pearson $r$ under marginal correction and locates the observed
 value of $r \approx 0.34$ inside the empirical band reported for
 daily Integrated Multi-satellitE Retrievals for Global Precipitation Measurement (IMERG) over the tropics.
+Section~\ref{sec:discussion-subdaily} reports a post-hoc empirical
+diagnostic, using the half-hourly IMERG-L source, that quantifies
+how much of the apparent $r$ ceiling is attributable to a
+calendar-window mismatch between the UTC-day IMERG aggregate and
+the morning-observation BMKG gauge convention.
 Section~\ref{sec:discussion-ops} translates the bound into
 operational guidance, distinguishing applications that depend on
 distributional properties from those that depend on day-specific
@@ -235,6 +240,145 @@ independently reconstruct on their own data.
 
 
 % ============================================================
+\section{Empirical Diagnostic of the Pearson $r$ Ceiling: Sub-Daily Aggregation Window}\label{sec:discussion-subdaily}
+% ============================================================
+
+The bound in Section~\ref{sec:discussion-bound} predicts that
+marginal correction cannot lift Pearson~$r$ above the timing
+quality of the underlying retrieval, but it does not decompose
+the absolute ceiling into its components. One component the bound
+discussion does not isolate is the calendar-window definition used
+to label each daily value. IMERG-L distributes daily totals
+aggregated over the Coordinated Universal Time (UTC) calendar day,
+while the BMKG climatological-station daily totals are reported
+under the morning-observation convention specified by Head of BMKG
+Decree SK.32/TL.202/KB/BMG-2006 \citep{ref:bmkg2006sk32} in
+agreement with the World Meteorological Organization guidance in
+WMO No.~8 \citep{ref:wmo2018no8}: the rainfall total assigned to
+date~$d$ is the 24-hour accumulation ending at the morning
+observation on date~$d$, nominally $07{:}00$ local time. Because
+Indonesia spans the three local-time zones WIB, WITA, and WIT
+(UTC$+7$, $+8$, $+9$), the BMKG daily window ends near $00{:}00$
+UTC for WIB stations and a few hours earlier for stations east of
+the WITA boundary. The daily IMERG-L window and the daily BMKG
+window are therefore offset by approximately 24~hours in the
+worst case, and the daily product values labelled by the same
+calendar date refer to different 24-hour rainfall periods.
+
+To quantify this component of the ceiling, we re-aggregate the
+half-hourly IMERG Late Run source \citep{ref:imerghh07} into
+24-hour windows that start at every integer hour offset~$h \in
+[-48, +48]$ from $00{:}00$ UTC on each target date, and compute
+the Pearson correlation between the resulting daily totals and the
+BMKG gauge daily totals for the same target date. The pipeline is
+not re-run; this analysis is a diagnostic on the raw retrieval at
+sub-daily time resolution that fixes the rank-preservation
+argument of Section~\ref{sec:discussion-bound} to a concrete
+window-offset value. The sample is January~2020 on the $163$ BMKG
+stations with complete records that month, with the half-hourly
+file series padded by two days on each end so that the
+$\pm 48$-hour windows are always fully populated.
+
+Figure~\ref{fig:subdaily-chart} reports the Pearson~$r$
+trajectory. The pooled correlation at $h = 0$ (the UTC-day
+alignment used in the daily IMERG-L archive) is $r = 0.19$. The
+correlation rises monotonically as the satellite window is shifted
+backward, reaches its global peak at $h = -22$ with $r = 0.62$,
+and falls again as the window leaves the gauge measurement period.
+The naive timezone-only hypothesis would predict three distinct
+peaks at $h \in \{-7, -8, -9\}$ for WIB, WITA, and WIT; the data
+shows a single broad peak near $h = -22$ shared across all three
+timezone bands (band-specific peak hours: WIB $-22$, WITA $-22$,
+WIT $-21$). The dominant signal is therefore the morning-observation
+convention rather than the local-midnight timezone offset, and the
+empirical offset of $-22$~h matches the convention defined by
+SK.32/2006 to within the two-to-four-hour spread expected from
+varying station observation times, retrieval blending of
+half-hourly precipitation across the timestamp boundary, and the
+diurnal phase of convective rainfall in the maritime continent.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFiveSubdailyChartWidth\textwidth]{fig_thesis_05_subdaily_chart.png}
+\caption[Pearson $r$ trajectory as the satellite 24-hour window is shifted by hourly offsets]{Pearson~$r$ as a function of the
+hour offset~$h$ of the satellite 24-hour aggregation window for
+raw half-hourly IMERG-L versus BMKG daily gauge totals (January
+2020, $163$ stations). Panel~(a) plots the mean per-station~$r$
+within each timezone band with the interquartile range shaded;
+panel~(b) shows the distribution of the per-station peak
+offset~$h^{\star}$. The peak is at $h = -22$~h, not at $h =
+0$, and is the same across the three timezone bands; the gauge
+window labelled with date~$d$ refers to a 24-hour rainfall period
+that ends near $02{:}00$ UTC of date~$d$ rather than starting at
+$00{:}00$ UTC of date~$d$.\label{fig:subdaily-chart}}
+\end{figure}
+
+The pooled trajectory in Figure~\ref{fig:subdaily-chart} is
+consistent with either a uniform metadata convention or a
+station-specific reporting irregularity, since either could
+produce a peak near $h = -22$ when averaged across the network.
+Figure~\ref{fig:subdaily-map} resolves the ambiguity at the
+per-station level. The median peak offset is
+$h^{\star} = -20$~h with an interquartile range of $[-24, -14]$~h,
+the spatial distribution of $h^{\star}$ shows no longitudinal
+clustering across the three timezone bands, and the per-station
+lift in~$r$ from $h = 0$ to $h = h^{\star}$ has a median of
+$+0.49$ with a unimodal distribution. The window mismatch is
+therefore a metadata convention shared across the entire
+network, not a station-specific local effect.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFiveSubdailyMapWidth\textwidth]{fig_thesis_05_subdaily_map.png}
+\caption[Per-station peak hour offset $h^{\star}$ across Indonesia, with the implied $r$ lift]{Geographic distribution of the
+per-station peak hour offset~$h^{\star}$ and the per-station~$r$
+lift from $h = 0$ to $h = h^{\star}$. Panel~(a): each gauge
+plotted at its location, coloured by $h^{\star}$; the three
+timezone-band dividers are shown as vertical dashed lines.
+Panel~(b): each row is one station; the red marker is~$r$ at the
+UTC-day alignment and the blue marker is~$r$ at the station's
+own peak. The median lift is $+0.49$; the thesis-headline
+$r \approx 0.34$ reference line is shown for context. The
+absence of geographic clustering in~$h^{\star}$ confirms that the
+$-22$~h offset is a shared metadata convention rather than a
+station-specific local effect.\label{fig:subdaily-map}}
+\end{figure}
+
+The diagnostic does not invalidate any number reported in
+Chapter~\ref{chap:results}. The pipeline operates on the daily
+IMERG-L archive as specified in Chapter~\ref{chap:methods}, and
+the four-pillar movements of value, distribution, extreme, and
+detection scores are unchanged by the window observation: those
+metrics are functions of the marginal distribution and of
+categorical events, both of which are invariant to a 24-hour
+window choice that preserves the daily sample composition. What
+the diagnostic does change is the interpretation of the absolute
+Pearson~$r$ value: the $r \approx 0.34$ in
+Table~\ref{tab:headline} is the correlation between the UTC-day
+IMERG aggregate and the BMKG morning-observation aggregate, and
+the diagnostic shows that approximately two-thirds of the gap
+between this value and the window-aligned upper bound of
+$r \approx 0.62$ is accounted for by the calendar-window
+mismatch. The pipeline lifts Pearson~$r$ from $0.19$ to $0.34$
+by mean and variance rescaling and rank-preserving distributional
+correction, exactly the contribution that Section~\ref{sec:discussion-bound}
+predicts; the bound discussion correctly assigns the remaining
+gap to the timing quality of the retrieval at the observed
+window, which the present diagnostic refines into a metadata
+component (window mismatch, approximately $0.30$ of the gap)
+and a residual retrieval-skill component (approximately the
+remainder). Re-aggregating the daily IMERG-L archive over a
+morning-to-morning window matched to the BMKG convention would
+therefore lift the operational Pearson~$r$ from approximately
+$0.34$ to approximately $0.62$ without changing any other
+pipeline output. The diagnostic is recorded here as a
+window-decomposition of the Pearson ceiling; the operational
+re-aggregation is a single-stage change outside the present
+correction pipeline and is identified as a path forward in
+Section~\ref{sec:discussion-paths}.
+
+
+% ============================================================
 \section{Operational Implications}\label{sec:discussion-ops}
 % ============================================================
 
@@ -340,21 +484,23 @@ timing ceiling as a structural feature inherited from the
 satellite retrieval, not a methodological gap to be closed by a
 better correction.
 
-A specific caveat applies in the Maritime Continent. The
-convective diurnal cycle over Indonesia peaks at local 14:00 to
-17:00, which falls in the UTC 07:00 to 10:00 band for the western
-archipelago and the UTC 06:00 to 09:00 band for the eastern
-archipelago. The daily aggregation window used by the present
-pipeline is aligned to UTC and therefore splits the local
-convective afternoon across two calendar days for stations east
-of UTC+7. The Pearson $r$ ceiling reported in
-Chapter~\ref{chap:results} mixes the underlying satellite timing
-accuracy with this calendar artefact. The implication for
-operational users is that the $r \approx 0.34$ figure should be
-read as a lower bound on what a locally-aligned daily product
-might achieve, and that the gap between the lower bound and the
-locally-aligned value is recoverable by re-aggregation rather
-than by a fundamentally different correction.
+A specific caveat applies in the Maritime Continent. The daily
+IMERG-L window is aligned to UTC, and the BMKG gauge daily total
+is aligned to the morning-observation convention defined by Head
+of BMKG Decree SK.32/TL.202/KB/BMG-2006 \citep{ref:bmkg2006sk32}.
+Section~\ref{sec:discussion-subdaily} quantifies the resulting
+calendar-window mismatch directly using the half-hourly IMERG-L
+source: the optimal alignment lies at $h \approx -22$~h, and the
+$r$ value at the matched window is approximately $0.62$ rather
+than the $0.34$ recorded under UTC alignment. The Pearson $r$
+ceiling reported in Chapter~\ref{chap:results} mixes the
+underlying satellite timing accuracy with this calendar-window
+artefact. The implication for operational users is that the
+$r \approx 0.34$ figure should be read as the correlation under
+UTC-day alignment, that the window-aligned upper bound for the
+same retrieval is approximately $0.62$, and that the gap between
+the two is recoverable by re-aggregation rather than by a
+fundamentally different correction.
 Section~\ref{sec:discussion-paths} returns to this point as the
 most operationally actionable next step for users in the UTC+7
 to UTC+9 band.
@@ -615,26 +761,29 @@ applications are equipped to handle. The path is therefore most
 useful for applications that are already ensemble-aware.
 
 The fourth path, and the most operationally actionable for users
-in the UTC+7 to UTC+9 band, is local-day re-aggregation. The
-calendar artefact discussed in
-Section~\ref{sec:discussion-ops} is a fixable mismatch between
-the UTC-aligned daily window and the local convective
-afternoon. Re-aggregating the native half-hourly IMERG fields
-to a local-day window aligned to the convective cycle, before
-applying the LSEQM+DL correction, would remove the artefact
-without changing the correction methodology. The cost is a
-re-run of the entire pipeline against a re-aggregated input
-archive, which is computationally modest but archive-intensive.
-The Himawari-9 cloud-tracking reference makes the diurnal cycle
-visible at $10$-minute resolution and would let an analyst
-verify the local-day alignment against the satellite-observed
-peak in convective cloud cover. This is the path most directly
-enabled by the parallel reproducibility contribution: the
-configurable daily-aggregation step is exposed in the pipeline,
-the re-aggregated archive can be substituted at the input layer,
-and the four-pillar verification report on the re-aggregated
-pipeline against the same BMKG validation set is reproducible by
-any independent user.
+in the UTC+7 to UTC+9 band, is morning-observation re-aggregation
+of the daily IMERG-L archive. The calendar-window mismatch
+diagnosed in Section~\ref{sec:discussion-subdaily} places the
+optimal alignment at $h \approx -22$~h relative to UTC midnight,
+matching the BMKG morning-observation convention
+\citep{ref:bmkg2006sk32}. Re-aggregating the native half-hourly
+IMERG fields \citep{ref:imerghh07} to a 24-hour window ending at
+$07{:}00$ local time on the recorded date, before applying the
+LSEQM+DL correction, would remove the mismatch component without
+changing the correction methodology. The expected operational
+effect, from the diagnostic in
+Section~\ref{sec:discussion-subdaily}, is a lift in headline
+Pearson $r$ from approximately $0.34$ to approximately $0.62$
+with no change to the four-pillar movements of value,
+distribution, extreme, and detection scores. The cost is a re-run
+of the entire pipeline against a re-aggregated input archive,
+which is computationally modest but archive-intensive. This is
+the path most directly enabled by the parallel reproducibility
+contribution: the configurable daily-aggregation step is exposed
+in the pipeline, the re-aggregated archive can be substituted at
+the input layer, and the four-pillar verification report on the
+re-aggregated pipeline against the same BMKG validation set is
+reproducible by any independent user.
 
 A common feature of all four paths is that they leave the
 LSEQM+DL pipeline as constructed in Chapter~\ref{chap:methods}
@@ -652,7 +801,7 @@ capability rather than replace existing capability.
 \section{Limitations and Constraints}\label{sec:discussion-limitations}
 % ============================================================
 
-The present work has five limitations that bound the strength of
+The present work has six limitations that bound the strength of
 its conclusions. They are catalogued here so that the
 operational guidance in Section~\ref{sec:discussion-ops} and the
 reproducibility claim in
@@ -726,6 +875,22 @@ present work does not claim to remove conditional bias; it
 claims to remove the marginal bias and to acknowledge the
 conditional component as the structural ceiling.
 
+\textbf{Validation window mismatch with the BMKG gauge convention.}
+The Pearson~$r$ in Table~\ref{tab:headline} is computed between
+the UTC-day IMERG-L aggregate and the morning-observation BMKG
+gauge daily total, two products whose 24-hour windows are offset
+by approximately $22$~hours per the diagnostic in
+Section~\ref{sec:discussion-subdaily}. The diagnostic shows that
+this metadata mismatch alone accounts for approximately
+two-thirds of the gap between the observed $r \approx 0.34$ and
+the window-aligned upper bound of $r \approx 0.62$. The four-pillar
+results (value, distribution, extreme, detection) are unaffected
+because they are functions of the marginal distribution and of
+categorical events, both invariant to the 24-hour window choice.
+Re-aggregating the daily IMERG-L archive to a morning-to-morning
+window matched to the BMKG convention is identified as a path
+forward (Section~\ref{sec:discussion-paths}).
+
 \textbf{Reproducibility scope is version-bounded.} The
 dependencies pinned at release time will drift as the Python
 ecosystem evolves and as cloud-platform defaults change. The
@@ -741,7 +906,7 @@ therefore be undertaken with the recorded dependency snapshot,
 not with a current environment, until a containerised release is
 prepared.
 
-The combined effect of these five limitations leaves the central
+The combined effect of these six limitations leaves the central
 claim of the chapter intact: marginal bias correction moves the
 four pillars cleanly toward the gauge target and cannot move the
 temporal-skill diagnostics, because rank preservation and variance

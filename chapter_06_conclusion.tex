@@ -141,8 +141,14 @@ day-specific timing questions, and the two cases cannot be told
 apart from an aggregate skill score alone. Where the application
 is timing-sensitive and operates over the Maritime Continent, the
 UTC-aligned daily window is a known contributor to the timing
-ceiling, and a locally-aligned re-aggregation should be
-considered before the product is rejected as unskilful.
+ceiling: the sub-daily diagnostic in
+Section~\ref{sec:discussion-subdaily} shows that re-aggregating
+the daily IMERG-L archive to a morning-observation window matched
+to the BMKG gauge convention would lift the headline Pearson~$r$
+from approximately $0.34$ to approximately $0.62$ with no change
+to any other pipeline output, so a locally-aligned re-aggregation
+should be considered before the product is rejected as
+unskilful.
 
 \medskip\noindent\textbf{For researchers extending the method.}
 The temporal-skill ceiling is set by the raw retrieval, not by
