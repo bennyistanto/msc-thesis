@@ -119,9 +119,19 @@ Administration (NOAA) Climate Prediction Center on a
 $0.5^{\circ}$ (approximately 55~km) global land grid. The product
 interpolates daily station observations using optimal
 interpolation with a station-density-aware correlation function.
-Over Indonesia, approximately 180 contributing stations enter the
-analysis, with the contributing network concentrated in Java and
-Sumatra. CPC-UNI is documented to systematically undercatch heavy
+Indonesian contributions come from BMKG and other Global
+Telecommunication System (GTS) reports; the contributing station
+count varies day to day with GTS reporting completeness, and the
+contributing network is concentrated in Java and Sumatra. The
+contributing observations follow the World Meteorological
+Organization (WMO) local-day morning-observation convention of
+their reporting stations, so the CPC-UNI daily total assigned to
+date~$d$ at a given grid cell represents a 24-hour accumulation
+ending at the local morning observation on date~$d$ rather than a
+UTC-day total \citep{ref:cpcuni_readme}; this convention is
+relevant to the Pearson~$r$ ceiling discussed in
+Section~\ref{sec:discussion-subdaily}.
+CPC-UNI is documented to systematically undercatch heavy
 rainfall, reflecting both the smoothing introduced by interpolation
 onto a $0.5^{\circ}$ grid and the under-representation of
 mountain and coastal sites in the contributing network. Despite

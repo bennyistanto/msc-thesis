@@ -116,15 +116,14 @@ and variance inflation without skill bound the attainable correlation at
 the timing quality of the raw retrieval. A post-hoc diagnostic using the half-hourly IMERG-L source shows that
 approximately two-thirds of the apparent ceiling is attributable to a
 calendar-window mismatch between the Coordinated Universal Time (UTC)
-daily IMERG aggregate and the morning-observation BMKG gauge convention
-specified by Head of BMKG Decree SK.32/TL.202/KB/BMG-2006: the
-window-aligned upper bound is approximately $r \approx 0.62$ rather
-than $r \approx 0.34$. Re-aggregating the daily IMERG-L archive to a
-morning-to-morning window matched to the BMKG convention would
-therefore lift the headline Pearson $r$ from approximately $0.34$ to
-approximately $0.62$ without changing any other pipeline output, and is
-identified as the most operationally actionable next step in the
-discussion. The corrected product
+daily IMERG aggregate and the local-day morning-observation convention
+shared by CPC-UNI (the calibration target) and the BMKG validation
+network: the window-aligned upper bound is approximately $r \approx
+0.62$ rather than $r \approx 0.34$. Re-aggregating the daily IMERG-L
+archive over a window matched to this gauge convention would lift the
+headline Pearson $r$ from approximately $0.34$ to approximately
+$0.62$ without changing any other pipeline output, and is identified
+as the most operationally actionable next step in the discussion. The corrected product
 is therefore suitable for applications that depend on the daily
 distribution and not for applications that depend on day-specific
 timing.
@@ -194,15 +193,15 @@ mentah. Diagnostik \emph{post-hoc} menggunakan sumber IMERG-L
 setengah-jaman menunjukkan bahwa sekitar dua per tiga dari batas
 yang teramati disebabkan oleh ketidaksesuaian jendela kalender
 antara agregasi harian IMERG dalam waktu UTC dan konvensi
-pengamatan pagi stasiun BMKG yang diatur oleh Keputusan Kepala
-BMG Nomor SK.32/TL.202/KB/BMG-2006: batas atas pada jendela yang
-selaras adalah sekitar $r \approx 0{,}62$, bukan $r \approx 0{,}34$.
-Pengagregasian ulang arsip harian IMERG-L pada jendela
-pagi-ke-pagi yang selaras dengan konvensi BMKG karenanya akan
-mengangkat Pearson $r$ utama dari sekitar $0{,}34$ ke sekitar
-$0{,}62$ tanpa mengubah keluaran \emph{pipeline} lainnya, dan
-ditetapkan sebagai langkah lanjutan yang paling dapat
-dioperasionalkan dalam pembahasan. Produk terkoreksi
+pengamatan pagi hari berbasis hari setempat yang sama-sama
+digunakan oleh CPC-UNI (target kalibrasi) dan jaringan validasi
+BMKG: batas atas pada jendela yang selaras adalah sekitar
+$r \approx 0{,}62$, bukan $r \approx 0{,}34$. Pengagregasian
+ulang arsip harian IMERG-L pada jendela yang selaras dengan
+konvensi pengamatan tersebut akan mengangkat Pearson $r$ utama
+dari sekitar $0{,}34$ ke sekitar $0{,}62$ tanpa mengubah keluaran
+\emph{pipeline} lainnya, dan ditetapkan sebagai langkah lanjutan
+yang paling dapat dioperasionalkan dalam pembahasan. Produk terkoreksi
 karenanya sesuai untuk aplikasi yang bergantung pada sifat
 sebaran, tetapi kurang sesuai untuk aplikasi yang bergantung pada
 ketepatan waktu harian.

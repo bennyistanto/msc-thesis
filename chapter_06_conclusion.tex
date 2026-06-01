@@ -143,21 +143,28 @@ is timing-sensitive and operates over the Maritime Continent, the
 UTC-aligned daily window is a known contributor to the timing
 ceiling: the sub-daily diagnostic in
 Section~\ref{sec:discussion-subdaily} shows that re-aggregating
-the daily IMERG-L archive to a morning-observation window matched
-to the BMKG gauge convention would lift the headline Pearson~$r$
-from approximately $0.34$ to approximately $0.62$ with no change
-to any other pipeline output, so a locally-aligned re-aggregation
-should be considered before the product is rejected as
-unskilful.
+the daily IMERG-L archive to a window matched to the local-day
+gauge convention shared by CPC-UNI and BMKG would lift the
+headline Pearson~$r$ from approximately $0.34$ to approximately
+$0.62$ with no change to any other pipeline output, so a
+locally-aligned re-aggregation should be considered before the
+product is rejected as unskilful.
 
 \medskip\noindent\textbf{For researchers extending the method.}
-The temporal-skill ceiling is set by the raw retrieval, not by
-the post-processing, so raising it requires methods outside the
-marginal correction family: multivariate quantile mapping,
+Section~\ref{sec:discussion-subdaily} decomposes the apparent
+Pearson~$r$ ceiling into two components. The first is a
+calendar-window component that accounts for approximately
+two-thirds of the gap and is addressable by re-aggregating the
+daily IMERG-L archive over a 24-hour window matched to the
+local-day gauge convention shared by the CPC-UNI calibration
+target and the BMKG validation network; this is a single-stage
+input-side change that does not modify the LSEQM+DL pipeline and
+is the first action item for any extension. The second is a
+residual retrieval-skill component that requires methods outside
+the marginal correction family: multivariate quantile mapping,
 sub-daily disaggregation against the native half-hourly product,
-stochastic disaggregation with ensemble verification, or
-local-day re-aggregation with a geostationary diurnal-cycle
-reference. The three sensitivity parameters explored one-at-a-time in
+or stochastic disaggregation with ensemble verification. The
+three sensitivity parameters explored one-at-a-time in
 Section~\ref{sec:results-sensitivity} but not jointly optimised
 (the blending weight, the GPD threshold, and the density
 saturation count) are exposed in the configuration and are the

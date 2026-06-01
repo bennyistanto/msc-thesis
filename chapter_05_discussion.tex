@@ -52,7 +52,8 @@ Section~\ref{sec:discussion-subdaily} reports a post-hoc empirical
 diagnostic, using the half-hourly IMERG-L source, that quantifies
 how much of the apparent $r$ ceiling is attributable to a
 calendar-window mismatch between the UTC-day IMERG aggregate and
-the morning-observation BMKG gauge convention.
+the local-day morning-observation convention shared by CPC-UNI
+and BMKG.
 Section~\ref{sec:discussion-ops} translates the bound into
 operational guidance, distinguishing applications that depend on
 distributional properties from those that depend on day-specific
@@ -167,12 +168,22 @@ time scales \citep{ref:ramadhan2022} reported daily correlations
 of similar magnitude, with skill rising substantially only at
 dekadal or monthly aggregation. The corrected LSEQM+DL value of
 $0.348$ sits inside this empirical band. The ceiling has two
-contributors: the timing accuracy of the underlying retrieval,
-which lies upstream of every step in the pipeline and is the
-dominant component; and the UTC-aligned daily aggregation window,
-which splits the local convective afternoon across two calendar
-days for stations east of UTC+7 and is therefore a fixable
-calendar artefact rather than a fundamental satellite limit.
+contributors. The first is a calendar-window component: the
+daily IMERG-L archive is constructed on the UTC calendar day,
+while both CPC-UNI (the calibration reference) and the BMKG
+validation network follow the WMO local-day morning-observation
+convention, so the satellite and gauge 24-hour windows do not
+coincide. Section~\ref{sec:discussion-subdaily} quantifies this
+component empirically using half-hourly IMERG-L and finds that
+it accounts for approximately two-thirds of the gap between the
+observed $r \approx 0.34$ and the window-aligned upper bound of
+$r \approx 0.62$; it is a fixable metadata artefact rather than a
+satellite limit. The second contributor is the residual timing
+accuracy of the underlying retrieval at the matched window,
+which lies upstream of every step in the pipeline and accounts
+for the remaining gap; this is the component that requires
+methods outside the marginal correction family
+(Section~\ref{sec:discussion-paths}).
 Section~\ref{sec:discussion-ops} returns to the operational
 significance of this split, and Section~\ref{sec:discussion-paths}
 proposes local-day re-aggregation as the most actionable next
@@ -344,6 +355,27 @@ $-22$~h offset is a shared metadata convention rather than a
 station-specific local effect.\label{fig:subdaily-map}}
 \end{figure}
 
+The same calendar-window mismatch is present at calibration, not
+only at validation. CPC-UNI, the correction target, follows the
+local-day morning-observation convention of its contributing
+gauge stations \citep{ref:cpcuni_readme},
+and BMKG independently follows the same WMO convention by
+SK.32/TL.202/KB/BMG-2006 \citep{ref:bmkg2006sk32}. The
+$22$~h offset between the UTC-day IMERG-L archive and the local-day
+gauge convention therefore applies at both ends of the pipeline:
+when IMERG-L is paired with CPC-UNI in calibration, and when the
+corrected output is paired with BMKG in validation. The diagnostic
+was performed against BMKG because BMKG provides the independent
+out-of-sample station network at point-pixel resolution, but the
+finding generalises to the calibration step. The four-pillar
+metrics (value, distribution, extreme, detection) are functions
+of the marginal distribution and of categorical events and are
+therefore window-invariant when the daily sample composition is
+preserved; the calibration of LS, EQM, and GPD against CPC-UNI
+remains correct under the present window choice. Pearson~$r$ is
+the only metric the mismatch suppresses, and it is suppressed at
+both calibration and validation by the same amount.
+
 The diagnostic does not invalidate any number reported in
 Chapter~\ref{chap:results}. The pipeline operates on the daily
 IMERG-L archive as specified in Chapter~\ref{chap:methods}, and
@@ -368,10 +400,10 @@ window, which the present diagnostic refines into a metadata
 component (window mismatch, approximately $0.30$ of the gap)
 and a residual retrieval-skill component (approximately the
 remainder). Re-aggregating the daily IMERG-L archive over a
-morning-to-morning window matched to the BMKG convention would
-therefore lift the operational Pearson~$r$ from approximately
-$0.34$ to approximately $0.62$ without changing any other
-pipeline output. The diagnostic is recorded here as a
+window matched to the local-day gauge convention shared by
+CPC-UNI and BMKG would therefore lift the operational
+Pearson~$r$ from approximately $0.34$ to approximately $0.62$
+without changing any other pipeline output. The diagnostic is recorded here as a
 window-decomposition of the Pearson ceiling; the operational
 re-aggregation is a single-stage change outside the present
 correction pipeline and is identified as a path forward in
@@ -485,9 +517,10 @@ satellite retrieval, not a methodological gap to be closed by a
 better correction.
 
 A specific caveat applies in the Maritime Continent. The daily
-IMERG-L window is aligned to UTC, and the BMKG gauge daily total
-is aligned to the morning-observation convention defined by Head
-of BMKG Decree SK.32/TL.202/KB/BMG-2006 \citep{ref:bmkg2006sk32}.
+IMERG-L window is aligned to UTC; both CPC-UNI (the calibration
+target) and the BMKG validation network follow the local-day
+morning-observation convention used by their contributing
+stations \citep{ref:cpcuni_readme, ref:bmkg2006sk32}.
 Section~\ref{sec:discussion-subdaily} quantifies the resulting
 calendar-window mismatch directly using the half-hourly IMERG-L
 source: the optimal alignment lies at $h \approx -22$~h, and the
@@ -765,8 +798,9 @@ in the UTC+7 to UTC+9 band, is morning-observation re-aggregation
 of the daily IMERG-L archive. The calendar-window mismatch
 diagnosed in Section~\ref{sec:discussion-subdaily} places the
 optimal alignment at $h \approx -22$~h relative to UTC midnight,
-matching the BMKG morning-observation convention
-\citep{ref:bmkg2006sk32}. Re-aggregating the native half-hourly
+matching the local-day morning-observation convention shared by
+the CPC-UNI calibration target and the BMKG validation network
+\citep{ref:cpcuni_readme, ref:bmkg2006sk32}. Re-aggregating the native half-hourly
 IMERG fields \citep{ref:imerghh07} to a 24-hour window ending at
 $07{:}00$ local time on the recorded date, before applying the
 LSEQM+DL correction, would remove the mismatch component without
@@ -875,21 +909,27 @@ present work does not claim to remove conditional bias; it
 claims to remove the marginal bias and to acknowledge the
 conditional component as the structural ceiling.
 
-\textbf{Validation window mismatch with the BMKG gauge convention.}
-The Pearson~$r$ in Table~\ref{tab:headline} is computed between
-the UTC-day IMERG-L aggregate and the morning-observation BMKG
-gauge daily total, two products whose 24-hour windows are offset
-by approximately $22$~hours per the diagnostic in
-Section~\ref{sec:discussion-subdaily}. The diagnostic shows that
-this metadata mismatch alone accounts for approximately
-two-thirds of the gap between the observed $r \approx 0.34$ and
-the window-aligned upper bound of $r \approx 0.62$. The four-pillar
-results (value, distribution, extreme, detection) are unaffected
-because they are functions of the marginal distribution and of
-categorical events, both invariant to the 24-hour window choice.
-Re-aggregating the daily IMERG-L archive to a morning-to-morning
-window matched to the BMKG convention is identified as a path
-forward (Section~\ref{sec:discussion-paths}).
+\textbf{Calendar-window mismatch between IMERG-L and the gauge
+reference family.} The daily IMERG-L archive is constructed on
+the UTC calendar day, while both CPC-UNI (the calibration target)
+and the BMKG validation network follow the local-day
+morning-observation convention used by their contributing
+stations \citep{ref:cpcuni_readme, ref:bmkg2006sk32}; the two
+24-hour windows are offset by approximately $22$~hours per the
+diagnostic in Section~\ref{sec:discussion-subdaily}. The mismatch
+is therefore present at both ends of the pipeline: when IMERG-L
+is paired with CPC-UNI in calibration, and when the corrected
+output is paired with BMKG in validation. The four-pillar results
+(value, distribution, extreme, detection) are unaffected because
+they are functions of the marginal distribution and of categorical
+events, both invariant to the 24-hour window choice. Pearson~$r$
+is suppressed at both calibration and validation by the same
+metadata mismatch, which accounts for approximately two-thirds
+of the gap between the observed $r \approx 0.34$ and the
+window-aligned upper bound of $r \approx 0.62$. Re-aggregating
+the daily IMERG-L archive over a window matched to the local-day
+gauge convention is identified as the most operationally
+actionable path forward (Section~\ref{sec:discussion-paths}).
 
 \textbf{Reproducibility scope is version-bounded.} The
 dependencies pinned at release time will drift as the Python
