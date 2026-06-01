@@ -121,12 +121,15 @@ shared by CPC-UNI (the calibration target) and the BMKG validation
 network: the window-aligned upper bound is approximately $r \approx
 0.62$ rather than $r \approx 0.34$. Re-aggregating the daily IMERG-L
 archive over a window matched to this gauge convention would lift the
-headline Pearson $r$ from approximately $0.34$ to approximately
-$0.62$ without changing any other pipeline output, and is identified
-as the most operationally actionable next step in the discussion. The corrected product
-is therefore suitable for applications that depend on the daily
-distribution and not for applications that depend on day-specific
-timing.
+pooled Pearson $r$ from approximately $0.34$ to approximately $0.62$,
+with per-station values reaching $r \geq 0.85$ at the strongest
+$15\%$ of stations, without changing any other pipeline output; this
+is identified as the most operationally actionable next step in the
+discussion. The corrected product is therefore suitable as delivered
+for applications that depend on the daily distribution; day-specific
+timing skill is moderate at the UTC-day alignment and is the regime
+where the calendar-window re-aggregation has the largest operational
+effect.
 
 \medskip
 The pipeline is released as an open, configuration-driven
@@ -198,13 +201,16 @@ digunakan oleh CPC-UNI (target kalibrasi) dan jaringan validasi
 BMKG: batas atas pada jendela yang selaras adalah sekitar
 $r \approx 0{,}62$, bukan $r \approx 0{,}34$. Pengagregasian
 ulang arsip harian IMERG-L pada jendela yang selaras dengan
-konvensi pengamatan tersebut akan mengangkat Pearson $r$ utama
-dari sekitar $0{,}34$ ke sekitar $0{,}62$ tanpa mengubah keluaran
-\emph{pipeline} lainnya, dan ditetapkan sebagai langkah lanjutan
-yang paling dapat dioperasionalkan dalam pembahasan. Produk terkoreksi
-karenanya sesuai untuk aplikasi yang bergantung pada sifat
-sebaran, tetapi kurang sesuai untuk aplikasi yang bergantung pada
-ketepatan waktu harian.
+konvensi pengamatan tersebut akan mengangkat Pearson $r$
+\emph{pooled} dari sekitar $0{,}34$ ke sekitar $0{,}62$, dengan
+nilai per-stasiun mencapai $r \geq 0{,}85$ pada $15\%$ stasiun
+terkuat, tanpa mengubah keluaran \emph{pipeline} lainnya; langkah
+ini ditetapkan sebagai langkah lanjutan yang paling dapat
+dioperasionalkan dalam pembahasan. Produk terkoreksi karenanya
+sesuai sebagaimana yang diberikan untuk aplikasi yang bergantung
+pada sifat sebaran; keterampilan ketepatan waktu harian sedang
+pada penyelarasan UTC dan merupakan ranah di mana pengagregasian
+ulang jendela kalender memberikan dampak operasional terbesar.
 
 \medskip
 \emph{Pipeline} dirilis sebagai implementasi terbuka berbasis berkas
