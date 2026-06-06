@@ -9,18 +9,6 @@
 % Included by main_thesis.tex.
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
-%
-% Source material:
-%   - paper/draft_literature_review.docx           (existing draft, citation backbone)
-%   - paper/additional_information.md              (technical Q&A entries)
-%   - paper/PPS1691_..._compact_20260526.tex       (compact seminar refs)
-%   - paper/PPS1591_..._mdpi.docx                  (parallel MDPI manuscript)
-%
-% Conventions (per DECISIONS.md):
-%   - No em-dashes; no AI-language watchlist; no overclaim
-%   - Long-form abbreviation on first use, short form after
-%   - Citation keys descriptive: \cite{ref:author2024}
-% ============================================================
 
 \chapter{Literature Review}\label{chap:litreview}
 
@@ -63,7 +51,7 @@ from gauge networks alone. The Indonesian archipelago, the
 study domain of the present work, illustrates the gap directly:
 the contributing gauge network is concentrated over Java and
 southern Sumatra and is sparse over Papua, Maluku, and eastern
-Nusa Tenggara~\citep{ref:tan2016, ref:ramadhan2022}. The
+Nusa Tenggara~\citep{ref:chen2008}. The
 satellite family of precipitation products fills the gap by
 providing daily fields at uniform spatial resolution across the
 domain, though at the cost of systematic biases that the
@@ -95,7 +83,7 @@ the product spans a continuous 25-year record.
 
 \subsection{IMERG V07 architecture}
 
-IMERG V07~\citep{ref:huffman2020} merges three input streams.
+The IMERG algorithm~\citep{ref:huffman2020} merges three input streams.
 Passive-microwave retrievals from the GPM constellation
 (including the GPM Core Observatory's GMI, partner-satellite
 SSMI/S, ATMS, AMSR2, MHS, and SAPHIR instruments) provide the
@@ -155,8 +143,9 @@ product at 0.05$^{\circ}$ with two-day latency. The Precipitation
 Estimation from Remotely Sensed Information using Artificial Neural
 Networks Climate Data Record (PERSIANN-CDR)
 \citep{ref:ashouri2015} provides a long historical record from
-1983 onward with no gauge integration. The Multi-Source Weighted-Ensemble
-Precipitation (MSWEP) \citep{ref:beck2017}
+1983 onward, bias-adjusted to the monthly GPCP gauge analysis at
+coarse resolution. The Multi-Source Weighted-Ensemble
+Precipitation (MSWEP) \citep{ref:beck2019}
 blends gauges, satellites, and reanalyses into a single product
 at 0.1$^{\circ}$. For the present study, IMERG Late Run was
 selected because its 14-hour latency fits the operational
@@ -182,7 +171,7 @@ IMERG Final Run         & 3 months   & 2000 -- present & Ensemble with monthly g
 IMERG Late Run          & 12--18 h   & 2000 -- present & No gauge integration            & 0.1$^{\circ}$ \\
 IMERG Early Run         & 4--6 h     & 2000 -- present & No gauge integration            & 0.1$^{\circ}$ \\
 CHIRPS                  & 2 days     & 1981 -- present & Ensemble with gauges            & 0.05$^{\circ}$ \\
-PERSIANN-CDR            & 3--5 days  & 1983 -- present & No gauge integration            & 0.25$^{\circ}$ \\
+PERSIANN-CDR            & 3--5 days  & 1983 -- present & Monthly GPCP adjustment         & 0.25$^{\circ}$ \\
 MSWEP                   & 1--3 days  & 1979 -- present & Ensemble with gauges            & 0.1$^{\circ}$ \\
 \bottomrule
 \end{tabular}
@@ -201,12 +190,11 @@ satellite under-estimates extreme rainfall magnitudes, a
 limitation of microwave retrieval at the upper tail of
 precipitation rates), and a full distributional mismatch
 between the satellite and gauge distributions of daily
-precipitation~\citep{ref:maggioni2016, ref:tang2020}. Over the
+precipitation~\citep{ref:maggioni2016, ref:tang2020, ref:tan2016}. Over the
 tropics specifically, multi-product comparisons report daily
 Pearson correlations between $0.3$ and $0.5$ against gauge
 networks and reanalyses, with skill improving substantially
-only at dekadal or longer aggregation~\cite{ref:tang2020,
-ref:tan2016}. These bias modes motivate the methodological
+only at dekadal or longer aggregation~\citep{ref:ramadhan2022ts, ref:tang2020}. These bias modes motivate the methodological
 families reviewed in Section~\ref{sec:lit-methods}; the
 empirical magnitudes for IMERG-L over Indonesia are reported in
 Chapter~\ref{chap:results}.
@@ -237,8 +225,7 @@ metrics at a wet-day or heavy-rain threshold). The grouping
 follows the conventions in the standard verification references
 \citep{ref:wilks2011, ref:ebert2007} and matches the World
 Meteorological Organization (WMO) verification standards for
-quantitative precipitation forecasts and remotely-sensed
-products~\citep{ref:wmo1485, ref:wmo1317}. The framework allows
+quantitative precipitation forecasts~\citep{ref:wmo1485, ref:wmo1132}. The framework allows
 the question \enquote{how well does this product reproduce the
 gauge field?} to be decomposed into four narrower questions,
 each with a measurable answer.
@@ -265,18 +252,18 @@ threshold-dependence of skill: a product may detect light rain
 well and heavy rain poorly, and a single number cannot
 distinguish the two regimes. The WMO multi-threshold
 verification standard~\citep{ref:wmo1485} reports categorical
-skill at a series of thresholds spanning the operational range
-(typically 1, 5, 10, 20, 50, 100, and 150~mm/day), exposing the
-threshold-dependence directly. The framework adopted in this
-study uses the seven WMO thresholds and reports separate
-categorical metrics at each.
+skill at a series of thresholds spanning the operational range,
+exposing the threshold-dependence directly. The framework adopted
+in this study uses seven thresholds spanning this range (1, 5, 10,
+20, 50, 100, and 150~mm/day) and reports separate categorical
+metrics at each.
 
 \subsection{Station-based out-of-sample validation}
 
 The verification reference may itself contain biases. Gauge
 networks have well-documented undercatch behaviour, particularly
 for heavy rainfall and at high-elevation or coastal
-sites~\citep{ref:wmo1485}. Gridded gauge analyses such as the
+sites~\citep{ref:adam2003}. Gridded gauge analyses such as the
 CPC Unified Gauge-Based Analysis~\citep{ref:chen2008} interpolate
 station observations onto a regular grid and inherit the
 station-density gradient: cells with many contributing stations
@@ -465,15 +452,14 @@ above the threshold. The threshold is typically chosen as the
 80th to 95th percentile of the wet-day sample, with the trade-off
 that higher thresholds isolate the extreme tail more cleanly
 but yield fewer exceedances per pixel-dekad and therefore less
-stable GPD fits. Parameter estimation by L-moments
-\citep{ref:hoskingwallis1997} is preferred over maximum
-likelihood for the small exceedance samples typical of
-per-pixel per-dekad fits, because L-moments are less sensitive
-to outliers and converge well in the 30 to 100 exceedance
-range. Stage~3 of the LSEQM+DL pipeline implements this hybrid
-strategy with a fixed 80th-percentile threshold and a
-five-fold cross-validation aggregation to reduce variance on
-the GPD parameter estimates.
+stable GPD fits. For the small exceedance samples typical of per-pixel per-dekad
+fits, L-moment estimators are often preferred over maximum
+likelihood because they are less sensitive to outliers
+\citep{ref:hoskingwallis1997}. The present pipeline instead
+retains maximum-likelihood estimation with subsample-averaging
+to reduce estimator variance (Section~\ref{sec:methods-gpd}).
+Stage~3 of the LSEQM+DL pipeline implements this hybrid strategy
+with a fixed 80th-percentile threshold.
 
 \subsection{Deep Learning Approaches}\label{sec:lit-dl}
 
@@ -487,8 +473,8 @@ plausible. Deep learning approaches address this limitation by
 operating on the spatial neighbourhood of each pixel.
 
 Convolutional Neural Networks (CNNs) have been applied to
-satellite precipitation correction in several recent
-studies~\citep{ref:pan2019, ref:banomedina2020}. The principle
+precipitation estimation and statistical downscaling in several
+recent studies~\citep{ref:pan2019, ref:banomedina2020}. The principle
 is to train a network to map the raw satellite field to the
 reference field over a large historical sample, then apply the
 trained network at inference time to produce corrected fields.
@@ -598,13 +584,13 @@ it.
 
 The empirical magnitude of the bound for daily IMERG over the
 tropics is well documented. Multi-product comparisons of IMERG
-against gauge networks and reanalyses over tropical regions
+against gauge networks and reanalyses
 report daily correlations in the range of $0.3$ to $0.5$ across
 products and seasons \citep{ref:tang2020}, and evaluations over
 the Indonesian Maritime Continent report daily correlations of
 similar magnitude that rise substantially only when the
 aggregation window is widened to dekadal or monthly scales
-\citep{ref:ramadhan2022}. These values define the empirical
+\citep{ref:ramadhan2022ts}. These values define the empirical
 ceiling within which any corrected daily product over the region
 must operate. The present study tests the rank-preservation
 bound directly by reporting the Pearson correlation at each
@@ -642,8 +628,7 @@ computational notebook workflows that the design draws on.
 
 Computational notebooks have become a standard medium for
 documenting and sharing analytical workflows in climate science
-and Earth observation \cite{ref:perkel2018, ref:beg2021,
-ref:wagemann2022}. A notebook integrates code, results, and
+and Earth observation \cite{ref:perkel2018, ref:wagemann2022}. A notebook integrates code, results, and
 narrative in a single document, making the analytical process
 transparent and re-runnable on the same data. Jupyter is the
 most widely used implementation in the scientific Python
@@ -654,10 +639,10 @@ cloud-hosted runtime such as Google Colab with no change to
 the underlying file. For climate science specifically,
 computational notebooks have been used to integrate satellite
 imagery, station records, and model outputs into single
-self-documenting workflows \citep{ref:beg2021, ref:kluyver2016},
+self-documenting workflows \citep{ref:gentemann2021, ref:kluyver2016},
 and to teach climate-data analytics in a way that makes the
 underlying processing steps explicit and modifiable
-\citep{ref:wagemann2022, ref:liu2023}. The notebook format
+\citep{ref:wagemann2022}. The notebook format
 preserves the connection between the prose claim and the code
 that produced it, which is precisely the connection that a
 peer-reviewed paper without released code cannot guarantee.
@@ -668,8 +653,7 @@ a published workflow. Google Earth Engine and Microsoft
 Planetary Computer expose their data catalogues through
 notebook-friendly Python libraries such as \texttt{geemap},
 allowing a reader to execute a published analysis in a browser
-without local installation \cite{ref:kamelboulos2023,
-ref:gorelick2017, ref:wu2020}. Google Colab itself
+without local installation \cite{ref:gorelick2017, ref:wu2020}. Google Colab itself
 provides a no-installation execution environment for the same
 notebook files that run locally under Jupyter, with the cloud
 runtime additionally providing free Graphics Processing Unit (GPU)
@@ -694,7 +678,7 @@ expose every correction stage and every verification step as a
 runnable artefact tied to specific functions in the source
 codebase, so a reader following the documentation can move
 directly to the runnable cell and back \cite{ref:perkel2018,
-ref:granger2021}. Second, the notebooks can be opened in either
+ref:granger2021, ref:beg2021}. Second, the notebooks can be opened in either
 a local Jupyter installation or a cloud-hosted Google Colab
 session, which means the workflow is portable across the local
 development environment the author used and the browser-hosted
@@ -736,7 +720,7 @@ on the verification and correction problem this study addresses.
 Rainfall over the archipelago is dominated by deep convection
 organised by the interaction between the large-scale monsoon
 circulation and intense local land-sea breeze systems
-\citep{ref:ramadhan2022}. Two monsoon phases set the seasonal
+\citep{ref:aldrian2003, ref:wu2008}. Two monsoon phases set the seasonal
 cycle: the northwest monsoon (roughly November to March) brings
 the primary wet season to most of the archipelago, while the
 southeast monsoon (roughly May to September) brings the dry
@@ -753,7 +737,7 @@ The diurnal cycle is the feature most consequential for daily
 verification. Convection over the large islands peaks in the
 local afternoon, typically between 14:00 and 17:00 local time,
 driven by daytime heating and the sea-breeze convergence over
-land \citep{ref:ramadhan2022}. Indonesia spans three standard
+land \citep{ref:wu2008}. Indonesia spans three standard
 time zones, from UTC+7 in the west (Sumatra, Java) through UTC+8
 (Bali, Kalimantan, Sulawesi) to UTC+9 in the east (Maluku,
 Papua). The IMERG product is accumulated on a UTC calendar day,

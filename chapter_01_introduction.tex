@@ -10,13 +10,6 @@
 % Included by main_thesis.tex.
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
-%   - paper/additional_information.md (§1 scope, §7.7 limitations)
-%   - paper/thesis_outline.md (§1.1-§1.6 mapping)
-%
-% Conventions: no em-dashes; no AI-language; no overclaim;
-%              dual contribution (scientific + reproducibility) seeded here;
-%              sensitivity parameters acknowledged as not formally optimised.
-% ============================================================
 
 \chapter{Introduction}\label{chap:introduction}
 
@@ -30,9 +23,12 @@ water budgeting, and disaster risk assessment. For most of the
 global land surface, the only source of spatially continuous
 daily precipitation is the satellite family of products. The
 Integrated Multi-satellitE Retrievals for the Global
-Precipitation Measurement mission (IMERG), in its version 7
-release, has become the de facto reference for this class of
-data \citep{ref:hou2014, ref:huffman2020}. Among its variants,
+Precipitation Measurement mission (IMERG) is the flagship
+multi-satellite product of the GPM era
+\citep{ref:hou2014, ref:huffman2020}. Its version 7 (V07)
+release is the current recommended version, used here; it
+succeeds the version 6 generation that the published algorithm
+documentation describes. Among its variants,
 the Late Run (IMERG-L) is the one suited to near-real-time use:
 its latency of approximately 14 hours fits within the same-day
 decision window of operational flood and drought services, where

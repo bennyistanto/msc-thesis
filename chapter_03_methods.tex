@@ -12,28 +12,6 @@
 % Included by main_thesis.tex.
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
-%
-% Drafting position in workflow:
-%   [Methods] -> LitRev v1 -> Results -> Discussion -> LitRev v2
-%   -> Conclusion -> Introduction -> Front matter
-%
-% Source materials for this chapter:
-%   - paper/PPS1691_..._compact_20260526.tex  (compressed methods)
-%   - paper/PPS1691_..._20260522_seminar.tex  (master, 20pp)
-%   - paper/PPS1591_..._mdpi.docx              (parallel manuscript)
-%   - paper/additional_information.md          (deep technical material)
-%   - docs/ Quarto site                        (reproducibility evidence)
-%   - src/ Python codebase                     (implementation artefact)
-%   - notebooks/ Jupyter                       (workflow artefact)
-%
-% Conventions:
-%   - No em-dashes anywhere (hyphen-space or colon)
-%   - No AI-language watchlist words
-%   - Long-form abbreviation on first use, short form after
-%   - MDPI_STATUS placeholder for the parallel manuscript citation
-%   - Station density mask: design choice, NOT "key contribution"
-%   - alpha=0.70, GPD 80th percentile, density_saturation=3: sensitivity caveat preserved
-% ============================================================
 
 \chapter{Methods}\label{chap:methods}
 
@@ -79,7 +57,7 @@ centre of the Maritime Continent, where the convergence of the
 Pacific and Indian Ocean basins drives a deep convective regime
 and where the seasonal cycle is governed by the
 Asian-Australian monsoon and the migration of the Inter-Tropical
-Convergence Zone \citep{ref:tan2016}. Daily-mean precipitation is
+Convergence Zone \citep{ref:aldrian2003}. Daily-mean precipitation is
 high across the archipelago, but the spatial pattern is uneven:
 dense convective rainfall over Sumatra, Java, and Kalimantan
 contrasts with the comparatively drier eastern provinces. The
@@ -89,7 +67,7 @@ IMERG calendar day is defined in UTC and therefore splits the
 local convective afternoon across two calendar days. The gauge
 network is concentrated in Java and southern Sumatra; coverage is
 sparse over Papua, Maluku, and eastern Nusa Tenggara
-\citep{ref:ramadhan2022}. This spatial gradient motivates the
+\citep{ref:chen2008}. This spatial gradient motivates the
 density-aware blending design described in
 Section~\ref{sec:methods-blending}.
 
@@ -132,7 +110,7 @@ UTC-day total \citep{ref:cpcuni_readme}; this convention is
 relevant to the Pearson~$r$ ceiling discussed in
 Section~\ref{sec:discussion-subdaily}.
 CPC-UNI is documented to systematically undercatch heavy
-rainfall, reflecting both the smoothing introduced by interpolation
+rainfall \citep{ref:chen2008}, reflecting both the smoothing introduced by interpolation
 onto a $0.5^{\circ}$ grid and the under-representation of
 mountain and coastal sites in the contributing network. Despite
 these limitations, CPC-UNI is the most widely used gauge-based
@@ -1028,11 +1006,11 @@ distribution, which is the segment that drives flood and drought
 thresholds in operational use. The $Q_{95}$ and $Q_{99}$ ratios
 are the percentile ratio of Equation~\eqref{eq:pctlratio}
 evaluated at $q = 95$ and $q = 99$, with target unity. In
-addition, multi-threshold verification at seven thresholds
-(1, 5, 10, 20, 50, 100, and 150 mm/day) reports the categorical
-skill of the corrected series following the World Meteorological
-Organization (WMO) verification standard TD-1485
-\citep{ref:wmo1485}. At each threshold, hits $H$, false alarms
+addition, multi-threshold verification at seven thresholds spanning the
+operational range (1, 5, 10, 20, 50, 100, and 150 mm/day) reports
+the categorical skill of the corrected series, following the
+multi-threshold verification approach of the World Meteorological
+Organization (WMO) standard TD-1485 \citep{ref:wmo1485}. At each threshold, hits $H$, false alarms
 $F$, misses $M$, and correct negatives $Z$ are counted from the
 $2 \times 2$ contingency table, from which the threshold-resolved
 probability of detection (POD), critical success index (CSI), and

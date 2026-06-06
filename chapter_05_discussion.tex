@@ -10,17 +10,6 @@
 % Included by main_thesis.tex.
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
-%
-% Source material:
-%   - paper/PPS1691_..._compact_20260526.tex  (compact seminar §4.1, §4.2, §4.3, §4.4)
-%   - paper/PPS1591_..._mdpi.docx              (parallel manuscript discussion)
-%   - paper/additional_information.md          (§7.4, §7.5, §7.7 limitations)
-%
-% Conventions: no em-dashes; no AI-language; no overclaim;
-%              sensitivity caveats preserved on alpha, GPD threshold,
-%              and saturation_count; reproducibility positioned as
-%              parallel contribution rather than supplementary feature.
-% ============================================================
 
 \chapter{Discussion}\label{chap:discussion}
 
@@ -160,11 +149,11 @@ flat $r$ pattern are jointly expressing.
 The bound is empirically supported by two lines of evidence that
 locate $r \approx 0.34$ inside the expected range for daily IMERG
 over tropical regions. A multi-product comparison of IMERG
-against gauge networks and reanalyses over the tropics
+against gauge networks and reanalyses
 \citep{ref:tang2020} reported daily correlations between $0.3$
 and $0.5$ across products, seasons, and gauge densities. An
 evaluation over the Indonesian Maritime Continent at multiple
-time scales \citep{ref:ramadhan2022} reported daily correlations
+time scales \citep{ref:ramadhan2022ts} reported daily correlations
 of similar magnitude, with skill rising substantially only at
 dekadal or monthly aggregation. The corrected LSEQM+DL value of
 $0.348$ sits inside this empirical band. The ceiling has two
@@ -213,7 +202,7 @@ correction is stable month-by-month.\label{fig:taylor-monthly}}
 
 A complementary reading uses the canonical decomposition of the
 mean squared error into bias, spread, and covariance components
-\citep{ref:nashsutcliffe1970}. The bias component is moved cleanly
+\citep{ref:gupta2009}. The bias component is moved cleanly
 by the Linear Scaling stage, and the spread component is moved
 toward unity by the EQM stage acting on the daily distribution.
 The covariance component, proportional to
@@ -263,10 +252,11 @@ to label each daily value. IMERG-L distributes daily totals
 aggregated over the Coordinated Universal Time (UTC) calendar day,
 while the BMKG climatological-station daily totals are reported
 under the morning-observation convention specified by Head of BMKG
-Decree SK.32/TL.202/KB/BMG-2006 \citep{ref:bmkg2006sk32} in
-agreement with the World Meteorological Organization guidance in
-WMO No.~8 \citep{ref:wmo2018no8}: the rainfall total assigned to
-date~$d$ is the 24-hour accumulation ending at the morning
+Decree SK.32/TL.202/KB/BMG-2006 \citep{ref:bmkg2006sk32},
+consistent with the World Meteorological Organization principle of
+measuring daily precipitation at fixed observation times common to
+the network \citep{ref:wmo2018no8}: the rainfall total assigned to
+date~$d$ is the 24-hour accumulation ending at the BMKG morning
 observation on date~$d$, nominally $07{:}00$ local time. Because
 Indonesia spans the three local-time zones WIB, WITA, and WIT
 (UTC$+7$, $+8$, $+9$), the BMKG daily window ends near $00{:}00$
@@ -395,14 +385,20 @@ IMERG aggregate and the BMKG morning-observation aggregate, and
 the diagnostic shows that approximately two-thirds of the gap
 between this value and the window-aligned upper bound of
 $r \approx 0.62$ is accounted for by the calendar-window
-mismatch. The pipeline lifts Pearson~$r$ from $0.19$ to $0.34$
-by mean and variance rescaling and rank-preserving distributional
-correction, exactly the contribution that Section~\ref{sec:discussion-bound}
-predicts; the bound discussion correctly assigns the remaining
-gap to the timing quality of the retrieval at the observed
-window, which the present diagnostic refines into a metadata
-component (window mismatch, approximately $0.30$ of the gap)
-and a residual retrieval-skill component (approximately the
+mismatch. Consistent with Section~\ref{sec:discussion-bound}, the
+marginal-correction pipeline leaves this correlation essentially
+unchanged, because $r$ is invariant under the rank-preserving
+rescaling the pipeline applies. The diagnostic instead operates on
+the raw retrieval at sub-daily resolution: in the January~2020
+sample the pooled correlation rises from $r = 0.19$ at the UTC-day
+window to $r = 0.62$ at the matched $-22$~h window. The pooled
+$0.19$ and the full-record headline $0.34$ differ because the
+diagnostic pools a single wet-season month of raw half-hourly data
+rather than the 25-year per-station record, not because of any
+correction step. The bound discussion assigns the gap to the
+timing quality of the retrieval, which this diagnostic separates
+into a calendar-window component (the larger part, recoverable by
+re-aggregation) and a residual retrieval-skill component (the
 remainder). Re-aggregating the daily IMERG-L archive over a
 window matched to the local-day gauge convention shared by
 CPC-UNI and BMKG would therefore lift the operational
@@ -666,7 +662,7 @@ a numerically comparable baseline. The same structure, combined
 with the free-tier Colab runtime in the order of minutes per
 dekad, supports use as a graduate-level training resource on
 satellite precipitation bias correction
-\citep{ref:perkel2018,ref:beg2021}. This is not the central
+\citep{ref:perkel2018, ref:wagemann2022}. This is not the central
 scientific contribution of the present work, but it is a
 substantive secondary benefit of the open release.
 
