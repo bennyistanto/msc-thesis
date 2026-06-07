@@ -7,6 +7,14 @@
 # Usage: ./build.sh [--clean]
 
 set -u
+
+# Force bash to see the MiKTeX binaries on Windows
+# Bridge the gap for Windows CMD, WSL, and Git Bash
+export PATH="/mnt/c/Users/benny/AppData/Local/Programs/MiKTeX/miktex/bin/x64:/c/Users/benny/AppData/Local/Programs/MiKTeX/miktex/bin/x64:$PATH"
+shopt -s expand_aliases
+alias pdflatex="pdflatex.exe"
+alias bibtex="bibtex.exe"
+
 cd "$(dirname "$0")"
 
 if [[ "${1:-}" == "--clean" ]]; then
