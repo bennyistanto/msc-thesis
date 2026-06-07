@@ -8,12 +8,13 @@
 
 set -u
 
-# Force bash to see the MiKTeX binaries on Windows
-# Bridge the gap for Windows CMD, WSL, and Git Bash
-export PATH="/mnt/c/Users/benny/AppData/Local/Programs/MiKTeX/miktex/bin/x64:/c/Users/benny/AppData/Local/Programs/MiKTeX/miktex/bin/x64:$PATH"
-shopt -s expand_aliases
-alias pdflatex="pdflatex.exe"
-alias bibtex="bibtex.exe"
+# Bridge the gap for Windows CMD/WSL locally, but ignore during GitHub Actions CI
+if [[ "${GITHUB_ACTIONS:-}" != "true" ]]; then
+  export PATH="/mnt/c/Users/benny/AppData/Local/Programs/MiKTeX/miktex/bin/x64:/c/Users/benny/AppData/Local/Programs/MiKTeX/miktex/bin/x64:$PATH"
+  shopt -s expand_aliases
+  alias pdflatex="pdflatex.exe"
+  alias bibtex="bibtex.exe"
+fi
 
 cd "$(dirname "$0")"
 
