@@ -14,7 +14,7 @@ Faculty of Mathematics and Natural Sciences</br>
 Bogor Agricultural University</br>
 Bogor, Indonesia
 
-Supervised by Prof. Dr. Ir. Rizaldi Boer, M.S. and Dr. I Putu Santikayasa.
+Supervised by Prof. Dr. Ir. Rizaldi Boer, M.S. and Dr. I Putu Santikayasa, S.Si., M.Sc.
 
 ## What this repository contains
 
