@@ -314,6 +314,24 @@ trade-off is the intended outcome of the design choice;
 Section~\ref{sec:results-threshold} shows where it is
 favourable and where it is not.
 
+A complementary reading of the same contingency table answers a
+question operational users ask directly: on a day the gauge
+records as dry, does the corrected product also report dry? Dry
+days, those below the $1$~mm wet-day threshold, account for about
+half of the validated station-days, so their treatment carries as
+much weight as wet-day skill. Counting correct negatives at the
+$1$~mm threshold, the fraction of dry gauge days that the product
+also reports dry rises from roughly $56\%$ under Linear Scaling to
+roughly $69\%$ under LSEQM+DL, so the false-alarm rate on dry days
+falls from about $44\%$ to $31\%$. This is the dry-day counterpart
+of the wet-day frequency ratio moving from $1.21$ to $0.95$: the
+empirical quantile mapping reclassifies spurious light-rain pixels
+to dry and removes the raw product's over-detection. The gain is
+not free, and follows the same trade-off as the detection scores:
+the reclassification that suppresses false alarms also lowers the
+probability of detection from $0.78$ to $0.65$, exchanging a
+portion of light-rain hits for cleaner dry-day agreement.
+
 \subsection*{What LSEQM+DL Adds: Tail Refinement}
 
 The contribution of Stages~3 and 4 over the LSEQM baseline is
