@@ -20,12 +20,14 @@ main_thesis*.html
 
 # Compiled PDF (publish via GitHub Releases instead of in-repo)
 main_thesis.pdf
+GFM1699*.pdf
 
 # Editor / OS
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+.claude/
 
 # Python build artifacts from the figure scripts
 __pycache__/
@@ -34,3 +36,6 @@ scripts/__pycache__/
 
 # Local working notes (not part of the published thesis)
 docs/
+
+# PPKI skill files (not relevant to the thesis)
+SKILL.md
