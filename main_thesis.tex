@@ -1,8 +1,8 @@
 % ============================================================
 % main_thesis.tex - Master document
 %
-% Thesis : How Far Can Bias Correction Improve Daily Satellite Precipitation?
-% Author : Benny Istanto (IPB University, Applied Climatology, 2026)
+% Thesis : A Hybrid Bias Correction Framework for Daily Satellite Precipitation
+% Author : Benny Istanto (Bogor Agricultural University, Applied Climatology, 2026)
 % Format : IPB PPKI (margins 4/3/3/3 cm, single spacing, 1 cm first-line
 %          indent, Roman chapter numbers, Arabic sub-numbering, roman
 %          front matter / arabic body).
@@ -39,6 +39,9 @@
 \usepackage{booktabs}
 \usepackage{float}
 \usepackage{enumitem}
+% Compact, single-spaced lists matching body spacing (PPKI): no extra
+% inter-item space, small uniform space before/after the list.
+\setlist{noitemsep, topsep=2pt, parsep=0pt, partopsep=0pt}
 \usepackage{setspace}
 \usepackage{xcolor}
 \usepackage{xurl}
@@ -80,7 +83,7 @@
 \hypersetup{
   pdftitle={Master Thesis - Benny Istanto, IPB 2026},
   pdfauthor={Benny Istanto},
-  pdfsubject={How Far Can Bias Correction Improve Daily Satellite Precipitation?},
+  pdfsubject={A Hybrid Bias Correction Framework for Daily Satellite Precipitation},
   pdfkeywords={daily satellite precipitation, gauge validation, hybrid bias correction, IMERG, reproducibility}
 }
 \setcounter{secnumdepth}{2}  % number to subsection (3 levels: I, 1.1, 1.1.1)
