@@ -1,4 +1,4 @@
-# How Far Can Bias Correction Improve Daily Satellite Precipitation?
+# A Hybrid Bias Correction Framework for Daily Satellite Precipitation
 
 Master's thesis (Bogor Agricultural University, 2026) on the hybrid LSEQM+DL bias correction framework for daily Integrated Multi-satellitE Retrievals for GPM Late Run (IMERG-L) precipitation over Indonesia, with gauge validation against 171 independent BMKG stations.
 
@@ -26,7 +26,7 @@ This repository holds the LaTeX sources, figures, and figure-generator scripts f
 ```
 .
 ├── main_thesis.tex                  # entry point
-├── frontmatter.tex                  # cover, abstracts, signatures, ToC, LoT, LoF
+├── frontmatter.tex                  # cover, summary, signatures, ToC, LoT, LoF
 ├── chapter_01_introduction.tex      # chapter 1
 ├── chapter_02_literature_review.tex # chapter 2
 ├── chapter_03_methods.tex           # chapter 3
@@ -64,37 +64,23 @@ This runs the canonical three-pass cycle:
 3. `pdflatex` (populates ToC / LoF / LoT)
 4. `pdflatex` (stabilises cross-references)
 
-The output is `main_thesis.pdf` (~ 97 pages, ~ 9 MB).
+The output is `main_thesis.pdf` (~ 110 pages, ~ 9 MB).
 
 ### Overleaf
 
-This repository is Overleaf-compatible: upload the folder, set
-`main_thesis.tex` as the main document, and use the pdfLaTeX compiler.
-The `et al.` italic post-processing step does not run on Overleaf, so a
-small number of `et al.` strings in the bibliography will render
-upright instead of italic; the rest of the formatting is identical to
-the local build.
+This repository is Overleaf-compatible: upload the folder, set `main_thesis.tex` as the main document, and use the pdfLaTeX compiler. The `et al.` italic post-processing step does not run on Overleaf, so a small number of `et al.` strings in the bibliography will render upright instead of italic; the rest of the formatting is identical to the local build.
 
 ## How to rebuild the figures
 
-The figure generators live in `scripts/`. See `scripts/README.md` for
-the one-script-per-figure inventory and dependencies. Each script is
-runnable in isolation; collectively they require a scientific Python
-stack (numpy / pandas / xarray / matplotlib / geopandas) plus access
-to the data archive cited in Appendix B.
+The figure generators live in `scripts/`. See `scripts/README.md` for the one-script-per-figure inventory and dependencies. Each script is runnable in isolation; collectively they require a scientific Python stack (numpy / pandas / xarray / matplotlib / geopandas) plus access to the data archive cited in Appendix B.
 
 ## Citation
 
-If you reference this thesis, please cite it as recorded in
-[`CITATION.cff`](CITATION.cff). After publication on Zenodo a DOI will
-be added.
+If you reference this thesis, please cite it as recorded in [`CITATION.cff`](CITATION.cff). After publication on Zenodo a DOI will be added.
 
 ## License
 
-The thesis text and figures are released under
-[Creative Commons Attribution 4.0 (CC-BY-4.0)](LICENSE).
-The build scripts and figure-generator Python code are released under
-the [MIT License](LICENSE).
+The thesis text and figures are released under [Creative Commons Attribution 4.0 (CC-BY-4.0)](LICENSE). The build scripts and figure-generator Python code are released under the [MIT License](LICENSE).
 
 See [`LICENSE`](LICENSE) for the full text of both.
 
