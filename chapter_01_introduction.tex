@@ -4,9 +4,10 @@
 % Purpose: motivates the thesis (satellite-precipitation biases over the
 %          Indonesian Maritime Continent, the verification-decomposition
 %          gap, the reproducibility gap) and states the research question.
-% Sections: 1.1 Background and Motivation, 1.2 Problem Statement,
-%           1.3 Research Question, 1.4 Objectives, 1.5 Scope and Limits,
-%           1.6 Thesis Outline.
+% Sections: 1.1 Background, 1.2 Problem Statement,
+%           1.3 Objectives and Benefits,
+%           1.4 Scope, Limitations, and Constraint, 1.5 Novelty,
+%           1.6 Hypotheses, 1.7 Thesis Structure.
 % Included by main_thesis.tex.
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
@@ -100,8 +101,8 @@ The two gaps combine into a single problem with two faces. On
 the scientific side, the question is not whether a hybrid bias
 correction pipeline improves daily satellite precipitation in
 aggregate, which the literature already establishes, but which
-bias dimension each stage corrects, and how far the correction
-can reach along each dimension when judged against independent
+bias dimension each stage corrects, and the reach of the correction
+along each dimension when judged against independent
 gauges. A pipeline can report a high aggregate score while
 leaving a specific operationally important dimension unmoved, and
 only a stage-resolved verification against out-of-sample stations
@@ -129,7 +130,7 @@ reproducible artefact that an independent reader can re-execute.
 
 The study pursues four objectives:
 
-\begin{enumerate}[noitemsep, topsep=2pt]
+\begin{enumerate}
     \item To attribute the skill of the LSEQM+DL pipeline
     stage-by-stage against 171 independent Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) stations,
     establishing which bias dimension each of the four stages
