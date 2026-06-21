@@ -37,7 +37,6 @@ Chapter~\ref{chap:discussion}.
 
 % ============================================================
 \section{Satellite-derived Daily Precipitation}\label{sec:lit-imerg}
-% Target: 3-4 pp
 % ============================================================
 
 Daily precipitation is the basic temporal unit for many
@@ -81,7 +80,7 @@ quasi-global precipitation product at $0.1^{\circ}$ spatial and
 TRMM-era retrievals reprocessed under the IMERG framework so
 the product spans a continuous 25-year record.
 
-\subsection{IMERG V07 architecture}
+\subsection{IMERG V07 Architecture}
 
 The IMERG algorithm~\citep{ref:huffman2020} merges three input streams.
 Passive-microwave retrievals from the GPM constellation
@@ -101,7 +100,7 @@ Climatology Centre (GPCC) gauge analysis, correcting long-term
 mean biases while preserving the high-frequency variability of
 the merged microwave-plus-IR product.
 
-\subsection{Three latency variants}
+\subsection{Three Latency Variants}
 
 IMERG releases three latency variants of the same daily product.
 The \textit{Early Run} is released approximately 4~hours after
@@ -119,14 +118,16 @@ that can wait for the Final Run gain the gauge-anchored
 adjustment; applications that need timely fields must accept
 the larger biases of the Early and Late runs.
 
-\subsection{Gridded daily precipitation products}
+\subsection{Gridded Daily Precipitation Products}
 
 IMERG is one of several global gridded daily precipitation
 products available to operational users; each makes a different
 trade-off between latency, gauge anchoring, and spatial
 resolution. Table~\ref{tab:gridded-products} summarises the
 products most often considered for daily-scale work over the
-tropics. CPC Unified Gauge-Based Analysis of Daily Precipitation (CPC-UNI) \citep{ref:chen2008} interpolates gauge
+tropics, where latency is the typical time lag between
+observation and product release and gauge integration describes
+whether and how gauge data is incorporated in the product. CPC Unified Gauge-Based Analysis of Daily Precipitation (CPC-UNI) \citep{ref:chen2008} interpolates gauge
 observations directly and is therefore the highest-quality
 reference where the contributing network is dense, at the cost
 of a coarse 0.5$^{\circ}$ grid and limited skill where the
@@ -156,10 +157,7 @@ in Chapter~\ref{chap:results}.
 \begin{table}[H]
 \centering
 \caption[Daily gridded precipitation products commonly used for tropical hydrological and operational applications]{Daily gridded precipitation products commonly used for
-tropical hydrological and operational applications. Latency is
-the typical time lag between observation and product release;
-gauge integration describes whether and how gauge data is
-incorporated in the product.\label{tab:gridded-products}}
+tropical hydrological and operational applications.\label{tab:gridded-products}}
 \begingroup\footnotesize
 \begin{tabular}{@{}lllll@{}}
 \toprule
@@ -178,18 +176,19 @@ MSWEP                   & 1--3 days  & 1979 -- present & Ensemble with gauges   
 \endgroup
 \end{table}
 
-\subsection{Known biases against gauges}
+\subsection{Known Biases Against Gauges}
 
 Multi-product comparisons of IMERG and its predecessors against
-gauge networks have documented three persistent bias modes:
-over-detection of light rainfall (the satellite reports rain
-when gauges report dry, often associated with sub-pixel cloud
-artefacts or shallow drizzle that the satellite retrieves but
-the gauge misses), under-detection of heavy events (the
-satellite under-estimates extreme rainfall magnitudes, a
-limitation of microwave retrieval at the upper tail of
-precipitation rates), and a full distributional mismatch
-between the satellite and gauge distributions of daily
+gauge networks have documented three persistent bias modes. The
+first is over-detection of light rainfall, where the satellite
+reports rain when gauges report dry, often associated with
+sub-pixel cloud artefacts or shallow drizzle that the satellite
+retrieves but the gauge misses. The second is under-detection of
+heavy events, where the satellite under-estimates extreme
+rainfall magnitudes, a limitation of microwave retrieval at the
+upper tail of precipitation rates. The third is a full
+distributional mismatch between the satellite and gauge
+distributions of daily
 precipitation~\citep{ref:maggioni2016, ref:tang2020, ref:tan2016}. Over the
 tropics specifically, multi-product comparisons report daily
 Pearson correlations between $0.3$ and $0.5$ against gauge
@@ -202,7 +201,6 @@ Chapter~\ref{chap:results}.
 
 % ============================================================
 \section{Bias Dimensions and Verification}\label{sec:lit-verification}
-% Target: 2-3 pp
 % ============================================================
 
 A satellite precipitation product has many ways to be wrong, and
@@ -213,7 +211,7 @@ metrics that target distinct bias dimensions independently, so
 that a product's strengths and weaknesses can be diagnosed
 rather than averaged together.
 
-\subsection{Four-pillar verification framework}
+\subsection{Four-Pillar Verification Framework}
 
 The four-pillar framework used in this thesis groups verification
 metrics into \textit{value adjustment} (mean offset and spread
@@ -241,7 +239,7 @@ Chapter~\ref{chap:discussion}, and the theoretical basis for
 why marginal-correction methods leave Pearson correlation
 bounded is developed in Section~\ref{sec:lit-bounds}.
 
-\subsection{Multi-threshold verification}
+\subsection{Multi-Threshold Verification}
 
 Categorical skill scores at a single wet-day threshold reduce a
 full daily precipitation field to a binary rain-or-no-rain
@@ -258,7 +256,7 @@ in this study uses seven thresholds spanning this range (1, 5, 10,
 20, 50, 100, and 150~mm/day) and reports separate categorical
 metrics at each.
 
-\subsection{Station-based out-of-sample validation}
+\subsection{Station-Based Out-of-Sample Validation}
 
 The verification reference may itself contain biases. Gauge
 networks have well-documented undercatch behaviour, particularly
@@ -281,7 +279,6 @@ out-of-sample comparison against independent point observations
 
 % ============================================================
 \section{Bias Correction Method Families}\label{sec:lit-methods}
-% Target: 4-5 pp
 % ============================================================
 
 The bias correction literature has produced four broad method
@@ -295,6 +292,24 @@ Each subsection below reviews the principle of one family, its
 canonical references, and its acknowledged limits. A unifying
 review of the marginal-distribution families is provided by
 \citep{ref:maraun2016}.
+
+Each family contains many variants beyond the representative method
+named here. The scaling family includes the delta or change-factor
+method, local intensity scaling, and power transformation, of which
+linear scaling is the simplest multiplicative case; the
+quantile-mapping family includes empirical and parametric mapping,
+quantile delta mapping, scaled distribution mapping, and
+cumulative-distribution-function transformation
+\citep{ref:gudmundsson2012, ref:teutschbein2012, ref:cannon2015}. This
+review selects one canonical representative per family rather than
+surveying every variant, because the contribution of this thesis is
+the staged composition of the four families into a single daily
+pipeline, not a comparison among variants of any one of them. Variants
+developed primarily to preserve long-term trends in climate-projection
+downscaling, such as quantile delta mapping, are not central to the
+satellite-versus-gauge setting, where there is no projected trend to
+preserve.
+
 Table~\ref{tab:biascorr-methods} summarises the principal
 strengths and acknowledged weaknesses of the methods considered
 in this review, providing a single-page reference against which
@@ -304,11 +319,7 @@ positioned.
 \begin{table}[H]
 \centering
 \caption[Strengths and weaknesses of bias correction methods considered for daily precipitation]{Strengths and weaknesses of bias correction methods
-considered for daily precipitation. The LSEQM+DL pipeline of
-Chapter~\ref{chap:methods} combines the first three rows
-(LS, EQM, and an extreme-value tail correction) into a sequential
-pipeline and adds a deep-learning refinement
-stage.\label{tab:biascorr-methods}}
+considered for daily precipitation.\label{tab:biascorr-methods}}
 \begingroup\footnotesize
 \begin{tabular}{@{}p{3.0cm} p{5.0cm} p{5.0cm}@{}}
 \toprule
@@ -549,7 +560,7 @@ on one day than on another, the corrected series does too
 property in the context of trend preservation and showed that
 standard quantile mapping can distort climate-change trends
 precisely because it operates on ranks rather than on the
-temporal sequence; the same rank-preservation mechanism that
+temporal sequence. The same rank-preservation mechanism that
 distorts trends also fixes the day-by-day ordering of a
 corrected series relative to its source.
 
@@ -624,7 +635,7 @@ empirically in Section~\ref{sec:results-reproducibility}; the
 present section reviews the supporting literature on
 computational notebook workflows that the design draws on.
 
-\subsection{Computational notebooks in climate and Earth observation analysis}
+\subsection{Computational Notebooks in Climate and Earth Observation Analysis}
 
 Computational notebooks have become a standard medium for
 documenting and sharing analytical workflows in climate science
@@ -686,7 +697,7 @@ environment a reader is likely to start with. The empirical
 demonstration of this portability is reported in
 Section~\ref{sec:results-reproducibility}.
 
-\subsection{Notebook-based workflows in bias correction}
+\subsection{Notebook-Based Workflows in Bias Correction}
 
 Within the bias correction literature specifically,
 notebook-based release remains the exception rather than the
@@ -695,9 +706,9 @@ Chapter~\ref{chap:methods} against a published alternative is
 typically able to find the method description but not the code.
 This gap between method documentation and runnable artefact is
 the methodological position that the present study takes a
-deliberate stance against: the chapter argues that the empirical
+deliberate stance against. The chapter argues that the empirical
 claim of a bias correction study should be re-executable by an
-independent reader, and the implementation reported in
+independent reader. The implementation reported in
 Section~\ref{sec:methods-reproducibility} is structured to make
 that claim verifiable rather than aspirational. The wider
 literature on open scientific workflows
@@ -708,8 +719,6 @@ correction sub-literature.
 
 % ============================================================
 \section{Maritime Continent Precipitation Context}\label{sec:lit-maritime-continent}
-% Target: 2-3 pp
-% Status: SKELETON - drafted in LitRev v2
 % ============================================================
 
 The Indonesian Maritime Continent presents a precipitation
@@ -783,7 +792,6 @@ Chapter~\ref{chap:discussion} proposes.
 
 % ============================================================
 \section*{Chapter summary}
-% Status: SKELETON - drafted in LitRev v2 once all six sections are filled
 % ============================================================
 
 This review has established the foundations on which the present
