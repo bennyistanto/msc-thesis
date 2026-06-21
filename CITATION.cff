@@ -5,7 +5,7 @@
 cff-version: 1.2.0
 message: "If you reference this thesis, please cite it as below."
 type: thesis
-title: "How Far Can Bias Correction Improve Daily Satellite Precipitation?"
+title: "A Hybrid Bias Correction Framework for Daily Satellite Precipitation"
 authors:
   - family-names: "Istanto"
     given-names: "Benny"
