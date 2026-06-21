@@ -26,8 +26,8 @@
 \vspace*{1cm}   % 3 cm top margin + 2 cm = 5 cm from the top edge
 \begin{center}
   {\fontsize{14}{17}\selectfont\bfseries
-   HOW FAR CAN BIAS CORRECTION IMPROVE\\
-   DAILY SATELLITE PRECIPITATION?\par}
+   A HYBRID BIAS CORRECTION FRAMEWORK FOR\\
+   DAILY SATELLITE PRECIPITATION\par}
   \vfill
   {\fontsize{14}{17}\selectfont\bfseries BENNY ISTANTO\par}
   \vfill
@@ -54,8 +54,8 @@
 \end{center}
 \vspace{\baselineskip}
 
-I declare that the master's thesis with the title ``How Far Can Bias
-Correction Improve Daily Satellite Precipitation?'' is my work under the
+I declare that the master's thesis with the title ``A Hybrid Bias
+Correction Framework for Daily Satellite Precipitation'' is my work under the
 direction of the supervisors and has not been submitted in any form to
 any other university. Sources of information derived from or cited from
 published or unpublished work by other authors have been mentioned in
@@ -77,14 +77,14 @@ G2501222008
 
 % ----- Summary (English) -----
 \chapter*{SUMMARY}\thispagestyle{empty}
-\noindent BENNY ISTANTO. How Far Can Bias Correction Improve Daily
-Satellite Precipitation? Supervised by RIZALDI BOER and I PUTU
+\noindent BENNY ISTANTO. A Hybrid Bias Correction Framework for
+Daily Satellite Precipitation. Supervised by RIZALDI BOER and I PUTU
 SANTIKAYASA.
 
 \medskip
 Daily satellite precipitation underpins flood early warning, drought
 monitoring, and water-budget analysis, but the Integrated Multi-satellitE
-Retrievals for Global Precipitation Measurement (GPM) Late Run (IMERG-L)
+Retrievals for Global Precipitation Measurement Late Run (IMERG-L)
 carries systematic biases over the Indonesian Maritime Continent. This thesis evaluates a four-stage hybrid
 bias correction pipeline: Linear Scaling (LS), Empirical Quantile
 Mapping (EQM) with a Gamma fit, Generalized Pareto Distribution (GPD)
@@ -94,7 +94,6 @@ LSEQM+DL, applied to IMERG-L over Indonesia for $2001$ to $2025$, with
 gauge validation against $171$ independent stations of Indonesia's
 Meteorological, Climatological, and Geophysical Agency (BMKG).
 
-\medskip
 Against the out-of-sample BMKG network, three of the four verification
 pillars move close to the gauge target. Relative bias drops from
 $-11.4\%$ for the raw Linear-Scaling stage to $-0.6\%$ for LSEQM+DL, the
@@ -104,11 +103,10 @@ ratios at the $95$th and $99$th percentiles move from $0.74$ and $0.71$
 to $1.05$ and $1.01$. Event detection shows a designed trade-off: the
 corrected product detects fewer light-rain events than the raw retrieval
 below $10$~mm/day but achieves higher critical success at every threshold
-above $20$~mm/day, with a $57\%$ Critical Success Index (CSI) gain at the $50$~mm/day
+above $20$~mm/day, with a $57\%$ Critical Success Index gain at the $50$~mm/day
 threshold ($0.097$ versus $0.062$), the regime in which BMKG flood
 early-warning advisories operate.
 
-\medskip
 One diagnostic does not move. The Pearson correlation between paired
 daily satellite and gauge values stays near $0.34$ across all four stages
 and stays in the narrow band $[0.332, 0.348]$ across all fifteen settings
@@ -134,13 +132,12 @@ timing skill is moderate at the UTC-day alignment and is the regime
 where the calendar-window re-aggregation has the largest operational
 effect.
 
-\medskip
 The pipeline is released as an open, configuration-driven
 implementation whose reproducibility is demonstrated by re-executing
 the headline results end-to-end on free cloud infrastructure: the Bali
 subdomain ($9 \times 14$ grid at $0.1^{\circ}$, $80$ land pixels, all
 $36$ dekadal windows of the $2001$ to $2025$ record) completes in
-$72.1$ minutes on a standard Google Colab Central Processing Unit (CPU)
+$72.1$ minutes on a standard Google Colab Central Processing Unit
 runtime.
 
 \medskip
@@ -150,14 +147,14 @@ hybrid bias correction, IMERG, reproducibility
 
 % ----- Ringkasan (Bahasa Indonesia) -----
 \chapter*{RINGKASAN}\thispagestyle{empty}
-\noindent BENNY ISTANTO. Sejauh Mana Koreksi Bias Mampu Memperbaiki Data
-Presipitasi Satelit Harian? Dibimbing oleh RIZALDI BOER dan I PUTU
+\noindent BENNY ISTANTO. Kerangka Koreksi Bias Hibrida untuk
+Presipitasi Satelit Harian. Dibimbing oleh RIZALDI BOER dan I PUTU
 SANTIKAYASA.
 
 \medskip
-Produk satelit presipitasi harian menopang peringatan dini banjir,
+Produk presipitasi satelit harian menopang peringatan dini banjir,
 pemantauan kekeringan, dan analisis neraca air; namun, \emph{Integrated
-Multi-satellitE Retrievals for Global Precipitation Measurement} (GPM)
+Multi-satellitE Retrievals for Global Precipitation Measurement}
 \emph{Late Run} (IMERG-L) mengandung bias sistematis di Benua Maritim
 Indonesia. Penelitian ini mengevaluasi \emph{pipeline} koreksi bias
 hibrida empat tahap: \emph{Linear Scaling} (LS), \emph{Empirical
@@ -170,7 +167,6 @@ IMERG-L di Indonesia untuk periode $2001$ hingga $2025$, dengan
 validasi terhadap $171$ stasiun Badan Meteorologi, Klimatologi, dan
 Geofisika (BMKG) yang tidak digunakan dalam koreksi.
 
-\medskip
 Terhadap jaringan BMKG yang dipisahkan untuk validasi, tiga dari empat
 pilar verifikasi bergerak mendekati target pengamatan stasiun: bias
 relatif dari $-11{,}4\%$ (LS) menjadi $-0{,}6\%$ (LSEQM+DL), rasio
@@ -181,12 +177,11 @@ $1{,}05$ dan $1{,}01$. Pendeteksian kejadian menunjukkan
 \emph{trade-off} yang dirancang: produk terkoreksi mendeteksi lebih
 sedikit kejadian hujan ringan di bawah $10$~mm/hari, namun mencapai
 keberhasilan kritis yang lebih tinggi pada setiap ambang di atas
-$20$~mm/hari, dengan peningkatan \emph{Critical Success Index} (CSI)
+$20$~mm/hari, dengan peningkatan \emph{Critical Success Index}
 sebesar $57\%$ pada ambang $50$~mm/hari ($0{,}097$ dibanding
 $0{,}062$), yaitu rentang ambang yang relevan dengan peringatan dini
 banjir BMKG.
 
-\medskip
 Satu diagnostik tidak berubah: korelasi Pearson antara nilai harian
 satelit dan stasiun yang dipasangkan tetap pada $0{,}34$ di seluruh
 empat tahap dan dalam pita $[0{,}332;~0{,}348]$ di seluruh lima belas
@@ -215,18 +210,17 @@ pada sifat sebaran; keterampilan ketepatan waktu harian sedang
 pada penyelarasan UTC dan merupakan ranah di mana pengagregasian
 ulang jendela kalender memberikan dampak operasional terbesar.
 
-\medskip
 \emph{Pipeline} dirilis sebagai implementasi terbuka berbasis berkas
 konfigurasi; reproduktibilitasnya ditunjukkan dengan mengeksekusi
 ulang hasil utama secara menyeluruh pada infrastruktur awan gratis:
 \emph{subdomain} Bali ($9 \times 14$ piksel pada $0{,}1^{\circ}$, $80$
 piksel daratan, $36$ jendela dekadik $2001$-$2025$) selesai dalam
-$72{,}1$ menit pada \emph{Central Processing Unit} (CPU) standar
+$72{,}1$ menit pada \emph{Central Processing Unit} standar
 Google Colab.
 
 \medskip
-\noindent Kata kunci: presipitasi satelit harian, validasi stasiun,
-koreksi bias hibrida, IMERG, reproduktibilitas
+\noindent Kata kunci: IMERG, koreksi bias hibrida, presipitasi satelit harian,
+reproduktibilitas, validasi stasiun
 \clearpage
 
 % ----- Copyright notice (bottom of page; prohibition spans full margin) -----
@@ -254,8 +248,8 @@ the citation does not inflict harm to IPB.}
 \vspace*{1cm}   % 5 cm from the top edge
 \begin{center}
   {\fontsize{14}{17}\selectfont\bfseries
-   HOW FAR CAN BIAS CORRECTION IMPROVE\\
-   DAILY SATELLITE PRECIPITATION?\par}
+   A HYBRID BIAS CORRECTION FRAMEWORK FOR\\
+   DAILY SATELLITE PRECIPITATION\par}
   \vfill
   {\fontsize{14}{17}\selectfont\bfseries BENNY ISTANTO\par}
   \vfill
@@ -292,8 +286,8 @@ Thesis Exam:
 % ----- Validation / approval page -----
 \clearpage
 \thispagestyle{empty}
-\noindent Thesis title: How Far Can Bias Correction Improve Daily
-Satellite Precipitation?\\
+\noindent Thesis title: A Hybrid Bias Correction Framework for
+Daily Satellite Precipitation\\
 Name: Benny Istanto\\
 Student ID: G2501222008
 
@@ -331,8 +325,8 @@ Completion date: \rule{3cm}{0.4pt}
 \chapter*{ACKNOWLEDGEMENTS}\thispagestyle{empty}
 \textit{Alhamdulillah}, this thesis has been completed.
 
-This thesis grew out of a simple question: how far can bias correction
-actually improve a daily satellite precipitation field? Answering it became a
+This thesis grew out of a simple question about the reach of bias
+correction on a daily satellite precipitation field. Answering it became a
 study of what statistical correction can and cannot do, together with a
 small open-source pipeline that anyone can re-run. I hope both the finding
 and the code prove useful to others working on satellite precipitation,
