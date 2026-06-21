@@ -79,7 +79,7 @@ Indonesia's Meteorological, Climatological, and Geophysical Agency
 (BMKG). The parent network has approximately 180 stations; two
 filters reduce it to the 171 used in validation:
 
-\begin{enumerate}[noitemsep, topsep=2pt]
+\begin{enumerate}
     \item \textbf{Spatial-mapping filter.} The station coordinates
     must fall within the land mask used by the satellite product.
     A small number of stations near the maritime border or with
@@ -201,15 +201,14 @@ single-station daily samples are smaller and noisier than the
 pooled 171-station Indonesia result, but the same pattern is
 visible. The full per-station tables for all 171 Indonesia
 stations are in the Zenodo release.
+Table~\ref{tab:perstation-bali} reports, per station, the correlation
+($r$) against the daily station record for raw IMERG-L and corrected
+LSEQM+DL, the observed and LSEQM+DL standard deviations ($\sigma$, in
+mm/day), and the LSEQM+DL bias (mm/day).
 
 \begin{table}[H]
 \centering
-\caption{Per-station Taylor statistics for the four Bali BMKG
-stations. Correlation ($r$) against the daily station record for
-raw IMERG-L and corrected LSEQM+DL; observed and LSEQM+DL standard
-deviations ($\sigma$, mm/day); and LSEQM+DL bias (mm/day).
-Correlation is essentially unchanged by correction; the standard
-deviation moves toward the observed value.\label{tab:perstation-bali}}
+\caption{Per-station Taylor statistics for the four Bali BMKG stations.\label{tab:perstation-bali}}
 \begingroup\small
 \begin{tabular}{@{}lccccc@{}}
 \toprule
@@ -343,69 +342,66 @@ chosen because it falls within the active northwest-monsoon convective
 regime over much of the archipelago, where the systematic bias of IMERG-L
 against the gauge reference is the most visible.
 
+Figure~\ref{fig:atlas-diff} maps three differences: the raw IMERG-L
+minus CPC-UNI (where the satellite departs from the gauge reference),
+the corrected LSEQM+DL minus CPC-UNI (the residual after correction),
+and the corrected LSEQM+DL minus the raw IMERG-L (the net effect of the
+pipeline, largest where the correction does the most work).
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=\atlasGoneWidth\textwidth]{fig_thesis_G1_differences.png}
-\caption[Difference maps locating the correction residual]{Difference
-maps for $1$~January~$2025$ (mm/day). (a)~the raw IMERG-L minus CPC-UNI,
-showing where the satellite product departs from the gauge reference;
-(b)~the corrected LSEQM+DL minus CPC-UNI, showing the residual after
-correction; (c)~the corrected LSEQM+DL minus the raw IMERG-L, showing
-the net effect of the pipeline. Where panel~(c) deviates most strongly
-from zero is where the correction is doing the most
-work.\label{fig:atlas-diff}}
+\caption[Difference maps locating the correction residual]{Difference maps for $1$~January~$2025$ (mm/day).\label{fig:atlas-diff}}
 \end{figure}
+
+Figure~\ref{fig:atlas-threedays} contrasts three days (the start,
+middle, and end of dekad~$1$: $1$, $5$, and $10$~January) across IMERG-L
+(raw), CPC-UNI (gauge reference), and LSEQM+DL (corrected); the
+correction tracks the day-to-day variation of the gauge reference at all
+three regimes without imposing a uniform overlay, preserving spatial
+pattern while bringing the daily amount toward the gauge target.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\atlasGtwoWidth\textwidth]{fig_thesis_G2_three_days.png}
-\caption[Three-day daily contrast across products]{Three-day daily
-contrast. Rows are the start, middle, and end of dekad~$1$ of January~$2025$
-($1$, $5$, and $10$~January); columns are IMERG-L (raw), CPC-UNI (gauge
-reference), and LSEQM+DL (corrected). The figure shows that the
-correction tracks the day-to-day variation of the gauge reference at
-all three regimes without imposing a uniform overlay; spatial pattern is
-preserved while the daily amount is brought toward the gauge
-target.\label{fig:atlas-threedays}}
+\caption[Three-day daily contrast across products]{Three-day daily contrast across products for dekad~$1$ of January~$2025$.\label{fig:atlas-threedays}}
 \end{figure}
+
+Figure~\ref{fig:atlas-pillars} maps the four verification pillars
+(rows: relative bias, KS $p$-value, $Q_{99}$ ratio, and CSI) across the
+LS, LSEQM, and LSEQM+DL stages (columns), computed over all
+dekad-$1$-of-January samples in the $2001$ to $2025$ record; each row's
+colour scale is set so that the pillar's target value (zero for bias,
+unity otherwise) reads as neutral colour.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\atlasGthreeWidth\textwidth]{fig_thesis_G3_pillar_metrics.png}
-\caption[Per-pillar climatological metric maps across correction stages]{
-Per-pixel climatological metric maps for the four verification pillars
-across the three correction stages. Rows are pillars: relative bias
-(value adjustment), KS $p$-value (distribution alignment), $Q_{99}$ ratio
-(extreme preservation), and CSI (event detection). Columns are LS, LSEQM,
-and LSEQM+DL. Each pixel value is computed across all dekad-$1$-of-January
-samples in the $2001$ to $2025$ record. The colour scale of each row is
-chosen so that the target value (zero for bias, unity for KS $p$-value,
-unity for $Q_{99}$ ratio, unity for CSI) corresponds to neutral
-colour.\label{fig:atlas-pillars}}
+\caption[Per-pillar climatological metric maps across correction stages]{Per-pixel climatological metric maps for the four verification pillars across the three correction stages.\label{fig:atlas-pillars}}
 \end{figure}
+
+Figure~\ref{fig:atlas-six} maps six daily products on a shared colour
+bar: the raw IMERG-L Late Run, the IMERG-F Final Run (the gauge-anchored
+independent benchmark), the Linear Scaling stage, the LSEQM intermediate
+(LS plus EQM plus GPD), the LSEQM+DL corrected output, and the CPC-UNI
+gauge reference; reading the panels in sequence traces the correction
+from raw retrieval to gauge reference.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\atlasGfourWidth\textwidth]{fig_thesis_G4_six_products.png}
-\caption[Six-product comparison for 1 January 2025]{Six-product daily
-precipitation map for $1$~January~$2025$. (a) raw IMERG-L Late Run;
-(b) IMERG-F Final Run, the gauge-anchored independent benchmark; (c) the
-Linear Scaling stage; (d) the LSEQM intermediate (LS plus EQM plus GPD);
-(e) the LSEQM+DL corrected output; (f) the CPC-UNI gauge reference. Reading
-left-to-right and top-to-bottom traces the correction from raw retrieval
-to gauge reference. The same colour bar applies to all six
-panels.\label{fig:atlas-six}}
+\caption[Six-product comparison for 1 January 2025]{Six-product daily precipitation map for $1$~January~$2025$.\label{fig:atlas-six}}
 \end{figure}
+
+Figure~\ref{fig:atlas-stations} overlays the BMKG validation stations
+(triangles coloured by their own dekad-$1$-of-January climatological
+mean) on the same climatology for four products: CPC-UNI gauge analysis,
+raw IMERG-L, corrected LSEQM+DL, and IMERG-F Final Run; where a
+triangle's interior colour matches the surrounding gridded colour, the
+gridded product agrees with the station.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\atlasGfiveWidth\textwidth]{fig_thesis_G5_station_overlay.png}
-\caption[Station-overlay maps for dekad-1-January climatology]{
-Dekad-$1$-of-January climatological mean precipitation
-(mm/day, $2001$ to $2025$ average) for four products, with the BMKG
-validation stations overlaid as triangles coloured by their own
-dekad-$1$-of-January climatological mean. Where the triangle interior
-colour matches the surrounding gridded colour, the gridded product
-agrees with the station. (a) CPC-UNI gauge analysis; (b) raw IMERG-L;
-(c) corrected LSEQM+DL; (d) IMERG-F Final Run.\label{fig:atlas-stations}}
+\caption[Station-overlay maps for dekad-1-January climatology]{Dekad-$1$-of-January climatological mean precipitation (mm/day, $2001$ to $2025$ average) for four products with the BMKG validation stations overlaid.\label{fig:atlas-stations}}
 \end{figure}
