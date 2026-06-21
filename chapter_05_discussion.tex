@@ -5,8 +5,10 @@
 %          predicted Pearson-r bound under marginal correction, and
 %          the operational + reproducibility implications.
 % Sections: 5.1 Theoretical Bound on Pearson Correlation,
-%           5.2 Operational Implications, 5.3 Reproducibility
-%           Implications, 5.4 Paths Forward, 5.5 Limitations.
+%           5.2 Empirical Diagnostic of the Pearson r Ceiling (Sub-Daily
+%           Aggregation Window), 5.3 Operational Implications,
+%           5.4 Reproducibility Implications, 5.5 Paths Forward,
+%           5.6 Limitations and Constraints.
 % Included by main_thesis.tex.
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
@@ -84,16 +86,7 @@ Table~\ref{tab:headline}.
 \centering
 \includegraphics[width=\figFiveOneWidth\textwidth]{fig_thesis_05_bound_schematic.png}
 \caption[Schematic of the theoretical bound on Pearson $r$ under marginal correction]{Schematic of the theoretical bound on Pearson $r$ under
-marginal correction. (a)~Synthetic gauge series (blue) and the
-corresponding raw IMERG Late Run (IMERG-L) series (red) at one pixel over $30$
-days, together with the rank-preserving LSEQM+DL corrected series
-(green). The corrected series follows the same day-by-day
-ordering as the raw series but matches the gauge spread; the
-day-by-day pairing against the gauge is unchanged. (b)~Empirical
-expression of the bound on the headline numbers. Pearson $r$
-(red bars, left axis) stays near $0.34$ across the three stages,
-while Standard Deviation Ratio (SDR) (green bars, right axis) moves from $0.71$ to
-$1.0$.\label{fig:bound-schematic}}
+marginal correction.\label{fig:bound-schematic}}
 \end{figure}
 
 The first component is rank preservation. Strictly monotonic
@@ -177,11 +170,11 @@ Section~\ref{sec:discussion-ops} returns to the operational
 significance of this split, and Section~\ref{sec:discussion-paths}
 proposes local-day re-aggregation as the most actionable next
 step for users in the affected longitude band. The pattern is
-also stable across the calendar year:
+also stable across the calendar year.
 Figure~\ref{fig:taylor-monthly} aggregates the BMKG Taylor
 analysis by month and shows that the angular position of the
 three method symbols, which encodes correlation, sits at the
-same place in every month, while the radial position, which
+same place in every month. The radial position, which
 encodes the standard deviation ratio, sits near unity for LSEQM
 and LSEQM+DL and short for LS. The bound is therefore not a
 seasonal artefact and does not depend on the wet- or dry-season
@@ -191,13 +184,7 @@ sample composition.
 \centering
 \includegraphics[width=\figFiveTwoWidth\textwidth]{fig_thesis_05_taylor_monthly.png}
 \caption[Monthly Taylor diagram aggregated across the $171$ BMKG validation stations]{Monthly Taylor diagram aggregated across the $171$ BMKG
-validation stations. One panel per month from January to
-December. The three method symbols (triangle for LS, square for
-LSEQM, star for LSEQM+DL) sit at similar angular positions in
-every month, indicating that the flat-correlation pattern is
-stable across the seasonal cycle. Radial positions move toward the
-reference radius for LSEQM and LSEQM+DL, confirming the spread
-correction is stable month-by-month.\label{fig:taylor-monthly}}
+validation stations.\label{fig:taylor-monthly}}
 \end{figure}
 
 A complementary reading uses the canonical decomposition of the
@@ -208,7 +195,7 @@ toward unity by the EQM stage acting on the daily distribution.
 The covariance component, proportional to
 $r \times \sigma_{\text{sat}} \times \sigma_{\text{gauge}}$, is
 the mechanism through which the RMSE actually increases between
-LS ($13.1$ mm per day) and LSEQM+DL ($14.1$ mm per day): once the
+LS ($13.1$ mm per day) and LSEQM+DL ($14.1$ mm per day). Once the
 satellite spread is inflated to match the gauge spread without
 any improvement in $r$, the covariance term grows in absolute
 magnitude because $\sigma_{\text{sat}}$ has grown, while the
@@ -249,13 +236,14 @@ quality of the underlying retrieval, but it does not decompose
 the absolute ceiling into its components. One component the bound
 discussion does not isolate is the calendar-window definition used
 to label each daily value. IMERG-L distributes daily totals
-aggregated over the Coordinated Universal Time (UTC) calendar day,
-while the BMKG climatological-station daily totals are reported
+aggregated over the Coordinated Universal Time (UTC) calendar day.
+The BMKG climatological-station daily totals are reported
 under the morning-observation convention specified by Head of BMKG
 Decree SK.32/TL.202/KB/BMG-2006 \citep{ref:bmkg2006sk32},
 consistent with the World Meteorological Organization principle of
 measuring daily precipitation at fixed observation times common to
-the network \citep{ref:wmo2018no8}: the rainfall total assigned to
+the network \citep{ref:wmo2018no8}. Under that convention the
+rainfall total assigned to
 date~$d$ is the 24-hour accumulation ending at the BMKG morning
 observation on date~$d$, nominally $07{:}00$ local time. Because
 Indonesia spans the three local-time zones WIB, WITA, and WIT
@@ -291,7 +279,7 @@ peaks at $h \in \{-7, -8, -9\}$ for WIB, WITA, and WIT; the data
 shows a single broad peak near $h = -22$ shared across all three
 timezone bands (band-specific peak hours: WIB $-22$, WITA $-22$,
 WIT $-21$). The dominant signal is therefore the morning-observation
-convention rather than the local-midnight timezone offset, and the
+convention rather than the local-midnight timezone offset. The
 empirical offset of $-22$~h matches the convention defined by
 SK.32/2006 to within the two-to-four-hour spread expected from
 varying station observation times, retrieval blending of
@@ -304,14 +292,7 @@ diurnal phase of convective rainfall in the maritime continent.
 \caption[Pearson $r$ trajectory as the satellite 24-hour window is shifted by hourly offsets]{Pearson~$r$ as a function of the
 hour offset~$h$ of the satellite 24-hour aggregation window for
 raw half-hourly IMERG-L versus BMKG daily gauge totals (January
-2020, $163$ stations). Panel~(a) plots the mean per-station~$r$
-within each timezone band with the interquartile range shaded;
-panel~(b) shows the distribution of the per-station peak
-offset~$h^{\star}$. The peak is at $h = -22$~h, not at $h =
-0$, and is the same across the three timezone bands; the gauge
-window labelled with date~$d$ refers to a 24-hour rainfall period
-that ends near $02{:}00$ UTC of date~$d$ rather than starting at
-$00{:}00$ UTC of date~$d$.\label{fig:subdaily-chart}}
+2020, $163$ stations).\label{fig:subdaily-chart}}
 \end{figure}
 
 The pooled trajectory in Figure~\ref{fig:subdaily-chart} is
@@ -337,16 +318,7 @@ station-specific local effect.
 \includegraphics[width=\figFiveSubdailyMapWidth\textwidth]{fig_thesis_05_subdaily_map.png}
 \caption[Per-station peak hour offset $h^{\star}$ across Indonesia, with the implied $r$ lift]{Geographic distribution of the
 per-station peak hour offset~$h^{\star}$ and the per-station~$r$
-lift from $h = 0$ to $h = h^{\star}$. Panel~(a): each gauge
-plotted at its location, coloured by $h^{\star}$; the three
-timezone-band dividers are shown as vertical dashed lines.
-Panel~(b): each row is one station; the red marker is~$r$ at the
-UTC-day alignment and the blue marker is~$r$ at the station's
-own peak. The median lift is $+0.49$; the thesis-headline
-$r \approx 0.34$ reference line is shown for context. The
-absence of geographic clustering in~$h^{\star}$ confirms that the
-$-22$~h offset is a shared metadata convention rather than a
-station-specific local effect.\label{fig:subdaily-map}}
+lift from $h = 0$ to $h = h^{\star}$.\label{fig:subdaily-map}}
 \end{figure}
 
 The same calendar-window mismatch is present at calibration, not
@@ -430,10 +402,7 @@ relevant headline metric from Table~\ref{tab:headline}.
 \begin{table}[H]
 \centering
 \caption[Application classes for corrected IMERG-L over Indonesia]{Application classes for corrected IMERG-L over
-Indonesia. The split tracks whether the application depends on
-the daily distribution (well-served) or on day-by-day timing
-(poorly-served). The relevant headline metrics are the ones
-listed in the corresponding rows of Table~\ref{tab:headline}.\label{tab:app-classes}}
+Indonesia.\label{tab:app-classes}}
 \begingroup\small
 \begin{tabular}{@{}p{2cm}p{5.5cm}p{2.5cm}p{2.5cm}@{}}
 \toprule
@@ -626,7 +595,7 @@ open release lowers the entry cost of tuning from re-implementing
 the pipeline to changing a configuration line.
 
 A tangible example of what the open release supports is the
-station-density confidence mask itself: it is published as a
+station-density confidence mask itself. It is published as a
 NetCDF file alongside the corrected product and the source code,
 so an independent user can inspect the spatial distribution of
 correction confidence directly and verify that the CNN
@@ -634,21 +603,15 @@ contribution is suppressed in their region of interest if the
 local gauge density is below the saturation threshold.
 Figure~\ref{fig:confmask} shows the confidence mask and its
 operational consequence on Composite Quality Index (CQI) improvement.
+The CQI gain is concentrated in the highest-confidence regions, and
+the lowest confidence quintile shows a near-zero median improvement,
+by design, because the framework reverts to LSEQM where the reference
+cannot support CNN refinement.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\figFiveThreeWidth\textwidth]{fig_thesis_05_confidence_mask.png}
-\caption[Station-density confidence mask]{Station-density confidence mask. (a) Spatial
-distribution of the confidence value $C(x,y)$ across Indonesia,
-from $0$ where no contributing gauges fall within the smoothing
-neighbourhood (red) to $1$ where the gauge density saturates the
-design threshold (yellow). (b) Box-and-whisker distribution of
-CQI improvement from LSEQM to LSEQM+DL, stratified by confidence
-quintile. The CQI gain is concentrated in the highest-confidence
-regions; the lowest quintile shows a near-zero median
-improvement, by design, because the framework reverts to LSEQM
-where the reference cannot support CNN
-refinement.\label{fig:confmask}}
+\caption[Station-density confidence mask]{Station-density confidence mask.\label{fig:confmask}}
 \end{figure}
 
 The fourth category combines comparison studies and training
@@ -701,13 +664,7 @@ Continent setting.
 \begin{table}[H]
 \centering
 \caption[Four paths for raising the temporal-skill ceiling beyond $r \approx 0.34$]{Four paths for raising the temporal-skill ceiling
-beyond $r \approx 0.34$. Methodological distance ranks
-the path against the LSEQM+DL pipeline of
-Chapter~\ref{chap:methods}; infrastructure cost is the
-incremental dependency and runtime burden on operational
-users; ceiling effect names the qualitative potential to lift
-$r$ above the retrieval bound in the Indonesian Maritime
-Continent setting.\label{tab:paths-forward}}
+beyond $r \approx 0.34$.\label{tab:paths-forward}}
 \begingroup\small
 % Use tabular* so the table fills \textwidth exactly: keep the original
 % 3.0/2.0/2.5/4.5 cm p-column widths (sum 12 cm) and let
