@@ -13,8 +13,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch
 
-# --- repo root ---
-os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# --- repo root (scripts/ is 4 levels below: root/paper/thesis/scripts) ---
+os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))))
 
 # --- synthetic example: one pixel, 30 daily values ---
 rng = np.random.default_rng(42)
@@ -34,9 +35,9 @@ pearson_r = [0.343, 0.345, 0.348]   # thesis Ch 4 numbers
 sdr = [0.71, 1.03, 1.00]            # thesis Ch 4 numbers
 
 # --- figure ---
-fig, (axA, axB) = plt.subplots(1, 2, figsize=(11, 4.2),
-                                gridspec_kw={'width_ratios': [1.4, 1.0]})
-fig.subplots_adjust(top=0.86, bottom=0.16, left=0.07, right=0.93, wspace=0.30)
+fig, (axA, axB) = plt.subplots(2, 1, figsize=(8.5, 9.0),
+                                gridspec_kw={'height_ratios': [1.1, 1.0]})
+fig.subplots_adjust(top=0.92, bottom=0.07, left=0.10, right=0.90, hspace=0.28)
 
 # Panel A: paired time series
 days = np.arange(1, n_days + 1)
@@ -50,6 +51,7 @@ axA.set_xlabel('Day of dekad', fontsize=9)
 axA.set_ylabel('Daily precipitation (mm/day)', fontsize=9)
 axA.set_title('(a) Day-by-day pairing is fixed by the satellite',
               fontsize=10, pad=8)
+axA.set_ylim(0, 14)
 axA.legend(loc='upper right', fontsize=8, framealpha=0.9)
 axA.grid(alpha=0.3)
 axA.tick_params(labelsize=8)
@@ -72,8 +74,8 @@ axB.set_ylabel('Pearson $r$', color='#d62728', fontsize=9)
 axB.set_ylim(0, 1.05)
 axB.tick_params(axis='y', labelcolor='#d62728', labelsize=8)
 axB.axhline(0.348, color='#d62728', linestyle=':', linewidth=1, alpha=0.5)
-axB.text(2.2, 0.42, 'bound\n$\\approx 0.35$', color='#d62728', fontsize=8,
-         ha='left')
+axB.text(1.825, 0.40, 'bound\n$\\approx 0.35$', color='#d62728', fontsize=8,
+         ha='center', va='bottom')
 
 axB2 = axB.twinx()
 axB2.bar(x + bar_w/2, sdr, bar_w, color='#2ca02c',
@@ -94,7 +96,7 @@ axB.set_title('(b) One metric moves, one does not',
 fig.suptitle('Theoretical bound under marginal correction: '
              'rank preservation $\\Rightarrow$ flat $r$, '
              'spread match $\\Rightarrow$ SDR $\\to 1$',
-             fontsize=11, y=0.985)
+             fontsize=10, y=0.975)
 
 out = 'paper/thesis/figures/fig_thesis_05_bound_schematic.png'
 plt.savefig(out, dpi=180, bbox_inches='tight')

@@ -85,18 +85,18 @@ if idn is not None:
     idn.boundary.plot(ax=ax_map, color="0.20", linewidth=0.30, zorder=3)
 ax_map.set_xlim(*LON_RANGE); ax_map.set_ylim(*LAT_RANGE); ax_map.set_aspect("equal")
 ax_map.set_xticks([100, 110, 120, 130, 140]); ax_map.set_yticks([-10, -5, 0, 5])
-ax_map.set_xticklabels([f"{x}E" for x in [100, 110, 120, 130, 140]], fontsize=6)
-ax_map.set_yticklabels([f"{y}" + ("N" if y >= 0 else "S") for y in [-10, -5, 0, 5]], fontsize=6)
-ax_map.tick_params(labelsize=6, length=1.5, pad=1)
+ax_map.set_xticklabels([f"{x}E" for x in [100, 110, 120, 130, 140]], fontsize=8)
+ax_map.set_yticklabels([f"{y}" + ("N" if y >= 0 else "S") for y in [-10, -5, 0, 5]], fontsize=8)
+ax_map.tick_params(labelsize=8, length=1.5, pad=1)
 ax_map.set_title("(a) Station Density Confidence Mask",
-                  fontsize=9, fontweight="bold", pad=2)
+                  fontsize=8.5, fontweight="normal", pad=6)
 
 bbox = ax_map.get_position()
 cax = fig.add_axes([bbox.x0 + 0.18, bbox.y0 - 0.045,
                      bbox.width - 0.36, 0.012])
 cbar = fig.colorbar(qm, cax=cax, orientation="horizontal", extend="min")
-cbar.set_label("Confidence", fontsize=7)
-cbar.ax.tick_params(labelsize=6)
+cbar.set_label("Confidence", fontsize=8)
+cbar.ax.tick_params(labelsize=8)
 
 # (b) box-and-whisker of delta CQI by confidence quintile
 positions = np.arange(len(groups))
@@ -113,14 +113,15 @@ for patch, c in zip(bp["boxes"], quintile_colors):
 ax_box.axhline(0.0, color="0.4", linestyle="--", linewidth=0.7)
 ax_box.set_xticks(positions)
 ax_box.set_xticklabels(quintile_labels, fontsize=8)
-ax_box.set_xlabel("Confidence Quintile", fontsize=9)
-ax_box.set_ylabel(r"$\Delta$ CQI (LSEQM+DL $-$ LSEQM)", fontsize=9)
+ax_box.tick_params(labelsize=8)
+ax_box.set_xlabel("Confidence Quintile", fontsize=8)
+ax_box.set_ylabel(r"$\Delta$ CQI (LSEQM+DL $-$ LSEQM)", fontsize=8)
 ax_box.set_title("(b) CQI Improvement by Confidence Quintile",
-                  fontsize=9, fontweight="bold", pad=2)
+                  fontsize=8.5, fontweight="normal", pad=6)
 ax_box.grid(axis="y", alpha=0.3, linestyle=":")
 
 fig.suptitle("Station Density Confidence Mask and CQI Improvement",
-             fontsize=10, fontweight="bold", y=0.99)
+             fontsize=9, fontweight="bold", y=0.99)
 
 OUT = FIGOUT / "fig_thesis_05_confidence_mask.png"
 fig.savefig(OUT, dpi=200, bbox_inches="tight", facecolor="white")

@@ -1,5 +1,5 @@
 % ============================================================
-% chapter_99_appendices.tex - Appendices A through G
+% chapter_99_appendices.tex - Appendices A through H
 %
 % Purpose: archival back-matter material kept separate from the body
 %          chapters: data sources, code+data availability, full
@@ -7,7 +7,8 @@
 %          reproducibility checklist, glossary, and the spatial atlas.
 % Sections: A Data Catalogue, B Code and Data Availability,
 %           C Configuration Template, D Per-Station Verification,
-%           E Reproducibility Checklist, F Glossary, G Spatial Atlas.
+%           E Reproducibility Checklist, F Glossary, G Spatial Atlas,
+%           H Supplementary Temporal-Alignment Diagnostics.
 % Numbering: \thefigure / \thetable / \theequation prefix re-set to
 %            the appendix letter so figures land as G.1, G.2, ...
 %            instead of clashing with the Chapter 4 numbering.
@@ -72,12 +73,12 @@ from the National Oceanic and Atmospheric Administration (NOAA)
 Physical Sciences Laboratory. All fields span 2001 to 2025 and are
 processed per dekad (days 1 to 10, 11 to 20, 21 to month end).
 
-\section{BMKG validation network: 180 to 171}
+\section{BMKG validation network: 180 to 172}
 
 Independent validation uses daily station observations from
 Indonesia's Meteorological, Climatological, and Geophysical Agency
 (BMKG). The parent network has approximately 180 stations; two
-filters reduce it to the 171 used in validation:
+filters reduce it to the 172 used in validation:
 
 \begin{enumerate}
     \item \textbf{Spatial-mapping filter.} The station coordinates
@@ -91,7 +92,7 @@ filters reduce it to the 171 used in validation:
     window.
 \end{enumerate}
 
-Together these drop 9 of 180 stations, leaving 171 for the
+Together these drop 8 of 180 stations, leaving 172 for the
 per-station Taylor diagrams, multi-threshold verification, and
 station-level summaries.
 
@@ -192,14 +193,14 @@ rather than a code change.
 
 Table~\ref{tab:perstation-bali} reports the per-station Taylor
 statistics for the four BMKG stations on Bali, computed against
-the daily station records over 2001 to 2025. The table illustrates
+the daily station records over 2001 to 2021. The table illustrates
 the correlation pattern at the level of individual stations: the
 Pearson correlation barely moves between the raw IMERG-L and the
 corrected LSEQM+DL series, while the standard deviation of the
 corrected series moves toward the observed standard deviation. The
 single-station daily samples are smaller and noisier than the
-pooled 171-station Indonesia result, but the same pattern is
-visible. The full per-station tables for all 171 Indonesia
+pooled 172-station Indonesia result, but the same pattern is
+visible. The full per-station tables for all 172 Indonesia
 stations are in the Zenodo release.
 Table~\ref{tab:perstation-bali} reports, per station, the correlation
 ($r$) against the daily station record for raw IMERG-L and corrected
@@ -222,6 +223,36 @@ Jembrana (97236)     & 0.233 & 0.202 & 17.36 & 11.52 & $-2.54$ \\
 \end{tabular}
 \endgroup
 \end{table}
+
+\medskip
+The single-month noise in such per-station figures is large enough to be
+worth quantifying, because the optimal-window analysis of
+Section~\ref{sec:results-window} reports per-station correlations, and an
+earlier single-month version of that analysis produced systematically
+larger per-station values. Figure~\ref{fig:noise-selection} explains the
+difference. A per-station correlation estimated from a single month rests
+on roughly ten to twenty wet days, so it scatters widely around its true
+value: at a fixed aggregation window the single-month estimate has a
+median near the seven-year value (both near $0.56$) but an
+interquartile range of $[0.35, 0.73]$. Taking the maximum over the $97$
+candidate window offsets then adds a selection bias, shifting the
+single-month median up to $0.66$ and inflating the high tail, so that
+half the stations appear to exceed $r = 0.65$. Both effects vanish on the
+full seven-year record, where each offset is estimated precisely: the
+per-station peak correlation tightens to a median of $0.56$ with an
+interquartile range of $[0.51, 0.62]$, and the selection bias disappears
+because the peak and fixed-window values coincide. The per-station
+figures reported in the main text use the seven-year estimates for this
+reason.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig_thesis_99_noise_selection.png}
+\caption[Sampling stability of the per-station window correlation]{Sampling
+stability of the per-station window correlation: one month is inflated by
+noise and offset selection, the seven-year record is precise (dashed lines
+mark each distribution's median).\label{fig:noise-selection}}
+\end{figure}
 
 
 % ============================================================
@@ -293,7 +324,7 @@ notebook and the upstream corrected outputs are prerequisites.
     \item[BSQS] Basic Statistical Quality sub-score.
     \item[CNN] Convolutional Neural Network.
     \item[CPC-UNI] CPC Unified Gauge-Based Analysis of Global Daily Precipitation.
-    \item[CQI] Composite (Continuous) Quality Index.
+    \item[CQI] Composite Quality Index.
     \item[CRMSE] Centred root mean square error.
     \item[CSI] Critical Success Index.
     \item[DQS] Distribution Quality sub-score.
@@ -405,3 +436,59 @@ gridded product agrees with the station.
 \includegraphics[width=\atlasGfiveWidth\textwidth]{fig_thesis_G5_station_overlay.png}
 \caption[Station-overlay maps for dekad-1-January climatology]{Dekad-$1$-of-January climatological mean precipitation (mm/day, $2001$ to $2025$ average) for four products with the BMKG validation stations overlaid.\label{fig:atlas-stations}}
 \end{figure}
+
+
+% ============================================================
+\chapter{Supplementary Temporal-Alignment Diagnostics}\label{app:window}
+\addcontentsline{apx}{appx}{\protect\numberline{Appendix~\thechapter}Supplementary Temporal-Alignment Diagnostics}
+% ============================================================
+
+% --- Tunable per-figure widths (fraction of \textwidth) ---
+\newcommand{\gridTrmmWidth}{1.0}   % H.1 gridded-CPC, TRMM-input era (full text width)
+\newcommand{\gridGpmWidth}{1.0}    % H.2 gridded-CPC, GPM era (full text width)
+
+The whole-domain window-offset diagnostic of
+Section~\ref{sec:discussion-subdaily} (Figure~\ref{fig:gridded-cpc})
+is shown here separately for the two satellite eras, with the
+per-timezone-band pooled correlation the main-text figure omits.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\gridTrmmWidth\textwidth]{fig_thesis_H1_gridded_trmm.png}
+\caption[Gridded window offset against CPC-UNI, TRMM-input era]{Gridded
+window-offset diagnostic against CPC-UNI over the TRMM-input era ($2001$ to
+$2013$).\label{fig:grid-trmm}}
+\end{figure}
+
+Each figure maps the optimal aggregation-window offset $h^\star$
+of the half-hourly IMERG-L source against the gridded CPC-UNI
+analysis at every $0.5^\circ$ cell, at CPC-UNI's native UTC labels
+(panel a, $h^\star\approx0$) and after harmonising CPC-UNI to the
+local-observation day (panel b, $h^\star\approx-23$~h), with the
+pooled $r(h)$ and its per-band decomposition below (panel c). The
+native optimum sits at $h^\star\approx0$ across the
+gauge-constrained western and central cells in both eras, the
+whole-domain signature of CPC-UNI sharing the IMERG-L UTC calendar
+date; the data-sparse eastern cells, where the CPC-UNI gauge
+network thins, carry low and noisy $h^\star$ and are read together
+with CPC gauge density.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\gridGpmWidth\textwidth]{fig_thesis_H2_gridded_gpm.png}
+\caption[Gridded window offset against CPC-UNI, GPM era]{Gridded window-offset
+diagnostic against CPC-UNI over the GPM era ($2015$ to
+$2025$).\label{fig:grid-gpm}}
+\end{figure}
+
+The optimum is the same in the timing-imprecise TRMM-input era
+(Figure~\ref{fig:grid-trmm}) as in the GPM era
+(Figure~\ref{fig:grid-gpm}), confirming that the offset is a
+property of the gauge-labelling convention rather than of the
+satellite retrieval skill. The absolute correlation against the
+smoothed $0.5^\circ$ analysis is muted in both eras and so does
+not reproduce the point-gauge era recovery documented in
+Section~\ref{sec:results-window}, while the spatial coverage that
+the gridded reference adds, beyond the BMKG station locations,
+shows the offset to be uniform across the gauge-constrained part
+of the archipelago.

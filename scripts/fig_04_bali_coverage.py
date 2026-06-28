@@ -18,7 +18,8 @@ from matplotlib.patches import Rectangle
 import geopandas as gpd
 
 warnings.filterwarnings("ignore")
-os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))))
 
 D = "data/example_bali/"
 BBOX = dict(lon=(114.45, 115.75), lat=(-8.85, -8.05))
@@ -85,7 +86,7 @@ ax.tick_params(labelsize=8)
 
 n_land = int((mask.values == 1).sum())
 n_tot = mask.values.size
-ax.set_title(f"Bali reproducibility subdomain: {mask.sizes['lat']} x "
+ax.set_title(f"{mask.sizes['lat']} x "
              f"{mask.sizes['lon']} grid at 0.1 deg, "
              f"{n_land} land / {n_tot - n_land} ocean-masked pixels",
              fontsize=10.5, pad=8)

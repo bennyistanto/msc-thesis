@@ -32,7 +32,7 @@ Pareto Distribution tail correction, and Deep Learning refinement
 through a Convolutional Neural Network) pipeline can and cannot
 do. Applied to the Integrated Multi-satellitE Retrievals for
 Global Precipitation Measurement (GPM) Late Run (IMERG-L) over
-Indonesia for 2001 to 2025 and validated against 171 independent
+Indonesia for 2001 to 2025 and validated against 172 independent
 Meteorological, Climatological, and Geophysical Agency (BMKG)
 stations, the pipeline moves three of the four verification
 pillars cleanly toward the gauge target. The value-adjustment
@@ -135,21 +135,20 @@ is timing-sensitive and operates over the Maritime Continent, the
 UTC-aligned daily window is a known contributor to the timing
 ceiling: the sub-daily diagnostic in
 Section~\ref{sec:discussion-subdaily} shows that re-aggregating
-the daily IMERG-L archive to a window matched to the local-day
-gauge convention shared by CPC-UNI and BMKG would lift the
-headline Pearson~$r$ from approximately $0.34$ to approximately
-$0.62$ with no change to any other pipeline output, so a
-locally-aligned re-aggregation should be considered before the
-product is rejected as unskilful.
+the daily IMERG-L archive to the local-observation window would
+lift the Pearson~$r$ against the BMKG gauges from approximately
+$0.20$ to approximately $0.57$ in the GPM era, with no change to
+any other pipeline output, so a locally-aligned re-aggregation
+should be considered before the product is rejected as unskilful.
 
 \medskip\noindent\textbf{For researchers extending the method.}
 Section~\ref{sec:discussion-subdaily} decomposes the apparent
 Pearson~$r$ ceiling into two components. The first is a
-calendar-window component that accounts for approximately
-two-thirds of the gap and is addressable by re-aggregating the
-daily IMERG-L archive over a 24-hour window matched to the
-local-day gauge convention shared by the CPC-UNI calibration
-target and the BMKG validation network; this is a single-stage
+calendar-window label offset that suppresses the correlation
+against the local-day BMKG gauges and is addressable by
+re-aggregating the daily IMERG-L archive to the local-observation
+window (the CPC-UNI calibration correlation carries no such
+offset); this is a single-stage
 input-side change that does not modify the LSEQM+DL pipeline and
 is the first action item for any extension. The second is a
 residual retrieval-skill component that requires methods outside
@@ -163,7 +162,12 @@ saturation count) are exposed in the configuration and are the
 natural target of a full Cartesian grid search with a strict
 temporal hold-out. A transfer experiment to a second tropical
 region would test the portability that the framework's design
-allows but does not by itself establish.
+allows but does not by itself establish. A fully-convolutional
+variant of the Stage~4 network, prototyped on the Bali subdomain,
+matched the dense model's station-validation skill while using
+about $900$ times fewer parameters at the full Indonesia
+resolution; replacing the dense reconstruction head with it
+across Indonesia is left to future work.
 
 \medskip\noindent\textbf{For BMKG, CPC, and Institut Pertanian Bogor (IPB).}
 The reproducibility contribution depends on continued access to

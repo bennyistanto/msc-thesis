@@ -1,9 +1,10 @@
 """Generate Figure 3.3 (Thesis Chapter 3): Stage-by-stage demonstration on
 sample data, illustrating what each LSEQM+DL stage does to the daily series.
 
-3 x 3 grid (9 panels). Clean matplotlib (no XKCD). Includes a dedicated
-EQM quantile-mapping mechanism panel that shows the source-to-target
-quantile mapping directly via arrows between the CDFs.
+5 x 2 grid (10 panels), one bar panel per pipeline stage plus the EQM
+mechanism, GPD quantile profile, cross-stage CDFs, and skill summary.
+Clean matplotlib (no XKCD). The EQM mechanism panel shows the
+source-to-target quantile mapping directly via arrows between the CDFs.
 
 Synthetic data; figure caption labels it as illustrative.
 """
@@ -13,7 +14,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch
 from scipy import stats
 
-os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))))
 np.random.seed(42)
 
 # ----- Style -----
@@ -30,12 +32,12 @@ PAL = {
 
 plt.rcParams.update({
     'font.family': 'sans-serif',
-    'font.size':   9,
-    'axes.titlesize': 10,
-    'axes.labelsize': 9,
-    'xtick.labelsize': 8,
-    'ytick.labelsize': 8,
-    'legend.fontsize': 7.5,
+    'font.size':   11,
+    'axes.titlesize': 12,
+    'axes.labelsize': 11,
+    'xtick.labelsize': 10,
+    'ytick.labelsize': 10,
+    'legend.fontsize': 9,
     'axes.grid': True,
     'grid.alpha': 0.3,
 })
@@ -164,17 +166,11 @@ METRICS = {
 
 
 # =========================================================================
-# Figure: 3 x 3 panels
+# Figure: 5 x 2 panels (tall layout for larger per-panel labels)
 # =========================================================================
-fig, axes = plt.subplots(3, 3, figsize=(15, 12.8), constrained_layout=True)
-# Add extra vertical padding so the main title is clearly separated from
-# the first-row panel titles.
-fig.set_constrained_layout_pads(w_pad=0.05, h_pad=0.12,
-                                hspace=0.08, wspace=0.05)
-fig.suptitle(
-    'Illustrative Effect of the LSEQM+DL Pipeline Stages on a 60-day Sample',
-    fontsize=13, fontweight='bold', y=1.025
-)
+fig, axes = plt.subplots(5, 2, figsize=(11, 16), constrained_layout=True)
+fig.set_constrained_layout_pads(w_pad=0.05, h_pad=0.05,
+                                hspace=0.04, wspace=0.05)
 width = 0.40
 
 
@@ -204,7 +200,7 @@ ax.set_xlim(0.5, n + 0.5)
 
 
 # --- (c) Stage 2 EQM mechanism: quantile mapping arrows between source and target CDFs ---
-ax = axes[0, 2]
+ax = axes[1, 0]
 # Fit Gamma to LS-corrected (source) and observed (target) wet-day samples
 ls_wet = ls[ls > 0]
 obs_wet = obs[obs > 0]
@@ -242,7 +238,7 @@ ax.legend(loc='lower right', frameon=True)
 
 
 # --- (d) Stage 2 EQM applied: bar chart ---
-ax = axes[1, 0]
+ax = axes[1, 1]
 ax.bar(day - width/2, obs, width, color=PAL['obs'], label='CPC-UNI (reference)', alpha=0.95)
 ax.bar(day + width/2, eqm, width, color=PAL['eqm'], label='After EQM', alpha=0.90)
 ax.set_title('(d) Stage 2 EQM applied\ndistribution aligned')
@@ -252,8 +248,19 @@ ax.legend(loc='upper right', frameon=True)
 ax.set_xlim(0.5, n + 0.5)
 
 
-# --- (e) Stage 3 GPD: wet-day quantile profile (Observed, EQM, GPD overlaid) ---
-ax = axes[1, 1]
+# --- (e) Stage 3 GPD applied: bar chart ---
+ax = axes[2, 0]
+ax.bar(day - width/2, obs, width, color=PAL['obs'], label='CPC-UNI (reference)', alpha=0.95)
+ax.bar(day + width/2, gpd_out, width, color=PAL['gpd'], label='After GPD', alpha=0.90)
+ax.set_title('(e) Stage 3 GPD applied\nextreme days lifted')
+ax.set_xlabel('Day')
+ax.set_ylabel('Precipitation (mm/day)')
+ax.legend(loc='upper right', frameon=True)
+ax.set_xlim(0.5, n + 0.5)
+
+
+# --- (f) Stage 3 GPD: wet-day quantile profile (Observed, EQM, GPD overlaid) ---
+ax = axes[2, 1]
 obs_sorted = np.sort(obs[obs > 0])
 eqm_sorted = np.sort(eqm[eqm > 0])
 gpd_sorted = np.sort(gpd_out[gpd_out > 0])
@@ -270,14 +277,14 @@ ax.plot(qg, gpd_sorted, color=PAL['gpd'], lw=1.7, marker='^', ms=3.5, alpha=0.95
 ax.axvline(0.80, color='gray', lw=0.8, ls='--', alpha=0.5)
 ax.text(0.80, ax.get_ylim()[1] * 0.05, ' 80th pct threshold',
         ha='left', va='bottom', fontsize=7, color='gray', style='italic')
-ax.set_title('(e) Stage 3 GPD\nextreme tail recovered')
+ax.set_title('(f) Stage 3 GPD\nextreme tail recovered')
 ax.set_xlabel('Wet-day quantile')
 ax.set_ylabel('Wet-day precipitation (mm/day)')
 ax.legend(loc='upper left', frameon=True)
 
 
-# --- (f) Empirical CDFs across all stages, wet-day only ---
-ax = axes[1, 2]
+# --- (i) Empirical CDFs across all stages, wet-day only ---
+ax = axes[4, 0]
 
 
 def ecdf(x):
@@ -291,14 +298,14 @@ xs, ys = ecdf(raw);      ax.plot(xs, ys, color=PAL['raw'], lw=1.2, alpha=0.85, l
 xs, ys = ecdf(ls);       ax.plot(xs, ys, color=PAL['ls'],  lw=1.2, alpha=0.75, label='LS')
 xs, ys = ecdf(eqm);      ax.plot(xs, ys, color=PAL['eqm'], lw=1.2, alpha=0.75, label='LSEQM')
 xs, ys = ecdf(lseqm_dl); ax.plot(xs, ys, color=PAL['cnn'], lw=1.5, label='LSEQM+DL')
-ax.set_title('(f) Wet-day empirical CDFs across stages')
+ax.set_title('(i) Wet-day empirical CDFs across stages')
 ax.set_xlabel('Wet-day precipitation (mm/day)')
 ax.set_ylabel('Cumulative probability')
 ax.legend(loc='lower right', frameon=True)
 
 
 # --- (g) Stage 4 CNN refinement scatter at extreme pixels ---
-ax = axes[2, 0]
+ax = axes[3, 0]
 ax_idx = np.where(gpd_out > thr_obs)[0]
 if len(ax_idx) > 0:
     ax.scatter(gpd_out[ax_idx], lseqm_dl[ax_idx],
@@ -316,7 +323,7 @@ ax.legend(loc='upper left', frameon=True)
 
 
 # --- (h) Final LSEQM+DL vs CPC-UNI reference ---
-ax = axes[2, 1]
+ax = axes[3, 1]
 ax.bar(day - width/2, obs, width, color=PAL['obs'], label='CPC-UNI (reference)', alpha=0.95)
 ax.bar(day + width/2, lseqm_dl, width, color=PAL['cnn'], label='LSEQM+DL', alpha=0.90)
 ax.set_title('(h) Final corrected vs CPC-UNI')
@@ -326,8 +333,8 @@ ax.legend(loc='upper right', frameon=True)
 ax.set_xlim(0.5, n + 0.5)
 
 
-# --- (i) Stage-skill summary (extended y range to avoid cutoff) ---
-ax = axes[2, 2]
+# --- (j) Stage-skill summary (extended y range to avoid cutoff) ---
+ax = axes[4, 1]
 stages = list(METRICS.keys())
 x_pos = np.arange(len(stages))
 w = 0.27
@@ -342,7 +349,7 @@ ax.axhline(0, color='black', lw=0.8)
 ax.set_xticks(x_pos)
 ax.set_xticklabels(stages, rotation=20, ha='right')
 ax.set_ylabel('Deviation from target (= 0)')
-ax.set_title('(i) Stage-skill summary')
+ax.set_title('(j) Stage-skill summary')
 ax.legend(loc='best', frameon=True, fontsize=7)
 # Compute a tight, symmetric y range that includes all bar tips with padding
 all_vals = rb_vals + sdr_dev + q99_dev

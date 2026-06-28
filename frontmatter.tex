@@ -91,7 +91,7 @@ Mapping (EQM) with a Gamma fit, Generalized Pareto Distribution (GPD)
 tail adjustment, and a station-density-aware Convolutional Neural
 Network (CNN) refinement, a Deep Learning (DL) architecture, denoted
 LSEQM+DL, applied to IMERG-L over Indonesia for $2001$ to $2025$, with
-gauge validation against $171$ independent stations of Indonesia's
+gauge validation against $172$ out-of-sample stations of Indonesia's
 Meteorological, Climatological, and Geophysical Agency (BMKG).
 
 Against the out-of-sample BMKG network, three of the four verification
@@ -103,7 +103,7 @@ ratios at the $95$th and $99$th percentiles move from $0.74$ and $0.71$
 to $1.05$ and $1.01$. Event detection shows a designed trade-off: the
 corrected product detects fewer light-rain events than the raw retrieval
 below $10$~mm/day but achieves higher critical success at every threshold
-above $20$~mm/day, with a $57\%$ Critical Success Index gain at the $50$~mm/day
+above $20$~mm/day, with a $56\%$ Critical Success Index gain at the $50$~mm/day
 threshold ($0.097$ versus $0.062$), the regime in which BMKG flood
 early-warning advisories operate.
 
@@ -111,26 +111,33 @@ One diagnostic does not move. The Pearson correlation between paired
 daily satellite and gauge values stays near $0.34$ across all four stages
 and stays in the narrow band $[0.332, 0.348]$ across all fifteen settings
 of a Bali sensitivity sweep over the blending weight, the GPD threshold
-percentile, and the station-density saturation count. This is the
+percentile, and the station-density saturation count, none of which was formally
+optimised. This is the
 predicted behaviour of marginal bias correction, where rank preservation
 and variance inflation without skill bound the attainable correlation at
-the timing quality of the raw retrieval. A complementary half-hourly diagnostic against the IMERG-L source shows that
-approximately two-thirds of the apparent ceiling is attributable to a
-calendar-window mismatch between the Coordinated Universal Time (UTC)
-daily IMERG aggregate and the local-day morning-observation convention
-shared by CPC-UNI (the calibration target) and the BMKG validation
-network: the window-aligned upper bound is approximately $r \approx
-0.62$ rather than $r \approx 0.34$. Re-aggregating the daily IMERG-L
-archive over a window matched to this gauge convention would lift the
-pooled Pearson $r$ from approximately $0.34$ to approximately $0.62$,
-with per-station values reaching $r \geq 0.85$ at the strongest
-$15\%$ of stations, without changing any other pipeline output; this
-is identified as the most operationally actionable next step in the
-discussion. The corrected product is therefore suitable as delivered
-for applications that depend on the daily distribution; day-specific
-timing skill is moderate at the UTC-day alignment and is the regime
-where the calendar-window re-aggregation has the largest operational
-effect.
+the timing quality of the raw retrieval. Re-aggregating the half-hourly
+IMERG-L source to a 24-hour window matched to the local-day
+morning-observation convention of the BMKG validation network
+locates most of this ceiling in a satellite-gauge calendar-window
+mismatch: over the GPM era ($2015$ to
+$2021$) the pooled correlation rises from $r = 0.20$ at the Coordinated
+Universal Time (UTC) daily window to $r = 0.57$ at the matched
+$-23$-hour window, with a per-station median of $0.56$. The same
+$-23$-hour offset is optimal in all twelve three-month running seasons
+and all three Indonesian time zones, while the recovered band
+correlation ranges from $0.56$ in the western zone (WIB) to $0.62$ in
+the eastern zone (WIT). The recovery is confined to the GPM era, in
+which the retrieval resolves the diurnal cycle, so the full-record
+$0.34$ blends this era with the earlier, timing-imprecise era; the
+window dependence dissolves under monthly aggregation, where the
+correlation is near $0.80$ regardless of window, placing the daily
+ceiling in the timing of the day-by-day pairing rather than in the
+rainfall the product captures. This window re-aggregation is a
+single-stage pre-processing change outside the correction pipeline,
+requiring the half-hourly source, and is identified as the most
+operationally actionable next step; the corrected product is suitable as
+delivered for applications that depend on the daily distribution, the
+regime the re-aggregation leaves unchanged.
 
 The pipeline is released as an open, configuration-driven
 implementation whose reproducibility is demonstrated by re-executing
@@ -164,7 +171,7 @@ berbasis \emph{Convolutional Neural Network} (CNN) yang
 mempertimbangkan kerapatan stasiun, sebuah arsitektur \emph{Deep
 Learning} (DL), disingkat LSEQM+DL. \emph{Pipeline} diterapkan pada
 IMERG-L di Indonesia untuk periode $2001$ hingga $2025$, dengan
-validasi terhadap $171$ stasiun Badan Meteorologi, Klimatologi, dan
+validasi terhadap $172$ stasiun Badan Meteorologi, Klimatologi, dan
 Geofisika (BMKG) yang tidak digunakan dalam koreksi.
 
 Terhadap jaringan BMKG yang dipisahkan untuk validasi, tiga dari empat
@@ -178,37 +185,42 @@ $1{,}05$ dan $1{,}01$. Pendeteksian kejadian menunjukkan
 sedikit kejadian hujan ringan di bawah $10$~mm/hari, namun mencapai
 keberhasilan kritis yang lebih tinggi pada setiap ambang di atas
 $20$~mm/hari, dengan peningkatan \emph{Critical Success Index}
-sebesar $57\%$ pada ambang $50$~mm/hari ($0{,}097$ dibanding
+sebesar $56\%$ pada ambang $50$~mm/hari ($0{,}097$ dibanding
 $0{,}062$), yaitu rentang ambang yang relevan dengan peringatan dini
 banjir BMKG.
 
-Satu diagnostik tidak berubah: korelasi Pearson antara nilai harian
-satelit dan stasiun yang dipasangkan tetap pada $0{,}34$ di seluruh
-empat tahap dan dalam pita $[0{,}332;~0{,}348]$ di seluruh lima belas
-pengaturan \emph{sweep} sensitivitas Bali (bobot pencampuran, ambang
-GPD, saturasi kerapatan stasiun). Perilaku ini merupakan prediksi
-teoretis dari koreksi bias berbasis sebaran marginal: pemeliharaan
-peringkat dan inflasi ragam tanpa keterampilan temporal membatasi
-korelasi pada kualitas penentuan waktu \emph{retrieval} satelit
-mentah. Diagnostik komplementer menggunakan sumber IMERG-L
-setengah-jaman menunjukkan bahwa sekitar dua per tiga dari batas
-yang teramati disebabkan oleh ketidaksesuaian jendela kalender
-antara agregasi harian IMERG dalam waktu UTC dan konvensi
-pengamatan pagi hari berbasis hari setempat yang sama-sama
-digunakan oleh CPC-UNI (target kalibrasi) dan jaringan validasi
-BMKG: batas atas pada jendela yang selaras adalah sekitar
-$r \approx 0{,}62$, bukan $r \approx 0{,}34$. Pengagregasian
-ulang arsip harian IMERG-L pada jendela yang selaras dengan
-konvensi pengamatan tersebut akan mengangkat Pearson $r$
-\emph{pooled} dari sekitar $0{,}34$ ke sekitar $0{,}62$, dengan
-nilai per-stasiun mencapai $r \geq 0{,}85$ pada $15\%$ stasiun
-terkuat, tanpa mengubah keluaran \emph{pipeline} lainnya; langkah
-ini ditetapkan sebagai langkah lanjutan yang paling dapat
-dioperasionalkan dalam pembahasan. Produk terkoreksi karenanya
-sesuai sebagaimana yang diberikan untuk aplikasi yang bergantung
-pada sifat sebaran; keterampilan ketepatan waktu harian sedang
-pada penyelarasan UTC dan merupakan ranah di mana pengagregasian
-ulang jendela kalender memberikan dampak operasional terbesar.
+Satu diagnostik tidak berubah. Korelasi Pearson antara nilai harian
+satelit dan stasiun yang berpasangan tetap di sekitar $0{,}34$ pada
+keempat tahap, dan berada dalam pita sempit $[0{,}332;~0{,}348]$ untuk
+seluruh lima belas konfigurasi \emph{sweep} sensitivitas Bali (bobot
+pencampuran, ambang GPD, dan saturasi kerapatan stasiun). Hal ini
+sesuai dengan teori koreksi bias berbasis sebaran marginal: karena
+koreksi mempertahankan urutan peringkat data, korelasi harian dibatasi
+oleh ketepatan waktu \emph{retrieval} satelit mentah, bukan oleh metode
+koreksinya. Ketika data IMERG-L setengah-jaman disusun ulang ke dalam
+jendela 24 jam yang mengikuti konvensi pengamatan pagi setempat
+yang dipakai jaringan validasi BMKG, sebagian besar batas korelasi ini ternyata
+berasal dari ketidaksesuaian jendela kalender antara satelit dan
+stasiun. Pada era GPM ($2015$ hingga $2021$), korelasi gabungan naik
+dari $r = 0{,}20$ pada jendela hari Waktu Universal Terkoordinasi (UTC)
+menjadi $r = 0{,}57$ pada jendela $-23$ jam yang selaras, dengan median
+per-stasiun $0{,}56$; pergeseran $-23$ jam ini sama untuk seluruh dua
+belas musim bergulir tiga-bulanan dan ketiga zona waktu Indonesia,
+sedangkan besar korelasi yang dipulihkan bervariasi dari $0{,}56$ di
+zona barat (WIB) hingga $0{,}62$ di zona timur (WIT). Pemulihan ini
+hanya muncul pada era GPM, ketika \emph{retrieval} sudah mampu menangkap
+siklus diurnal; karena itu nilai $0{,}34$ untuk seluruh rekaman
+sebenarnya merupakan campuran era ini dengan era awal yang ketepatan
+waktunya masih rendah. Ketergantungan terhadap jendela ini lenyap pada
+skala bulanan, ketika korelasi mencapai sekitar $0{,}80$ tanpa memandang
+pilihan jendela, sehingga batas korelasi harian sesungguhnya terletak
+pada pemasangan waktu hari per hari, bukan pada jumlah hujan yang
+ditangkap produk. Penyusunan ulang jendela ini hanya satu langkah
+praproses di luar \emph{pipeline} koreksi, memerlukan data
+setengah-jaman, dan ditetapkan sebagai langkah lanjutan yang paling siap
+diterapkan; dengan demikian produk terkoreksi sudah sesuai untuk
+aplikasi yang bergantung pada sifat sebaran harian, yaitu ranah yang
+tidak terpengaruh oleh penyusunan ulang tersebut.
 
 \emph{Pipeline} dirilis sebagai implementasi terbuka berbasis berkas
 konfigurasi; reproduktibilitasnya ditunjukkan dengan mengeksekusi
@@ -339,7 +351,7 @@ My deepest thanks go to my supervisors, Prof. Dr. Ir. Rizaldi Boer, MS.
 and Dr. I Putu Santikayasa, S.Si., M.Sc., for their guidance, patience,
 and insight throughout this research. Furthermore, I extend my gratitude 
 to all unnamed individuals who provided direct or indirect assistance 
-throughout the course of this
+throughout the course of this study.
 
 Finally, my heartfelt thanks to my wife Kiki Kartikasari, and daughter
 Wijanging Ngelmu Dyatmika, for their constant support and patience.

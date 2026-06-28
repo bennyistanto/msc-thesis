@@ -105,10 +105,10 @@ def draw_map(ax, field, *, cmap, norm, title):
         idn.boundary.plot(ax=ax, color="0.20", linewidth=0.30, zorder=3)
     ax.set_xlim(*LON_RANGE); ax.set_ylim(*LAT_RANGE); ax.set_aspect("equal")
     ax.set_xticks([100, 110, 120, 130, 140]); ax.set_yticks([-10, -5, 0, 5])
-    ax.set_xticklabels([f"{x}E" for x in [100, 110, 120, 130, 140]], fontsize=6)
-    ax.set_yticklabels([f"{y}" + ("N" if y >= 0 else "S") for y in [-10, -5, 0, 5]], fontsize=6)
-    ax.tick_params(labelsize=6, length=1.5, pad=1)
-    ax.set_title(title, fontsize=9, fontweight="bold", pad=2)
+    ax.set_xticklabels([f"{x}E" for x in [100, 110, 120, 130, 140]], fontsize=8)
+    ax.set_yticklabels([f"{y}" + ("N" if y >= 0 else "S") for y in [-10, -5, 0, 5]], fontsize=8)
+    ax.tick_params(labelsize=8, length=1.5, pad=1)
+    ax.set_title(title, fontsize=8.5, fontweight="normal", pad=6)
     return qm
 
 
@@ -122,7 +122,7 @@ axes[0].text(0.985, 0.97,
               f"$\\Delta$CQI > +0.01: {100 * n_pos / n_total:.1f}%\n"
               f"$\\Delta$CQI < $-$0.01: {100 * n_neg / n_total:.1f}%\n"
               f"Mean: {mean_delta:+.3f}",
-              transform=axes[0].transAxes, ha="right", va="top", fontsize=6,
+              transform=axes[0].transAxes, ha="right", va="top", fontsize=7.5,
               bbox=dict(facecolor="white", edgecolor="0.7", boxstyle="round,pad=0.25"))
 
 # Colorbars
@@ -131,8 +131,8 @@ cax_a = fig.add_axes([bbox_a.x0 + 0.18, bbox_a.y0 - 0.045,
                        bbox_a.width - 0.36, 0.013])
 cbar_a = fig.colorbar(qm_a, cax=cax_a, orientation="horizontal",
                        extend="both", ticks=[-0.15, -0.075, 0, 0.075, 0.15])
-cbar_a.set_label(r"$\Delta$ CQI", fontsize=7)
-cbar_a.ax.tick_params(labelsize=6)
+cbar_a.set_label(r"$\Delta$ CQI", fontsize=9)
+cbar_a.ax.tick_params(labelsize=8)
 
 bbox_b = axes[1].get_position()
 cax_b = fig.add_axes([bbox_b.x0 + 0.10, bbox_b.y0 - 0.045,
@@ -142,10 +142,10 @@ mid_ticks = [(CAT_EDGES[i] + CAT_EDGES[i + 1]) / 2
              for i in range(len(CAT_LABELS))]
 cbar_b = fig.colorbar(qm_b, cax=cax_b, orientation="horizontal",
                        ticks=mid_ticks)
-cbar_b.ax.set_xticklabels(CAT_LABELS, fontsize=6)
+cbar_b.ax.set_xticklabels(CAT_LABELS, fontsize=7.5)
 
 fig.suptitle("CQI Improvement from Hybrid Bias Correction",
-             fontsize=10, fontweight="bold", y=0.99)
+             fontsize=9, fontweight="bold", y=0.99)
 
 OUT = FIGOUT / "fig_thesis_04_cqi_improvement.png"
 fig.savefig(OUT, dpi=200, bbox_inches="tight", facecolor="white")

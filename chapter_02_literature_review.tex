@@ -13,7 +13,10 @@
 \chapter{Literature Review}\label{chap:litreview}
 
 This chapter establishes the scientific context for the
-LSEQM+DL (Linear Scaling (LS), Empirical Quantile Mapping (EQM), Generalized Pareto Distribution (GPD), and Convolutional Neural Network (CNN) refinement, a Deep Learning (DL) architecture) framework introduced in Chapter~\ref{chap:methods}.
+LSEQM+DL (Linear Scaling (LS), Empirical Quantile Mapping (EQM), 
+Generalized Pareto Distribution (GPD), and Convolutional Neural Network (CNN) 
+refinement, a Deep Learning (DL) architecture) framework introduced 
+in Chapter~\ref{chap:methods}.
 Section~\ref{sec:lit-imerg} reviews satellite-derived daily
 precipitation products, with emphasis on the Integrated
 Multi-satellitE Retrievals for Global Precipitation Measurement
@@ -106,12 +109,14 @@ IMERG releases three latency variants of the same daily product.
 The \textit{Early Run} is released approximately 4~hours after
 real time and is suitable for nowcasting applications that
 require minimum delay at the cost of reduced accuracy. The
-\textit{Late Run} (IMERG-L) is released approximately 14~hours
-after real time and is the variant operated on in this study;
+\textit{Late Run} (IMERG-L)~\citep{ref:imergdl07} is released
+approximately 14~hours after real time and is the variant
+operated on in this study;
 the 14-hour latency fits within the same-day decision window of
 operational services such as flood early warning. The
-\textit{Final Run} is released approximately 3.5 months after
-real time and benefits from the monthly gauge anchoring step
+\textit{Final Run}~\citep{ref:imergdf07} is released
+approximately 3.5 months after real time and benefits from the
+monthly gauge anchoring step
 that the Early and Late runs cannot include. The choice between
 variants is a latency-versus-accuracy trade-off: applications
 that can wait for the Final Run gain the gauge-anchored
@@ -127,7 +132,9 @@ resolution. Table~\ref{tab:gridded-products} summarises the
 products most often considered for daily-scale work over the
 tropics, where latency is the typical time lag between
 observation and product release and gauge integration describes
-whether and how gauge data is incorporated in the product. CPC Unified Gauge-Based Analysis of Daily Precipitation (CPC-UNI) \citep{ref:chen2008} interpolates gauge
+whether and how gauge data is incorporated in the product. 
+CPC Unified Gauge-Based Analysis of Global Daily Precipitation 
+(CPC-UNI) \citep{ref:chen2008} interpolates gauge
 observations directly and is therefore the highest-quality
 reference where the contributing network is dense, at the cost
 of a coarse 0.5$^{\circ}$ grid and limited skill where the
@@ -165,7 +172,7 @@ Product & Latency & Range & Gauge integration & Resolution \\
 \midrule
 CPC-UNI                 & 1 day      & 1979 -- present & Full gauge analysis             & 0.5$^{\circ}$ \\
 ERA5-Land               & 2--3 months & 1981 -- present & Reanalysis, no direct gauge     & $\sim$0.1$^{\circ}$ \\
-IMERG Final Run         & 3 months   & 2000 -- present & Ensemble with monthly gauges    & 0.1$^{\circ}$ \\
+IMERG Final Run         & 3.5 months & 2000 -- present & Ensemble with monthly gauges    & 0.1$^{\circ}$ \\
 IMERG Late Run          & 12--18 h   & 2000 -- present & No gauge integration            & 0.1$^{\circ}$ \\
 IMERG Early Run         & 4--6 h     & 2000 -- present & No gauge integration            & 0.1$^{\circ}$ \\
 CHIRPS                  & 2 days     & 1981 -- present & Ensemble with gauges            & 0.05$^{\circ}$ \\
@@ -193,7 +200,8 @@ precipitation~\citep{ref:maggioni2016, ref:tang2020, ref:tan2016}. Over the
 tropics specifically, multi-product comparisons report daily
 Pearson correlations between $0.3$ and $0.5$ against gauge
 networks and reanalyses, with skill improving substantially
-only at dekadal or longer aggregation~\citep{ref:ramadhan2022ts, ref:tang2020}. These bias modes motivate the methodological
+only at dekadal or longer aggregation~\citep{ref:ramadhan2022ts, ref:tang2020}. 
+These bias modes motivate the methodological
 families reviewed in Section~\ref{sec:lit-methods}; the
 empirical magnitudes for IMERG-L over Indonesia are reported in
 Chapter~\ref{chap:results}.
@@ -223,9 +231,9 @@ metrics at a wet-day or heavy-rain threshold). The grouping
 follows the conventions in the standard verification references
 \citep{ref:wilks2011, ref:ebert2007} and matches the World
 Meteorological Organization (WMO) verification standards for
-quantitative precipitation forecasts~\citep{ref:wmo1485, ref:wmo1132}. The framework allows
-the question \enquote{how well does this product reproduce the
-gauge field?} to be decomposed into four narrower questions,
+quantitative precipitation forecasts~\citep{ref:wmo1485, ref:wmo1132}. 
+The framework allows the question \enquote{how well does this product 
+reproduce the gauge field?} to be decomposed into four narrower questions,
 each with a measurable answer.
 
 Pearson correlation between paired daily satellite and gauge
@@ -275,6 +283,45 @@ Section~\ref{sec:methods-validation}: in-sample comparison
 against the gridded reference (the calibration target),
 out-of-sample comparison against independent point observations
 (the operational user's perspective).
+
+\subsection{Accumulation-Window and Time-of-Observation Effects}\label{sec:lit-window}
+
+A second property of the verification reference, distinct from its
+spatial biases, is the time window over which each daily total is
+accumulated. Satellite products are distributed on the Coordinated
+Universal Time (UTC) calendar day, whereas rain gauges report under
+national time-of-observation conventions, typically a 24-hour total
+ending at a fixed morning observation in local time, following the
+World Meteorological Organization principle of common observation
+times \citep{ref:wmo2018no8}. When daily satellite and gauge values
+labelled with the same calendar date refer to different 24-hour
+periods, the day-by-day correlation is suppressed even when the two
+products describe the same rainfall.
+
+This dependence on temporal matching is documented in the
+validation literature. The IMERG diurnal cycle is meaningful only
+in local solar time, and satellite-gauge agreement degrades rapidly
+when the two are compared at mismatched times \citep{ref:tan2019,
+ref:li2018}. Where the accumulation window has been aligned to the
+gauge convention, the agreement improves: evaluations over China
+and over southern South America re-aggregate the sub-daily satellite
+field to a $12$~UTC-to-$12$~UTC window to match the national daily
+reporting time before computing skill \citep{ref:xie2022,
+ref:salio2015}, and the global MSWEP analysis infers each gauge's
+reporting time by shifting the accumulation window to maximise
+correlation against independent products \citep{ref:beck2019}.
+
+This correction has been adopted unevenly, and in particular it has
+rarely been propagated from validation into daily bias correction.
+Over the Indonesian Maritime Continent the morning-observation
+convention is noted in evaluation studies \citep{ref:ramadhan2022,
+ref:ramadhan2024diurnal} but is not corrected: daily bias-correction
+studies adjust rainfall magnitudes against a fixed daily window
+\citep{ref:suhartanto2025, ref:ramadhan2024sumatra}, leaving the
+window contribution to the low daily correlation unquantified. This
+gap motivates the window-offset diagnostic developed in
+Section~\ref{sec:methods-window} and the recovery reported in
+Section~\ref{sec:results-window}.
 
 
 % ============================================================
@@ -460,7 +507,7 @@ to the full wet-day sample for the bulk distribution, fit the
 GPD to exceedances above a high threshold for the tail, and use
 the GPD-based quantile to replace the Gamma-based quantile
 above the threshold. The threshold is typically chosen as the
-80th to 95th percentile of the wet-day sample, with the trade-off
+90th to 99th percentile of the wet-day sample, with the trade-off
 that higher thresholds isolate the extreme tail more cleanly
 but yield fewer exceedances per pixel-dekad and therefore less
 stable GPD fits. For the small exceedance samples typical of per-pixel per-dekad
@@ -470,7 +517,9 @@ likelihood because they are less sensitive to outliers
 retains maximum-likelihood estimation with subsample-averaging
 to reduce estimator variance (Section~\ref{sec:methods-gpd}).
 Stage~3 of the LSEQM+DL pipeline implements this hybrid strategy
-with a fixed 80th-percentile threshold.
+with a fixed 80th-percentile threshold, set below the conventional
+range so that each per-pixel per-dekad fit retains enough
+exceedances to remain stable.
 
 \subsection{Deep Learning Approaches}\label{sec:lit-dl}
 
@@ -639,7 +688,8 @@ computational notebook workflows that the design draws on.
 
 Computational notebooks have become a standard medium for
 documenting and sharing analytical workflows in climate science
-and Earth observation \cite{ref:perkel2018, ref:wagemann2022}. A notebook integrates code, results, and
+and Earth observation \cite{ref:perkel2018, ref:wagemann2022}. 
+A notebook integrates code, results, and
 narrative in a single document, making the analytical process
 transparent and re-runnable on the same data. Jupyter is the
 most widely used implementation in the scientific Python
@@ -747,9 +797,10 @@ verification. Convection over the large islands peaks in the
 local afternoon, typically between 14:00 and 17:00 local time,
 driven by daytime heating and the sea-breeze convergence over
 land \citep{ref:wu2008}. Indonesia spans three standard
-time zones, from UTC+7 in the west (Sumatra, Java) through UTC+8
-(Bali, Kalimantan, Sulawesi) to UTC+9 in the east (Maluku,
-Papua). The IMERG product is accumulated on a UTC calendar day,
+time zones, from UTC+7 in the west (Sumatra, Western Kalimantan,
+Java) through UTC+8 (Bali, Nusa Tenggara, Eastern Kalimantan,
+Sulawesi) to UTC+9 in the east (Maluku, Papua). 
+The IMERG product is accumulated on a UTC calendar day,
 so the local convective afternoon falls in the UTC 07:00 to
 10:00 band for the western archipelago and earlier in UTC terms
 for the east. A daily aggregation window aligned to UTC
@@ -764,7 +815,8 @@ identifies as the most actionable next step for the region.
 
 The gauge network that anchors both the CPC-UNI reference and
 the independent validation is strongly heterogeneous in space.
-The Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) station network is dense over Java and southern
+The Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) 
+station network is dense over Java and southern
 Sumatra, where population and agricultural value are
 concentrated, and progressively sparser eastward into Maluku,
 Nusa Tenggara, and Papua \citep{ref:chen2008}. Because CPC-UNI is

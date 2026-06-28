@@ -2,10 +2,12 @@
 marginal bias correction" - 2x2 grid of (a) Pearson r, (b) RMSE, (c) NSE,
 (d) SDR across the three correction stages.
 
-Values are taken from Table 4.2 (in-sample CPC-UNI) of the thesis. The
-underlying NetCDFs (data/output/metrics_*) are not re-read because the
-aggregate pixel-mean values are already pinned in the table and unchanged
-by layout.
+The temporal-skill panels (r, RMSE, NSE) use the in-sample CPC-UNI values
+from Table 4.2; the amplitude panel (SDR) uses the independent BMKG
+validation value from Table 4.1. The two references are disclosed in the
+figure caption and the surrounding text. The underlying NetCDFs
+(data/output/metrics_*) are not re-read because the aggregate values are
+already pinned in the tables and unchanged by layout.
 
 Output: paper/thesis/figures/fig_thesis_04_paradox.png
 """
@@ -20,10 +22,11 @@ OUT = ROOT / "paper" / "thesis" / "figures" / "fig_thesis_04_paradox.png"
 METHODS = ["LS", "LSEQM", "LSEQM+DL"]
 x = np.arange(len(METHODS))
 
-# (Table 4.2 CPC-UNI in-sample row values)
+# temporal skill vs in-sample CPC-UNI (Table 4.2)
 r_values = [0.343, 0.345, 0.348]
 rmse_values = [13.10, 14.18, 14.07]
 nse_values = [-0.273, -0.548, -0.524]
+# amplitude vs independent BMKG validation (Table 4.1)
 sdr_values = [0.71, 1.03, 1.00]
 
 PANEL_RED = "#d62728"
@@ -89,9 +92,6 @@ ax_sdr.set_title("(d) Std-Dev Ratio", fontsize=10, fontweight="bold")
 ax_sdr.grid(axis="y", alpha=0.3, linestyle=":")
 ax_sdr.annotate("shift: $+0.29$", xy=(1.0, 0.69), ha="center",
                 fontsize=8, color="#555", style="italic")
-
-fig.suptitle("What does and does not improve under marginal bias correction",
-             fontsize=11, fontweight="bold")
 
 fig.savefig(OUT, dpi=200, bbox_inches="tight", facecolor="white")
 print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB)")

@@ -91,20 +91,20 @@ for ax, (stage, label) in zip(axes, STAGES):
     ax.set_aspect("equal")
     ax.set_xticks([100, 110, 120, 130, 140])
     ax.set_yticks([-10, -5, 0, 5])
-    ax.tick_params(labelsize=6, length=1.5, pad=1)
-    ax.set_xticklabels([f"{x}E" for x in [100, 110, 120, 130, 140]], fontsize=6)
-    ax.set_yticklabels([f"{y}" + ("N" if y >= 0 else "S") for y in [-10, -5, 0, 5]], fontsize=6)
+    ax.tick_params(labelsize=8, length=1.5, pad=1)
+    ax.set_xticklabels([f"{x}E" for x in [100, 110, 120, 130, 140]], fontsize=8)
+    ax.set_yticklabels([f"{y}" + ("N" if y >= 0 else "S") for y in [-10, -5, 0, 5]], fontsize=8)
     ax.set_title(f"{label} (median CQI = {np.nanmedian(cqi_maps[stage]):.3f})",
-                 fontsize=9, fontweight="bold", pad=2)
+                 fontsize=8.5, fontweight="normal", pad=6)
 
 # Bottom horizontal colorbar
 cax = fig.add_axes([0.20, 0.045, 0.60, 0.015])
 cbar = fig.colorbar(last_qm, cax=cax, orientation="horizontal")
-cbar.set_label("Composite Quality Index (CQI)", fontsize=8)
-cbar.ax.tick_params(labelsize=6)
+cbar.set_label("Composite Quality Index (CQI)", fontsize=9)
+cbar.ax.tick_params(labelsize=8)
 
 fig.suptitle("CQI Spatial Distribution by Method (climatology, 36 dekads)",
-             fontsize=10, fontweight="bold", y=0.99)
+             fontsize=9, fontweight="bold", y=0.99)
 
 OUT = FIGOUT / "fig_thesis_04_cqi_spatial.png"
 fig.savefig(OUT, dpi=200, bbox_inches="tight", facecolor="white")

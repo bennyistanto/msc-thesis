@@ -30,7 +30,11 @@ df = pd.read_csv(TAYLOR_CSV)
 print(f"  {len(df)} rows, {df['station_id'].nunique()} stations")
 
 # Build the 4x3 polar grid
-fig = plt.figure(figsize=(13, 16))
+fig = plt.figure(figsize=(13, 15))
+# Apply layout BEFORE capturing positions, otherwise the polar axes are
+# pinned to the default subplot grid and any later subplots_adjust is ignored.
+fig.subplots_adjust(bottom=0.07, top=0.94, left=0.05, right=0.97,
+                    wspace=0.13, hspace=0.30)
 axes = []
 for i in range(12):
     ax_tmp = fig.add_subplot(4, 3, i + 1)
@@ -53,8 +57,6 @@ fig.legend(handles=tst_h, title="Bias-corrected products",
            ncol=len(tst_h), fontsize=9, framealpha=0.9, title_fontsize=9)
 fig.suptitle("Station-Level Taylor Diagram by Month",
              fontsize=14, fontweight="bold", y=0.995)
-fig.subplots_adjust(bottom=0.06, top=0.94, left=0.05, right=0.97,
-                    wspace=0.38, hspace=1.00)
 
 fig.savefig(OUT, dpi=200, bbox_inches="tight", facecolor="white")
 print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB)")

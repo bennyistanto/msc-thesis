@@ -97,8 +97,5 @@ for ax, (metric, title, ylim, ylabel, target) in zip(axes_flat, PANELS):
     if metric == "pod":
         ax.legend(loc="upper right", fontsize=8, frameon=True)
 
-fig.suptitle("Multi-Threshold Verification (WMO TD-1485 framework)",
-             fontsize=11, fontweight="bold")
-
 fig.savefig(OUT, dpi=200, bbox_inches="tight", facecolor="white")
 print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB)")

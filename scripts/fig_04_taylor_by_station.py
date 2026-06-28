@@ -36,9 +36,10 @@ wet_ps, wet_agg = compute_period_stats(df, WET_MONTHS)
 dry_ps, dry_agg = compute_period_stats(df, DRY_MONTHS)
 
 # Build the 2-panel polar figure
-fig = plt.figure(figsize=(14, 7.5))
+fig = plt.figure(figsize=(14, 7.0))
 ax1 = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
+fig.subplots_adjust(bottom=0.13, top=0.99, left=0.07, right=0.95, wspace=0.30)
 p1, p2 = ax1.get_position(), ax2.get_position()
 ax1.remove(); ax2.remove()
 ax1 = fig.add_axes(p1, polar=True)
@@ -49,14 +50,11 @@ plot_one_panel(ax2, dry_ps, dry_agg, "(b)", "Dry Season (Apr-Sep)", compact=Fals
 
 ref_h, tst_h = legend_handles_split()
 fig.legend(handles=ref_h, title="Reference products",
-           loc="lower center", bbox_to_anchor=(0.30, -0.04),
+           loc="lower center", bbox_to_anchor=(0.30, 0.02),
            ncol=len(ref_h), fontsize=9, framealpha=0.9, title_fontsize=9)
 fig.legend(handles=tst_h, title="Bias-corrected products",
-           loc="lower center", bbox_to_anchor=(0.75, -0.04),
+           loc="lower center", bbox_to_anchor=(0.75, 0.02),
            ncol=len(tst_h), fontsize=9, framealpha=0.9, title_fontsize=9)
-fig.suptitle("Station-Level Taylor Diagram by Season",
-             fontsize=13, fontweight="bold", y=0.99)
-fig.subplots_adjust(bottom=0.14, top=0.88, left=0.07, right=0.95, wspace=0.30)
 
 fig.savefig(OUT, dpi=200, bbox_inches="tight", facecolor="white")
 print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB)")

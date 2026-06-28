@@ -21,6 +21,7 @@
   title = {{NASA} {Global} {Precipitation} {Measurement} ({GPM}) {Integrated} {Multi}-satellit{E} {Retrievals} for {GPM} ({IMERG}). {Algorithm} {Theoretical} {Basis} {Document} ({ATBD}) {Version} {06}},
   institution = {NASA},
   year = {2020},
+  url = {https://gpm.nasa.gov/sites/default/files/2020-05/IMERG_ATBD_V06.3.pdf},
   urldate = {2026 May 30}
 }
 
@@ -42,6 +43,7 @@
   journal = {J. Geophys. Res. Atmos.},
   volume = {113},
   number = {D4},
+  pages = {D04110},
   year = {2008},
   doi = {10.1029/2007JD009132},
   urldate = {2026 May 30}
@@ -273,6 +275,7 @@
   booktitle = {3rd International Conference on Learning Representations (ICLR)},
   year = {2015},
   eprint = {arXiv:1412.6980},
+  doi = {10.48550/arXiv.1412.6980},
   urldate = {2026 May 30}
 }
 
@@ -294,6 +297,7 @@
   edition = {3rd},
   publisher = {Academic Press},
   year = {2011},
+  doi = {10.1016/C2017-0-03921-6},
   urldate = {2026 May 30}
 }
 
@@ -322,6 +326,7 @@
   institution = {WMO},
   number = {WMO-No. 1132},
   year = {2014},
+  url = {https://library.wmo.int/idurl/4/51384},
   urldate = {2026 May 30}
 }
 
@@ -366,6 +371,7 @@
   title = {Implementing {Reproducible} {Research}},
   publisher = {CRC Press},
   year = {2014},
+  doi = {10.1201/9781315373461},
   urldate = {2026 May 30}
 }
 
@@ -637,16 +643,36 @@
   number       = {WMO-No.~8},
   edition      = {2018 edition, updated in 2021},
   year         = {2018},
+  doi          = {10.59327/WMO/CIMO/2},
   urldate      = {2026 May 31}
 }
 
-@misc{ref:imerghh07,
+@misc{ref:imerghhl07,
   author       = {Huffman, George J. and Stocker, Eric F. and Bolvin, David T. and Nelkin, Eric J. and Tan, Jackson},
-  title        = {{GPM} {IMERG} {Late} {Precipitation} {L3} {Half} {Hourly} 0.1~degree x 0.1~degree V07 ({GPM\_3IMERGHH\_07})},
+  title        = {{GPM} {IMERG} {Late} {Precipitation} {L3} {Half} {Hourly} 0.1~degree x 0.1~degree V07 ({GPM\_3IMERGHHL\_07})},
   howpublished = {NASA Goddard Earth Sciences Data and Information Services Center (GES DISC)},
   year         = {2023},
-  doi          = {10.5067/GPM/IMERG/3B-HH/07},
-  urldate      = {2026 May 31}
+  doi          = {10.5067/GPM/IMERG/3B-HH-L/07},
+  urldate      = {2026 June 25}
+}
+
+@misc{ref:imergdl07,
+  author       = {Huffman, George J. and Stocker, Eric F. and Bolvin, David T. and Nelkin, Eric J. and Tan, Jackson},
+  editor       = {Savtchenko, Andrey},
+  title        = {{GPM} {IMERG} {Late} {Precipitation} {L3} 1 day 0.1~degree x 0.1~degree V07 ({GPM\_3IMERGDL\_07})},
+  howpublished = {NASA Goddard Earth Sciences Data and Information Services Center (GES DISC)},
+  year         = {2023},
+  doi          = {10.5067/GPM/IMERGDL/DAY/07},
+  urldate      = {2026 June 25}
+}
+
+@misc{ref:imergdf07,
+  author       = {Huffman, George J. and Stocker, Eric F. and Bolvin, David T. and Nelkin, Eric J. and Tan, Jackson},
+  title        = {{GPM} {IMERG} {Final} {Precipitation} {L3} 1 day 0.1~degree x 0.1~degree V07 ({GPM\_3IMERGDF\_07})},
+  howpublished = {NASA Goddard Earth Sciences Data and Information Services Center (GES DISC)},
+  year         = {2023},
+  doi          = {10.5067/GPM/IMERGDF/DAY/07},
+  urldate      = {2026 June 25}
 }
 
 @misc{ref:cpcuni_readme,
@@ -656,4 +682,117 @@
   year         = {2008},
   url          = {https://ftp.cpc.ncep.noaa.gov/precip/CPC\_UNI\_PRCP/GAUGE\_GLB/DOCU/},
   urldate      = {2026 Jun 1}
+}
+
+% ============================================================
+% Added for the temporal-alignment / aggregation-window revision.
+% All metadata verified against Crossref / publisher records (Jun 2026).
+% Validation-side timing literature (window / diurnal):
+% ============================================================
+@article{ref:xie2022,
+  author       = {Xie, Wenhao and Yi, Shanzhen and Leng, Chuang and Xia, Defeng and Li, Mingli and Zhong, Zewen and Ye, Jianfeng},
+  title        = {The evaluation of {IMERG} and {ERA5}-{Land} daily precipitation over {China} with considering the influence of gauge data bias},
+  journal      = {Sci. Rep.},
+  volume       = {12},
+  number       = {1},
+  pages        = {8085},
+  year         = {2022},
+  doi          = {10.1038/s41598-022-12307-0},
+  urldate      = {2026 Jun 24}
+}
+
+@article{ref:salio2015,
+  author       = {Salio, Paola and Hobouchian, Mar{\'\i}a Paula and Garc{\'\i}a Skabar, Yanina and Vila, Daniel},
+  title        = {Evaluation of high-resolution satellite precipitation estimates over southern {South} {America} using a dense rain gauge network},
+  journal      = {Atmos. Res.},
+  volume       = {163},
+  pages        = {146--161},
+  year         = {2015},
+  doi          = {10.1016/j.atmosres.2014.11.017},
+  urldate      = {2026 Jun 24}
+}
+
+@article{ref:tan2019,
+  author       = {Tan, Jackson and Huffman, George J. and Bolvin, David T. and Nelkin, Eric J.},
+  title        = {Diurnal {Cycle} of {IMERG} {V06} {Precipitation}},
+  journal      = {Geophys. Res. Lett.},
+  volume       = {46},
+  number       = {22},
+  pages        = {13584--13592},
+  year         = {2019},
+  doi          = {10.1029/2019GL085395},
+  urldate      = {2026 Jun 24}
+}
+
+@article{ref:li2018,
+  author       = {Li, Runze and Wang, Kaicun and Qi, Dan},
+  title        = {Validating the {Integrated} {Multisatellite} {Retrievals} for {Global} {Precipitation} {Measurement} in terms of diurnal variability with hourly gauge observations collected at 50,000 stations in {China}},
+  journal      = {J. Geophys. Res. Atmos.},
+  volume       = {123},
+  number       = {18},
+  year         = {2018},
+  doi          = {10.1029/2018JD028991},
+  urldate      = {2026 Jun 24}
+}
+
+% ============================================================
+% Indonesia / Maritime Continent daily satellite-precipitation
+% bias-correction and validation studies:
+% ============================================================
+@article{ref:wei2022,
+  author       = {Wei, Linyong and Jiang, Shanhu and Ren, Liliang and Zhang, Linqi and Wang, Menghao and Liu, Yi and Duan, Zheng},
+  title        = {Bias correction of {GPM} {IMERG} {Early} {Run} daily precipitation product using near real-time {CPC} global measurements},
+  journal      = {Atmos. Res.},
+  volume       = {279},
+  pages        = {106403},
+  year         = {2022},
+  doi          = {10.1016/j.atmosres.2022.106403},
+  urldate      = {2026 Jun 24}
+}
+
+@article{ref:ramadhan2024diurnal,
+  author       = {Ramadhan, Ravidho and Marzuki, Marzuki and Suryanto, Wiwit and Sholihun, Sholihun and Yusnaini, Helmi and Muharsyah, Robi},
+  title        = {Validating {IMERG} data for diurnal rainfall analysis across the {Indonesian} maritime continent using gauge observations},
+  journal      = {Remote Sens. Appl. Soc. Environ.},
+  volume       = {34},
+  pages        = {101186},
+  year         = {2024},
+  doi          = {10.1016/j.rsase.2024.101186},
+  urldate      = {2026 Jun 24}
+}
+
+@article{ref:suhartanto2025,
+  author       = {Suhartanto, Ery and Andawayanti, Ussy and Hidayat, Muhammad Nurjati and Lufira, Rahmah Dara and Utami, Rizki Tri},
+  title        = {A comparative evaluation of bias correction techniques for improving {GPM}-{IMERG} precipitation data in the {Welang} {Watershed}, {Indonesia}},
+  journal      = {Eng. Technol. Appl. Sci. Res.},
+  volume       = {15},
+  number       = {6},
+  pages        = {29935--29941},
+  year         = {2025},
+  doi          = {10.48084/etasr.13762},
+  urldate      = {2026 Jun 24}
+}
+
+@article{ref:ramadhan2024sumatra,
+  author       = {Ramadhan, Ravidho and Marzuki, Marzuki and Suryanto, Wiwit and Sholihun, Sholihun and Yusnaini, Helmi and Hashiguchi, Hiroyuki and Shimomai, Toyoshi},
+  title        = {Bias correction of {IMERG} data in the mountainous areas of {Sumatra} based on a single gauge observation},
+  journal      = {Trends Sci.},
+  volume       = {21},
+  number       = {4},
+  pages        = {7592},
+  year         = {2024},
+  doi          = {10.48048/tis.2024.7592},
+  urldate      = {2026 Jun 24}
+}
+
+@article{ref:ramadhan2023,
+  author       = {Ramadhan, Ravidho and Marzuki, Marzuki and Yusnaini, Helmi and Muharsyah, Robi and Tangang, Fredolin and Vonnisa, Mutya and Harmadi, Harmadi},
+  title        = {A preliminary assessment of the {GSMaP} {Version} 08 products over {Indonesian} {Maritime} {Continent} against gauge data},
+  journal      = {Remote Sens.},
+  volume       = {15},
+  number       = {4},
+  pages        = {1115},
+  year         = {2023},
+  doi          = {10.3390/rs15041115},
+  urldate      = {2026 Jun 24}
 }

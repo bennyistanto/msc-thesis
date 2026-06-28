@@ -11,7 +11,8 @@
 % Inputs : frontmatter.tex, chapter_01..06_*.tex, chapter_99_appendices.tex,
 %          biography.tex, references.bib, ipb.bst, figures/, scripts/.
 % License: CC BY 4.0 for the text and figures (see ./LICENSE);
-%          MIT for the build script and figure-generator code.
+%          Mozilla Public License 2.0 for the code (build script,
+%          figure generators, and pipeline source).
 % ============================================================
 \documentclass[12pt, a4paper, twoside]{report}  % double-sided, mirror margins (inner 4cm)
 
@@ -250,6 +251,7 @@
 \newcommand{\figThreeTwoWidth}{0.92}   % Fig 3.2 pipeline (rotated, x textheight)
 \newcommand{\figThreeThreeWidth}{0.92} % Fig 3.3 CNN workflow (rotated)
 \newcommand{\figThreeFourWidth}{1.0}   % Fig 3.4 stage demonstration
+\newcommand{\figThreeWindowWidth}{1.0} % Fig 3.x window-offset timing schematic
 % Chapter 4: Results
 \newcommand{\figFourOneWidth}{1.0}     % Fig 4.1 headline bars
 \newcommand{\figFourTwoWidth}{1.0}     % Fig 4.2 multi-threshold
@@ -259,12 +261,18 @@
 \newcommand{\figFourSixWidth}{1.0}     % Fig 4.6 Taylor by station
 \newcommand{\figFourSevenWidth}{1.0}   % Fig 4.7 temporal stability
 \newcommand{\figFourEightWidth}{0.92}  % Fig 4.8 Bali coverage
+\newcommand{\figFourNineWidth}{1.0}    % Fig 4.9 window recovery / era curve
+\newcommand{\figFourTenWidth}{1.0}     % Fig 4.10 seasonal window landscape
+\newcommand{\figFourElevenWidth}{1.0}  % Fig 4.11 per-station window map
 % Chapter 5: Discussion
 \newcommand{\figFiveOneWidth}{1.0}     % Fig 5.1 bound schematic
 \newcommand{\figFiveTwoWidth}{1.0}     % Fig 5.2 Taylor monthly
 \newcommand{\figFiveSubdailyChartWidth}{1.0}   % Fig 5.3 subdaily r(h) chart
 \newcommand{\figFiveSubdailyMapWidth}{1.0}     % Fig 5.4 subdaily peak-h map
 \newcommand{\figFiveThreeWidth}{1.0}   % Fig 5.5 confidence mask (formerly 5.3)
+\newcommand{\figFiveWindowPrecisionWidth}{1.0} % Fig 5.x pre-GPM vs GPM day precision
+\newcommand{\figFiveConventionWidth}{1.0} % Fig 5.x convention conflict + resolution
+\newcommand{\figFiveGriddedCpcWidth}{0.92} % Fig 5.x gridded-CPC window offset, two eras
 
 % MDPI parallel-manuscript status macro. \xspace adds a trailing
 % space when followed by a letter (e.g. "...Remote Sensing) and is...")

@@ -6,7 +6,7 @@
 %          gap, the reproducibility gap) and states the research question.
 % Sections: 1.1 Background, 1.2 Problem Statement,
 %           1.3 Objectives and Benefits,
-%           1.4 Scope, Limitations, and Constraint, 1.5 Novelty,
+%           1.4 Scope, Limitations, and Constraint, 1.5 Contributions,
 %           1.6 Hypotheses, 1.7 Thesis Structure.
 % Included by main_thesis.tex.
 % License: CC BY 4.0 (see ../LICENSE).
@@ -92,6 +92,27 @@ or data, leaving any claim of reproduction to a reader who must
 re-implement the method from the paper alone. This thesis is
 organised around closing both gaps at once.
 
+Within the first of these gaps, one bias dimension is especially
+prone to being hidden by an aggregate score, and it is the focus of
+a specific contribution here. Bias correction and gauge merging are
+most established at the monthly scale, where satellite and gauge
+totals correlate strongly; at the daily scale the day-to-day
+correlation is markedly lower and is repeatedly cited as the
+limiting factor \citep{ref:ramadhan2022ts, ref:ramadhan2023,
+ref:tang2020}. Part of
+that low daily correlation is not a deficiency of the satellite but
+a mismatch of accumulation windows: the satellite archive
+accumulates over the UTC day, whereas gauges report over the local
+day ending at a fixed morning observation. The mismatch is
+recognised in validation studies, which align the accumulation
+period to the gauge convention \citep{ref:xie2022, ref:salio2015,
+ref:tan2019, ref:li2018}, but to our knowledge it has not been
+carried into the bias-correction step: satellite-precipitation bias
+corrections over Indonesia \citep{ref:suhartanto2025,
+ref:ramadhan2024sumatra} and elsewhere \citep{ref:wei2022} adjust
+rainfall magnitudes against a fixed daily window without re-aligning
+it to the gauge reporting convention.
+
 
 % ============================================================
 \section{Problem Statement}\label{sec:intro-problem}
@@ -128,11 +149,11 @@ reproducible artefact that an independent reader can re-execute.
 \section{Objectives and Benefits}\label{sec:intro-objectives}
 % ============================================================
 
-The study pursues four objectives:
+The study pursues five objectives:
 
 \begin{enumerate}
     \item To attribute the skill of the LSEQM+DL pipeline
-    stage-by-stage against 171 independent Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) stations,
+    stage-by-stage against 172 independent Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) stations,
     establishing which bias dimension each of the four stages
     corrects and by how much.
     \item To test, empirically and theoretically, the bound on
@@ -140,6 +161,12 @@ The study pursues four objectives:
     gauge values under marginal correction, and to locate the
     observed value within the empirical band reported for daily
     IMERG over the tropics.
+    \item To decompose the daily Pearson-correlation ceiling into a
+    recoverable calendar-window component and a residual
+    retrieval-skill component, by re-aggregating the half-hourly
+    satellite source to a window matched to the gauge reporting
+    convention, and to characterise the optimal window across
+    season, space, and satellite era.
     \item To deliver the pipeline as a reproducible, open,
     configuration-driven implementation that an independent reader
     can re-execute end-to-end on commodity hardware.
@@ -168,8 +195,8 @@ own terms.
 The study corrects IMERG-L over the Indonesian domain
 ($95$ to $141^{\circ}$E, $11^{\circ}$S to $6^{\circ}$N) at the
 native $0.1^{\circ}$ daily resolution, calibrated against the
-Climate Prediction Center (CPC) Unified Gauge-Based Analysis of Daily
-Precipitation (CPC-UNI) gauge analysis and validated against 171 BMKG stations.
+Climate Prediction Center (CPC) Unified Gauge-Based Analysis of Global Daily
+Precipitation (CPC-UNI) gauge analysis and validated against 172 BMKG stations.
 The temporal unit is the dekad (the three 10-day periods within
 each month), and statistics are pooled across the 36 dekadal
 windows of the 2001 to 2025 record. The four-stage LSEQM+DL
@@ -205,30 +232,49 @@ remove.
 
 
 % ============================================================
-\section{Novelty}\label{sec:intro-novelty}
+\section{Contributions}\label{sec:intro-novelty}
 % ============================================================
 
-The novelty of the thesis is dual. The scientific novelty is the
-explicit, stage-resolved demonstration, both empirical and
+The thesis makes three contributions: a verification
+contribution, a diagnostic contribution, and a methodological
+contribution.
+
+\medskip\noindent\textbf{Verification.}
+The explicit, stage-resolved demonstration, both empirical and
 theoretical, that the Pearson correlation between corrected daily
 satellite and gauge values is bounded by the raw satellite timing
-rather than by the correction method, paired with the
-demonstration that the same pipeline moves every marginal-distribution
-metric to the gauge target. Reporting the unchanged correlation
-alongside the corrected distribution, and explaining the contrast
-as structural rather than as failure, is the verification
-contribution. The methodological novelty is the delivery of the
-entire result as a reproducible, open, end-to-end pipeline that
-an independent reader can re-execute on free cloud infrastructure,
-which closes the reproducibility gap for this class of study and
-makes the scientific claim independently checkable.
+rather than by the correction method, while the same pipeline moves
+every marginal-distribution metric to the gauge target. Reporting
+the unchanged correlation alongside the corrected distribution, and
+explaining the contrast as structural rather than as failure, is
+what separates this from an aggregate skill report.
+
+\medskip\noindent\textbf{Diagnostic.}
+The decomposition of that timing bound. The daily correlation
+ceiling is shown to be dominated, in the GPM era, by the
+calendar-window mismatch between the UTC-day satellite archive and
+the local-day gauge convention, and is partly recoverable by
+re-aggregating the satellite to a gauge-matched window. The
+window-offset search itself follows \citet{ref:beck2019}; what is
+new is its grounding in the BMKG morning-observation convention, its
+propagation into a daily bias-correction workflow over Indonesia
+where prior corrections leave the window unaddressed, and the result
+that the recovery tracks the satellite's day-to-day temporal
+precision and is therefore confined to the GPM era.
+
+\medskip\noindent\textbf{Reproducibility.}
+The delivery of the entire result as a reproducible, open,
+end-to-end pipeline that an independent reader can re-execute on
+free cloud infrastructure, which closes the reproducibility gap for
+this class of study and makes the scientific claim independently
+checkable.
 
 
 % ============================================================
 \section{Hypotheses}\label{sec:intro-hypotheses}
 % ============================================================
 
-The study tests two hypotheses:
+The study tests three hypotheses:
 
 \begin{description}[noitemsep, topsep=2pt]
     \item[H1.] Each correction stage moves the verification
@@ -243,6 +289,13 @@ The study tests two hypotheses:
     sampling uncertainty, because marginal correction preserves
     the rank order of the satellite series and is bounded by the
     day-by-day pairing quality of the raw retrieval.
+    \item[H3.] In the GPM era, the daily Pearson correlation is
+    suppressed primarily by the calendar-window mismatch between the
+    UTC-day satellite archive and the local-day gauge convention, so
+    that re-aggregating the satellite to a gauge-matched window
+    recovers a large part of the correlation; the recovery is absent
+    in the earlier era, in which the retrieval does not resolve the
+    diurnal cycle.
 \end{description}
 
 
@@ -262,12 +315,14 @@ the reproducible implementation, the validation framework, and
 the verification metric catalogue.
 Chapter~\ref{chap:results} reports the stage-wise headline skill,
 the stage attribution, the threshold-dependent detection, the
-correlation result, the spatial skill distribution, the
-per-station Taylor analysis, the temporal stability, the
-sensitivity discussion, and the reproducibility evaluation.
+correlation result, the temporal-alignment and
+optimal-aggregation-window analysis, the spatial skill
+distribution, the per-station Taylor analysis, the temporal
+stability, the sensitivity discussion, and the reproducibility
+evaluation.
 Chapter~\ref{chap:discussion} develops the theoretical bound on
-the correlation, the operational implications, the
-reproducibility implications, the paths forward, and the
-limitations.
+the correlation, the interpretation of the optimal aggregation
+window, the operational implications, the reproducibility
+implications, the paths forward, and the limitations.
 Chapter~\ref{chap:conclusion} returns to the title question and
 states the recommendations.

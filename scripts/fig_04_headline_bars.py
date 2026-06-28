@@ -58,8 +58,5 @@ bar_panel(ax_csi, csi_values, ylim=(0.0, 1.05),
           ylabel="CSI", title="(d) CSI",
           target=1.0)
 
-fig.suptitle("Stage-Wise Skill at 171 Independent BMKG Stations",
-             fontsize=11, fontweight="bold")
-
 fig.savefig(OUT, dpi=200, bbox_inches="tight", facecolor="white")
 print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB)")

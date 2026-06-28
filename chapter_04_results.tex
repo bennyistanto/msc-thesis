@@ -2,7 +2,7 @@
 % chapter_04_results.tex - Chapter 4, Results
 %
 % Purpose: reports the empirical performance of the LSEQM+DL framework
-%          against 171 independent BMKG stations across the four
+%          against 172 independent BMKG stations across the four
 %          verification pillars + temporal-skill diagnostics.
 % Sections: 4.1 Headline Numbers, 4.2 Stage-wise Attribution,
 %           4.3 Threshold-stratified Verification, 4.4 Pearson r and
@@ -16,8 +16,8 @@
 \chapter{Results}\label{chap:results}
 
 This chapter reports the empirical performance of the LSEQM+DL (Linear Scaling (LS), Empirical Quantile Mapping (EQM), Generalized Pareto Distribution (GPD), and Convolutional Neural Network (CNN) refinement, a Deep Learning (DL) architecture)
-framework against 171 independent Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) stations, pooled across
-the 36 dekadal windows of 2001 to 2025. The results are organised
+framework against 172 independent Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) stations, pooled across
+the 36 dekadal windows of 2001 to 2021. The results are organised
 around the four-pillar verification framework introduced in
 Section~\ref{sec:methods-metrics}, with the temporal-skill
 diagnostic of Pearson correlation reported separately because of
@@ -64,16 +64,16 @@ LS over-corrects the mean, the LS column will reveal it; if EQM
 under-aligns the bulk distribution, the LSEQM column will too;
 and if the CNN distorts a metric outside its operating range,
 the LSEQM+DL column will show that as well. All numbers are
-pooled across the 36 dekadal windows of 2001 to 2025 at the 171
+pooled across the 36 dekadal windows of 2001 to 2021 at the 172
 BMKG stations not used in any correction step, so the comparison
 tests whether the corrections generalise beyond the Climate
-Prediction Center (CPC) Unified Gauge-Based Analysis of Daily
-Precipitation (CPC-UNI) training reference.
+Prediction Center (CPC) Unified Gauge-Based Analysis of Global
+Daily Precipitation (CPC-UNI) training reference.
 
 \begin{table}[H]
 \centering
-\caption[Stage-wise skill against 171 independent BMKG stations]{Stage-wise skill against 171 independent BMKG stations,
-pooled across all 36 dekads (2001 to 2025).\label{tab:headline}}
+\caption[Stage-wise skill against 172 independent BMKG stations]{Stage-wise skill against 172 independent BMKG stations,
+pooled across all 36 dekads (2001 to 2021).\label{tab:headline}}
 \begingroup\small
 \begin{tabular}{@{}llcccc@{}}
 \toprule
@@ -99,7 +99,7 @@ Event Detection
 \end{table}
 
 Table~\ref{tab:headline} reports the out-of-sample skill against
-the 171 BMKG validation stations, which is the strongest claim
+the 172 BMKG validation stations, which is the strongest claim
 the framework supports because the BMKG network is independent
 of the correction reference. Bold values mark the best
 performance per row, and the target column gives the value for
@@ -216,7 +216,7 @@ marked.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\figFourOneWidth\textwidth]{fig_thesis_04_headline_bars.png}
-\caption[Stage-wise skill at 171 BMKG stations for four representative metrics]{Stage-wise skill at 171 independent BMKG stations for
+\caption[Stage-wise skill at 172 BMKG stations for four representative metrics]{Stage-wise skill at 172 independent BMKG stations for
 four representative metrics drawn from
 Table~\ref{tab:headline}.\label{fig:headline-bars}}
 \end{figure}
@@ -352,25 +352,28 @@ where in the archipelago the correction is doing the most work.
 
 The aggregate event-detection metrics in
 Table~\ref{tab:headline} mask a threshold-dependent reversal in
-detection skill. Skill is broken out at the seven World Meteorological Organization (WMO) multi-threshold
-verification thresholds (1, 5, 10, 20, 50, 100, and
-150~mm/day) in Figure~\ref{fig:threshold-skill}. These thresholds
-follow the WMO classifications \citep{ref:wmo1132}: $1$~mm
-(measurable), $5$~mm (light), $10$~mm (moderate), $20$~mm
-(moderate-heavy), $50$~mm (heavy), and $100$~mm (very heavy). At the
+detection skill. Skill is broken out at the World Meteorological Organization (WMO)
+multi-threshold verification thresholds in
+Figure~\ref{fig:threshold-skill}. These follow the WMO
+classifications \citep{ref:wmo1132}: $1$~mm (measurable), $5$~mm
+(light), $10$~mm (moderate), $20$~mm (moderate-heavy), $50$~mm
+(heavy), and $100$~mm (very heavy). The $150$~mm/day extreme class
+is omitted because no station reaches the minimum of ten
+exceedances required for stable categorical verification in any
+dekad of the record. At the
 $1$ and $5~\mathrm{mm/day}$ thresholds LS retains a higher POD
 than LSEQM+DL, consistent with LS preserving the IMERG-L tendency
 to over-detect light rain and therefore scoring more hits at the
 low thresholds. Above $20~\mathrm{mm/day}$ the pattern reverses:
 LSEQM+DL achieves higher CSI than LS at every higher threshold.
 At $50~\mathrm{mm/day}$ the median CSI is $0.097$ for LSEQM+DL
-against $0.062$ for LS, a $57\%$ improvement, and the equitable
+against $0.062$ for LS, a $56\%$ improvement, and the equitable
 threat score (ETS), which removes the chance-hit contribution,
-shows the same ordering. At the $100$ and $150~\mathrm{mm/day}$
-thresholds the absolute CSI values are small for both methods,
-reflecting the difficulty of detecting individual
-heavy-rain events at the daily scale, but the LSEQM+DL advantage
-is consistent across thresholds.
+shows the same ordering. At the $100~\mathrm{mm/day}$
+threshold the absolute CSI values are small for both methods,
+reflecting the difficulty of detecting individual heavy-rain events
+at the daily scale, but the LSEQM+DL advantage is consistent across
+thresholds.
 
 The crossover threshold near $20~\mathrm{mm/day}$ matches the
 lower edge of the heavy-rain range used by BMKG flood
@@ -384,7 +387,7 @@ drive flood and drought decisions
 \begin{figure}[H]
 \centering
 \includegraphics[width=\figFourTwoWidth\textwidth]{fig_thesis_04_multi_threshold.png}
-\caption[Threshold-stratified verification at the $171$ BMKG station locations]{Threshold-stratified verification at the $171$ BMKG
+\caption[Threshold-stratified verification at the $172$ BMKG station locations]{Threshold-stratified verification at the $172$ BMKG
 station locations.\label{fig:threshold-skill}}
 \end{figure}
 
@@ -405,15 +408,18 @@ Fisher $z$-transform standard error at $n = 250$
 Figure~\ref{fig:paradox} states the central observation of this
 chapter in four panels. Pearson $r$, root mean square error
 (RMSE), and Nash-Sutcliffe efficiency (NSE)
-\citep{ref:nashsutcliffe1970} are temporal-skill diagnostics that
-do not improve across the four correction stages: $r$ stays near
+\citep{ref:nashsutcliffe1970} are temporal-skill diagnostics
+measured here against the in-sample CPC-UNI target, and they do
+not improve across the four correction stages: $r$ stays near
 $0.34$ across all stages, RMSE rises from $13.1$ to $14.1$~mm/day
 because the correction widens spread without re-aligning timing,
-and NSE moves from $-0.27$ to $-0.52$. The standard deviation
-ratio, an amplitude diagnostic, moves from $0.71$ to $1.00$
-across the same stages. One amplitude metric improves
-substantially toward the gauge target; three temporal-skill
-metrics do not move or get worse.
+and NSE moves from $-0.27$ to $-0.52$. The standard-deviation
+ratio, an amplitude diagnostic measured against the independent
+BMKG gauges, moves from $0.71$ to $1.00$ across the same stages.
+The amplitude is corrected to the validation target, yet the
+timing does not improve even against the reference the correction
+was fitted to: one amplitude metric improves substantially while
+three temporal-skill metrics do not move or get worse.
 
 \begin{figure}[H]
 \centering
@@ -439,6 +445,133 @@ Section~\ref{sec:discussion-bound} develops the theoretical
 basis for the bound, and the empirical value $r \approx 0.348$
 sits inside the $0.3$ to $0.5$ band reported for daily IMERG
 over tropical regions \citep{ref:ramadhan2022ts, ref:tang2020}.
+
+
+% ============================================================
+\section{Temporal Alignment and the Optimal Aggregation
+Window}\label{sec:results-window}
+% ============================================================
+
+The unchanged correlation of
+Section~\ref{sec:results-correlation} raises a question the stage
+comparison cannot answer: how much of the absolute ceiling is set
+by the retrieval timing, and how much by the calendar window used
+to label each daily total. The daily IMERG-L archive accumulates
+over the Coordinated Universal Time (UTC) day, whereas the BMKG
+stations report under the morning-observation convention, a
+24-hour total ending near $07{:}00$ local time. To separate the two
+components, the half-hourly IMERG-L source is re-aggregated into
+24-hour windows starting at every integer-hour offset
+$h \in [-48, +48]$ from $00{:}00$~UTC and correlated against the
+BMKG daily totals (Section~\ref{sec:methods-window}). The
+diagnostic operates on the raw retrieval rather than the corrected
+product; the offset search follows the gauge-timing procedure of
+\citet{ref:beck2019}. The diagnostic pools the $178$ of the $180$
+BMKG stations that carry valid half-hourly coverage, a different
+subset from the $172$ stations used for the dekadal
+correction-metric validation.
+
+Figure~\ref{fig:window-era} reports the result over the GPM era,
+$2015$ to $2021$. The pooled correlation rises from $r = 0.20$ at
+$h = 0$, the UTC-day alignment the daily archive uses, to
+$r = 0.57$ at $h = -23$, the window that matches the local-day
+gauge convention. This UTC-day value of $0.20$ is lower than the
+full-record headline of $r \approx 0.34$
+(Section~\ref{sec:results-correlation}) because the full record
+blends the GPM era with the earlier, timing-imprecise era, a point
+Section~\ref{sec:discussion-subdaily} returns to. The recovery is
+conditional on the satellite era. Before the full GPM
+constellation, the years through $2013$, whose IMERG inputs derive
+from the sparser TRMM-era sensor set, re-windowing does not lift
+the correlation: it stays near $r = 0.36$ at every offset and the
+peak offset wanders without a stable value. The window-matched
+recovery appears only once the half-hourly field resolves the
+diurnal cycle, a transition the per-year trace places at the
+$2014$ to $2015$ boundary.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourNineWidth\textwidth]{fig_thesis_04_window_era.png}
+\caption[Window-offset correlation recovery by satellite era]{Per-year
+Pearson~$r$ at the UTC-day window ($h = 0$) and at each year's
+best-matched window, with the peak offset~$h^{\star}$ below.\label{fig:window-era}}
+\end{figure}
+
+The optimal offset is stable across the seasonal cycle. Across all
+twelve three-month running seasons the pooled peak sits at
+$h = -23$~h in every timezone band
+(Figure~\ref{fig:window-seasonal}), and the optimum does not
+migrate between the wet and dry monsoon phases.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourTenWidth\textwidth]{fig_thesis_04_window_seasonal.png}
+\caption[GPM-era window-offset correlation and seasonal stability]{GPM-era
+window-offset correlation by timezone band (a) and the
+season-invariance of the peak offset~$h^{\star}$ across the twelve
+three-month running seasons (b).\label{fig:window-seasonal}}
+\end{figure}
+
+The offset is equally stable across space. The per-station peak
+offset has a median of $-23$~h, an interquartile range of
+$[-23, -21]$~h, and no systematic longitudinal organisation across
+the WIB, WITA, and WIT timezone bands
+(Figure~\ref{fig:window-map}). The recovered per-station
+correlation has a median of $0.56$, an interquartile range of
+$0.51$ to $0.62$, and a maximum near $0.78$; pooled within each
+timezone band at the matched window it ranges from $0.56$ for WIB
+to $0.62$ for WIT. The offset is therefore a property of the gauge
+reporting convention shared across the network, not a local effect.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourElevenWidth\textwidth]{fig_thesis_04_window_map.png}
+\caption[Per-station optimal window offset and correlation lift]{Per-station
+peak offset~$h^{\star}$ across Indonesia (a) and the per-station
+correlation lift from the UTC-day to the matched window, ordered by
+longitude and coloured by timezone band (b).\label{fig:window-map}}
+\end{figure}
+
+The window choice governs daily skill but not monthly skill.
+Aggregating the same daily totals to monthly sums and validating
+against the BMKG monthly totals returns a correlation near $0.80$
+whether the daily windows are UTC-aligned or gauge-matched
+(Table~\ref{tab:window-monthly}): a one-day window shift only
+redistributes one or two days across each month boundary, so it is
+invisible at the monthly scale. The same product that scores
+$r = 0.20$ against the daily gauges at the UTC-day alignment scores
+$r = 0.80$ against the monthly gauges, which places the daily
+ceiling in the timing of the day-by-day pairing rather than in the
+amount of rainfall the product captures.
+
+\begin{table}[H]
+\centering
+\caption[Daily versus monthly correlation under two aggregation windows]{Daily
+and monthly Pearson~$r$ under the UTC-day and gauge-matched windows
+(GPM era; $n = 5{,}338$ station-months).}
+\label{tab:window-monthly}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc@{}}
+\toprule
+Aggregation window & Daily $r$ & Monthly $r$ \\
+\midrule
+UTC day ($h = 0$)        & $0.20$ & $0.80$ \\
+Gauge-matched ($h = -23$) & $0.57$ & $0.81$ \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+These results localise the unchanged correlation of
+Section~\ref{sec:results-correlation}: the larger part of the gap
+between the UTC-day value and the gauge-matched value is a
+calendar-window component, recoverable by re-aggregating the
+archive over a window matched to the gauge convention, and the
+remainder is a residual retrieval-skill component that no window
+choice removes. The four-pillar value, distribution, extreme, and
+detection scores are functions of the marginal distribution and of
+categorical events, and are unchanged by the window observation.
+Section~\ref{sec:discussion-subdaily} develops the interpretation:
+why the recovery is confined to the GPM era, and what the
+re-aggregation implies operationally.
 
 
 % ============================================================
@@ -552,7 +685,7 @@ theoretical argument in Section~\ref{sec:discussion-bound}:
 correlation is bounded by the underlying retrieval timing,
 which is a property of the satellite product at each pixel and
 each day, and is not lifted by the marginal correction at any
-of the $171$ validation stations.
+of the $172$ validation stations.
 Appendix~\ref{app:atlas}~Figure~\ref{fig:atlas-stations}
 places the validation stations directly on dekadal-mean
 precipitation maps of the four products as a visual spatial
@@ -623,8 +756,15 @@ direction of effect of each, drawn from the design reasoning in
 Chapter~\ref{chap:methods}, then reports a parameter sweep over
 the Bali reproducibility subdomain
 (Section~\ref{sec:results-reproducibility}) that tests those
-predictions empirically. A full-domain sweep with a strict
-temporal hold-out remains future work.
+predictions empirically. The subdomain is used because each of the
+fifteen settings requires a complete end-to-end pipeline run,
+including per-dekad CNN training: the full sweep is tractable on the
+$126$-pixel Bali grid (about $72$ minutes per run;
+Section~\ref{sec:results-reproducibility}), but the per-pixel stages
+scale with the pixel count, and for the $10^{4}$ to $10^{5}$ land
+pixels of the full domain a fifteen-run national sweep is impractical
+on commodity hardware. A full-domain sweep with a strict temporal
+hold-out remains future work.
 
 The blending weight $\alpha$ sets the maximum CNN contribution
 in fully gauge-supported pixels through
@@ -677,7 +817,7 @@ $\alpha$ & $0.50$ & $0.344$ & $-14.5$ & $0.910$ & $5.88$ & $-0.40$ \\
 \multicolumn{7}{l}{\textit{GPD threshold percentile}} \\
 Pctl     & $70$ & $0.345$ & $-13.0$ & $0.923$ & $5.96$ & $-0.42$ \\
          & $75$ & $0.342$ & $-13.7$ & $0.919$ & $5.96$ & $-0.41$ \\
-         & $\mathbf{80}$ & $\mathbf{0.339}$ & $\mathbf{-15.0}$ & $\mathbf{0.904}$ & $\mathbf{5.89}$ & $\mathbf{-0.41}$ \\
+         & $\mathbf{80}$ & $\mathbf{0.340}$ & $\mathbf{-15.0}$ & $\mathbf{0.905}$ & $\mathbf{5.89}$ & $\mathbf{-0.41}$ \\
          & $85$ & $0.337$ & $-16.2$ & $0.891$ & $5.82$ & $-0.40$ \\
          & $90$ & $0.335$ & $-18.0$ & $0.867$ & $5.72$ & $-0.39$ \\
 \midrule
@@ -703,20 +843,28 @@ spread of $0.015$. No setting shifts the daily correlation by
 more than this amount, consistent with the interpretation of
 Section~\ref{sec:results-correlation} that the daily correlation
 is bounded by the timing skill of the raw retrieval rather than
-by the choice of correction parameter \citep{ref:maraun2013}.
+by the choice of correction parameter \citep{ref:maraun2013}. This
+flatness follows from the rank-preserving nature of the correction,
+not from any property of the Bali subdomain, so it is a structural
+result that holds wherever the pipeline is applied: the
+correction-parameter insensitivity of the daily correlation is not
+specific to Bali. The magnitudes of the distribution and bias
+responses in Table~\ref{tab:sensitivity-bali}, by contrast, are
+subdomain-specific and would differ in size over other regions, even
+though their direction of effect follows the design reasoning above.
 Third, the GPD threshold percentile dominates the dispersion:
 raising the percentile from the $70$th to the $90$th narrows
 the corrected distribution (SDR falls from $0.923$ to $0.867$)
 and shifts relative bias more negative (from $-13.0\%$ to
 $-18.0\%$), while RMSE falls modestly (from $5.96$ to
 $5.72$~mm/day). The blending weight and the saturation count
-each move bias by less than one percentage point and SDR by less
-than $0.012$ across their full sweep range. The operating choice
+each move bias by no more than one percentage point and SDR by
+less than $0.012$ across their full sweep range. The operating choice
 therefore sits inside a flat region for two of the three
 parameters, with the GPD threshold the single setting at which a
 downstream user would most need to revisit the trade-off.
 
-The sweep harness that produced Table~\ref{tab:sensitivity-bali}
+The sweep script that produced Table~\ref{tab:sensitivity-bali}
 accompanies the released code, so the same fifteen-setting table
 can be regenerated by an independent user without modifying the
 pipeline.
@@ -732,7 +880,7 @@ the pipeline runs end-to-end on commodity hardware. To
 demonstrate this, the full numbered-notebook sequence was
 re-executed on a free-tier Google Colab instance for a
 province-scale subdomain of Bali (a $9 \times 14$ pixel grid at
-$0.1^{\circ}$, spanning $114.4$ to $115.8^{\circ}$E and $-8.85$
+$0.1^{\circ}$, spanning $114.4$ to $115.7^{\circ}$E and $-8.85$
 to $-8.05^{\circ}$N), processing all $36$ dekadal windows of the
 $2001$ to $2025$ record. Bali was chosen because it is small
 enough to run within the free-tier session limits while
@@ -821,21 +969,18 @@ and it is identified here as the next reproducibility deliverable.
 \section*{Chapter summary}
 % ============================================================
 
-Against $171$ independent BMKG stations, the LSEQM+DL framework
+Against $172$ independent BMKG stations, the LSEQM+DL framework
 moves three of the four verification pillars cleanly toward the
-gauge target and produces a designed trade-off in the fourth. Value adjustment, distribution
-alignment, and extreme preservation all reach near-unity ratios,
-while aggregate event detection trades light-rain hits for a
-lower false-alarm ratio. The stage-wise attribution confirms that each
-stage moves the metrics matched to its design dimension. One
+gauge target, value adjustment, distribution alignment, and extreme
+preservation all reaching near-unity ratios, while the fourth, event
+detection, shows a designed trade-off of light-rain hits for a lower
+false-alarm ratio. The stage-wise attribution confirms that each
+stage moves the metric matched to its design dimension. One
 diagnostic does not move: the Pearson correlation between paired
-daily values stays near $0.34$ across all stages, a result that
-holds station-by-station in the Taylor analysis and month-by-month
-in the temporal-stability analysis. The spatial CQI maps show the
-skill concentrated in the densely gauged west, with graceful
-degradation to the LSEQM baseline in the sparsely gauged east,
-and the reproducibility evaluation demonstrates that the full
-pipeline runs end-to-end on a free Colab instance in $72.1$
-minutes for the Bali subdomain across all dekads. Chapter~\ref{chap:discussion} now explains
-this flat correlation as a structural property of marginal
-correction, not a failure of the framework.
+daily values stays near $0.34$ across all stages, station-by-station,
+and month-by-month. The spatial CQI maps concentrate the skill in the
+densely gauged west, with graceful degradation to the LSEQM baseline
+in the sparsely gauged east, and the pipeline runs end-to-end on a
+free Colab in $72.1$ minutes on the Bali subdomain.
+Chapter~\ref{chap:discussion} explains this flat correlation as a
+structural property of marginal correction, not a failure.

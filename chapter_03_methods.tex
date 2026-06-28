@@ -6,9 +6,9 @@
 % Sections: 3.1 Time, Place, and Tools, 3.2 Study Area and Data,
 %           3.3 Four-Stage Hybrid Pipeline (LSEQM+DL: LS, EQM/Gamma, GPD tail, CNN),
 %           3.4 Station-Density-Aware Blending,
-%           3.5 Reproducible Implementation Design,
-%           3.6 Validation Framework (BMKG out-of-sample),
-%           3.7 Verification Metric Catalogue (four-pillar + CQI).
+%           3.5 Validation Framework (BMKG out-of-sample),
+%           3.6 Verification Metric Catalogue (four-pillar + CQI),
+%           3.7 Reproducible Implementation Design.
 % Included by main_thesis.tex.
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
@@ -21,12 +21,11 @@ LSEQM+DL, comprising Linear Scaling (LS), Empirical Quantile Mapping (EQM),
 Generalized Pareto Distribution (GPD), and Convolutional Neural Network (CNN) 
 refinement that constitutes the Deep Learning (DL) stage (Section~\ref{sec:methods-pipeline}). It then sets out
 the station-density-aware blending design
-(Section~\ref{sec:methods-blending}), the reproducible
-implementation that supports independent verification
-(Section~\ref{sec:methods-reproducibility}), the out-of-sample
-validation framework (Section~\ref{sec:methods-validation}), and
-the verification metric catalogue
-(Section~\ref{sec:methods-metrics}). The algorithmic details
+(Section~\ref{sec:methods-blending}), the out-of-sample validation
+framework (Section~\ref{sec:methods-validation}), the verification
+metric catalogue (Section~\ref{sec:methods-metrics}), and the
+reproducible implementation that supports independent verification
+(Section~\ref{sec:methods-reproducibility}). The algorithmic details
 summarised here are extended from a parallel manuscript
 \citep{ref:istanto2026mdpi}\MDPIstatus; the present chapter adds
 the reproducibility design and the full 31-metric verification
@@ -58,13 +57,13 @@ architecture diagram, were prepared in Inkscape.
 Three datasets enter the framework. The Late Run variant of the
 Integrated Multi-satellitE Retrievals for Global Precipitation
 Measurement (IMERG) Version 7 (V07) is the product to be
-corrected. The CPC Unified Gauge-Based Analysis of Daily
+corrected. The CPC Unified Gauge-Based Analysis of Global Daily
 Precipitation (CPC-UNI) is the correction reference. The
 Indonesian Meteorological, Climatological, and Geophysical Agency
 (BMKG) operates the independent station network used for
 out-of-sample validation. Each is described in turn, with explicit
 attention to the BMKG filter logic that reduces the 180 archived
-stations to the 171 retained for the validation reported in
+stations to the 172 retained for the validation reported in
 Chapter~\ref{chap:results}.
 
 \subsection{Study Area}
@@ -82,7 +81,7 @@ high across the archipelago, but the spatial pattern is uneven:
 dense convective rainfall over Sumatra, Java, and Kalimantan
 contrasts with the comparatively drier eastern provinces. The
 convective diurnal cycle peaks at local 14:00 to 17:00 (UTC+7 to
-UTC+10), a detail that matters for daily aggregation because the
+UTC+9), a detail that matters for daily aggregation because the
 IMERG calendar day is defined in UTC and therefore splits the
 local convective afternoon across two calendar days. The gauge
 network is concentrated in Java and southern Sumatra; coverage is
@@ -101,13 +100,20 @@ product at $0.1^{\circ}$ (approximately 11~km) and 30-minute
 resolution. Three latency variants are released: Early
 (approximately 4~h), Late (approximately 14~h), and Final
 (approximately 3.5~months). The framework operates on the Late
-Run (IMERG-L) because its 14-hour latency fits within the
-same-day decision window of operational services such as
+Run daily product (IMERG-L, \texttt{GPM\_3IMERGDL.07};
+\citealp{ref:imergdl07}) because its 14-hour latency fits within
+the same-day decision window of operational services such as
 flash-flood warning and reservoir scheduling. The study period
 spans 2001-01-01 to 2025-12-31, providing 25 years of daily
 fields aggregated from the half-hourly native inputs. Native
 IMERG-L files are downloaded as NetCDF and subset to the
-Indonesian bounding box before processing.
+Indonesian bounding box before processing. The same Late Run is
+also used at its native half-hourly resolution
+(\texttt{GPM\_3IMERGHHL.07}; \citealp{ref:imerghhl07}) for the
+window-offset timing diagnostic in
+Section~\ref{sec:methods-window}; using the gauge-free Late Run
+at both resolutions keeps the diagnostic consistent with the
+product the pipeline corrects.
 
 \subsection{CPC Unified Gauge-Based Analysis}
 
@@ -152,11 +158,12 @@ interpolation step entirely. Validation therefore tests whether
 the corrected satellite reproduces the original point
 observations, not whether it reproduces the gridded reference.
 
-The raw archive contains 180 stations with daily observations
-from 2001-01-01 to 2025-12-31. Missing days are sentinel-coded as
-$8888.0$ in the source file; after sentinel removal the archive
-yields 880{,}702 valid daily observations. Two filters are
-applied before validation:
+The BMKG network reports in near-real-time, but the record
+extracted for this study covers 180 stations with daily
+observations from 2001-01-01 to 2021-12-31. Missing days are
+sentinel-coded as $8888.0$ in the source file; after sentinel
+removal the extracted record yields 880{,}702 valid daily
+observations. Two filters are applied before validation:
 
 \begin{enumerate}
     \item \textit{Spatial mapping filter.} The station's reported
@@ -171,9 +178,9 @@ applied before validation:
     Stations with very sparse records fail.
 \end{enumerate}
 
-Together the two filters drop 9 of the 180 archived stations,
-leaving 171 with usable data for the per-station verification
-reported in Chapter~\ref{chap:results}. The 9 dropped stations
+Together the two filters drop 8 of the 180 archived stations,
+leaving 172 with usable data for the per-station verification
+reported in Chapter~\ref{chap:results}. The 8 dropped stations
 fall into two categories. A small subset of stations report
 coordinates that lie outside the Indonesian land mask used by
 the satellite product, typically because the station is on a
@@ -183,7 +190,7 @@ error. The remaining dropped stations satisfy the spatial filter
 but yield fewer than 30 paired daily observations after sentinel
 removal, generally reflecting extended periods of equipment
 failure, transmission gaps, or stations that came online only
-late in the 2001 to 2025 window. The retained network spans the
+late in the 2001 to 2021 window. The retained network spans the
 seven major regions of the archipelago: Sumatra, Kalimantan,
 Sulawesi, Java, Bali and Nusa Tenggara, Maluku, and Papua. The
 full archived network is shown in Figure~\ref{fig:station-map},
@@ -404,6 +411,11 @@ threshold $u_{\text{ref}}$:
 P_{\text{LSEQM}} = u_{\text{ref}} + G_{\text{ref}}^{-1}(p_c).
 \label{eq:gpd-map}
 \end{equation}
+In the implementation the reference GPD is fitted to the
+threshold exceedances $x - u_{\text{ref}}$ with its location
+pinned to zero, so $G_{\text{ref}}^{-1}(p_c)$ returns an
+exceedance above $u_{\text{ref}}$ and the threshold is added
+back to recover the absolute value.
 Equations~\eqref{eq:gpd-pc} and~\eqref{eq:gpd-map} preserve the
 rank of the satellite value within its own tail and place it at
 the matching quantile of the reference tail, so the heavy-tail
@@ -524,17 +536,33 @@ output layer that reconstructs the full grid
 precipitation is non-negative, but a ReLU at the output would
 clamp at zero and remove the gradient signal that the mean
 squared error loss needs to refine values near the threshold.
-The non-negativity constraint is enforced at post-processing
-through the 99.9th-percentile cap from
-Section~\ref{sec:methods-gpd} rather than at the activation.
+The non-negativity constraint is enforced by clipping the
+blended output at zero in post-processing; the
+99.9th-percentile cap from Section~\ref{sec:methods-gpd} bounds
+the upper tail separately and is not re-applied after blending.
 Dropout in three places (after each of the two MaxPool layers
-and after the Dense bottleneck) is aggressive regularisation
-for a network this small; this is appropriate given the
-per-dekad sample size, discussed below.
+and after the Dense bottleneck) provides aggressive
+regularisation. The final Dense layer reconstructs the full
+grid and dominates the parameter count, so the network is large
+relative to the per-dekad training sample; the risk of
+overfitting is contained at inference rather than by the
+architecture, through applying the refinement only to extreme
+pixels, capping its contribution through the blend weight, and
+disabling it where station density is low, as discussed below. A
+fully-convolutional reconstruction head, prototyped on the Bali
+subdomain, matches the dense model's station-validation skill
+while cutting the Stage-4 parameter count by roughly $900$ times
+at the full Indonesia resolution; the dense head is retained here
+so that the released models reproduce the numbers reported in this
+thesis, with the fully-convolutional variant available through the
+\texttt{architecture} option as the recommended extension for
+full-resolution deployment.
 
 The model is trained one per dekadal window on the LSEQM-corrected
 field as input and the CPC-UNI reference as target. Loss is
-mean squared error computed at extreme pixels only, the Adam
+mean squared error over the full field; the extreme-pixel
+restriction is applied only at the blending step, not during
+training. The Adam
 optimizer \citep{ref:kingma2014} drives the parameter update,
 and an internal $80/20$ train-validation split with early
 stopping (patience of five epochs) controls the number of
@@ -611,18 +639,34 @@ Section~\ref{sec:methods-blending} formalises.
 \clearpage
 
 Figure~\ref{fig:stage-demo} shows the effect of the four stages
-on an illustrative 60-day sample, arranged in a $3 \times 3$
-grid. The reference shown in the figure is the CPC-UNI
-calibration target the pipeline acts on; the independent
-out-of-sample validation against 171 BMKG stations is reported
-in Chapter~\ref{chap:results}. The first row walks through the
-early stages on the time-series view and includes a dedicated
-mechanism panel for quantile mapping; the second row collects
-distribution diagnostics across the EQM and GPD stages; the
-third row covers the CNN refinement, the final corrected output,
-and the headline metric summary. The data are synthetic for
+on an illustrative 60-day sample, arranged in a $5 \times 2$
+grid read from top to bottom. The reference shown in the figure
+is the CPC-UNI calibration target the pipeline acts on; the
+independent out-of-sample validation against 172 BMKG stations
+is reported in Chapter~\ref{chap:results}. Panels (a, b) show the
+raw input and the LS mean match; panels (c, d) show the EQM
+quantile-mapping mechanism and its effect on the daily series;
+panels (e, f) show the GPD adjustment on the series and on the
+wet-day tail; panels (g, h) show the CNN refinement and the final
+corrected output; and panels (i, j) summarise the cross-stage
+distributions and the headline metrics. The data are synthetic for
 illustration; the empirical numbers for the BMKG validation
 appear in Chapter~\ref{chap:results}.
+
+Read together, the panels make the division of labour between the
+stages concrete. The LS step in panel (b) lifts the whole series
+to the gauge mean but leaves the day-to-day spread too narrow, so
+the heaviest days stay under-corrected. The EQM step in panels
+(c, d) widens the wet-day distribution to match the gauge, yet a
+Gamma fit alone still clips the rarest events. The GPD step in
+panels (e, f) restores those upper-tail days without disturbing the
+bulk of the distribution, and the CNN refinement in panel (g) moves
+only the extreme pixels toward the reference. The cumulative effect
+in panel (h) is a series whose mean, spread, and tail all track
+CPC-UNI; the empirical distributions in panel (i) and the metric
+summary in panel (j) confirm that relative bias, the
+standard-deviation ratio, and the 99th-percentile ratio each move
+toward their targets across the four stages.
 
 \begin{figure}[H]
 \centering
@@ -686,14 +730,17 @@ Section~\ref{sec:methods-gpd}; sub-threshold pixels pass
 through the LSEQM result unchanged.
 
 The confidence field $C(x, y)$ is built in three steps. First,
-the stations that contribute to the CPC-UNI gauge analysis are
-counted within each $0.5^{\circ}$ CPC cell. The relevant
-network is the CPC-UNI contributing-station list, which
-controls how well the reference is constrained at each cell; it
-is not the 171-station BMKG validation network of
-Section~\ref{sec:methods-data}, which serves a separate purpose
-in out-of-sample verification. The two networks overlap
-substantially but are not identical. Second, the count field is smoothed with
+the BMKG gauge-station locations of
+Section~\ref{sec:methods-data} are counted within each
+$0.5^{\circ}$ CPC cell as a proxy for how densely the reference
+is constrained there. The same station archive supplies the
+out-of-sample validation points, so the deep-learning
+refinement is most active in the cells where validation stations
+are densest; because the refinement is capped and acts only on
+extreme pixels, gauge values are not transferred into the
+validation comparison, but this coupling between the density
+gate and the validation network is noted here.
+Second, the count field is smoothed with
 a Gaussian filter of standard deviation $\sigma = 1$ cell, which
 corresponds to an e-folding distance of approximately 55~km at
 0.5$^{\circ}$ resolution. The smoothing scale is matched to the
@@ -737,112 +784,6 @@ response to sweeps across both parameters.
 
 
 % ------------------------------------------------------------
-\section{Reproducible Implementation Design}\label{sec:methods-reproducibility}
-% ------------------------------------------------------------
-
-The first three sections describe the pipeline as an algorithm.
-This section describes it as a software artefact. Reproducibility
-is treated here as a parallel methodological contribution of the
-thesis: every result reported in Chapter~\ref{chap:results} maps
-to a specific function in the source codebase, a specific cell
-in a numbered notebook, and a specific configuration value in
-\texttt{config.yml}. The empirical demonstration of end-to-end
-re-runnability is given in
-Section~\ref{sec:results-reproducibility}; this section
-describes the design that supports it.
-
-\subsection{Module Architecture}
-
-The Python implementation is partitioned into ten modules under
-\texttt{src/}, each with a single responsibility:
-\texttt{config} (path and parameter resolution),
-\texttt{io} (NetCDF and CSV input and output),
-\texttt{utility} (land-mask, lat-flip, sentinel handling),
-\texttt{bias\_correction} (LS and EQM stages),
-\texttt{distribution\_fitting} (Gamma and GPD parameter
-estimation via maximum likelihood, with the subsample-averaging
-aggregator for small exceedance samples),
-\texttt{deep\_learning} (CNN architecture, training loop, and
-inference),
-\texttt{station\_density} (confidence-mask construction),
-\texttt{metrics} (the 31-metric verification catalogue),
-\texttt{qa\_framework} (Composite Quality Index assembly), and
-\texttt{station\_validation} (per-station extraction and
-pairing). Each module is importable and exposes a small number
-of named entry points; no inline function definitions appear in
-the notebooks.
-
-\subsection{Configuration-Driven Design}
-
-All paths and parameters are declared in a single YAML file at
-the project root, \texttt{config.yml}. A loader,
-\texttt{initialize\_config()}, resolves placeholders such as
-\texttt{\{main\_dir\}}, \texttt{\{input\_dir\}}, and
-\texttt{\{output\_dir\}} to absolute paths at run time. The
-sensitivity parameters acknowledged earlier in this chapter
-($\alpha = 0.70$, the 80th-percentile GPD threshold, and
-$c_{\text{sat}} = 2$) are exposed as named entries in
-\texttt{config.yml}, so a sensitivity sweep is a configuration
-edit followed by a re-run, with no code changes. The same
-configuration file controls the dataset paths, the output
-directory layout, the metric pillars, the CNN architecture
-hyperparameters, and the per-method output filenames.
-
-\subsection{Notebook Workflow}
-
-The pipeline is exposed through six numbered Jupyter notebooks
-under \texttt{notebooks/}: 01 (data acquisition), 02 (LSEQM+DL
-bias correction), 03 (performance measurement), 04 (QA
-framework), 05 (QA visualisation), and 06 (station validation).
-Each notebook follows a
-consistent style: short Markdown section headers, small code
-cells with a single concern per cell, and calls into the
-\texttt{src/} modules rather than inline implementations. The
-batch-execution cells at the end of each notebook loop over the
-36 dekadal windows with \texttt{try-except} guards so that a
-failure in one window does not interrupt the others. The same
-notebook can be opened in a local Jupyter installation or in
-JupyterLab; the behaviour is the same because the configuration
-file is identical across environments.
-
-\subsection{Documentation Site}
-
-The \texttt{docs/} directory is a Quarto project that serves as
-the documentation site for the framework. The site is structured
-into sections that mirror this chapter: \textit{get-started},
-\textit{methodology}, \textit{implementation}, \textit{technical},
-\textit{example (Bali)}, and \textit{FAQ}. Each documentation page
-is cross-linked to the specific notebook cell and source-code
-function it describes, so a reader following the documentation can
-move directly to the runnable artefact and back. The source code,
-notebooks, and documentation are released openly on GitHub under
-the Mozilla Public License 2.0, and the full Indonesia input and
-output data are deposited on Zenodo with a citable DOI
-(Appendix~\ref{app:code}); the documentation site is the
-recommended entry point for any reader who wants to run or extend
-the pipeline.
-
-\subsection{Environment Specification}
-
-The Python environment is declared in \texttt{environment.yml}
-with pinned versions for the core scientific packages
-(\texttt{numpy}, \texttt{xarray}, \texttt{scipy},
-\texttt{scikit-learn}, \texttt{tensorflow}, \texttt{keras},
-\texttt{lmoments3}). The environment was tested on a Windows
-local installation with a Conda environment named
-\texttt{climate}. Hardware-dependent paths in the CNN training
-step are auto-detected at runtime.
-
-Together, these five elements (module architecture, configuration
-file, numbered notebooks, documentation site, and
-pinned environment) form the reproducibility design of the
-framework. Section~\ref{sec:results-reproducibility} demonstrates
-that an end-to-end re-run from the published source reproduces
-the headline numbers in Chapter~\ref{chap:results} to within the
-floating-point tolerance of the underlying libraries.
-
-
-% ------------------------------------------------------------
 \section{Validation Framework}\label{sec:methods-validation}
 % ------------------------------------------------------------
 
@@ -853,7 +794,7 @@ first tier compares the corrected satellite against CPC-UNI on
 the native CPC 0.5$^{\circ}$ grid; this is an in-sample comparison
 because CPC-UNI is the correction reference, and it tests
 whether the pipeline successfully matches the training target.
-The second tier compares the corrected satellite against the 171
+The second tier compares the corrected satellite against the 172
 BMKG stations on a per-station basis; this is an out-of-sample
 comparison because no BMKG station enters the correction step
 directly. All headline skill numbers in Chapter~\ref{chap:results}
@@ -915,7 +856,7 @@ out-of-sample metric reported in Chapter~\ref{chap:results}.
 \subsection{Reporting Conventions}
 
 Headline numbers in Chapter~\ref{chap:results} are pooled
-across the 171 stations and the 36 dekadal windows unless stated
+across the 172 stations and the 36 dekadal windows unless stated
 otherwise. Per-region and per-pillar breakdowns are reported in
 the appropriate subsections of Chapter~\ref{chap:results} where
 the spatial or pillar-level pattern is the object of analysis.
@@ -1156,6 +1097,178 @@ shifts in Pearson correlation reported in
 Section~\ref{sec:results-correlation}.
 
 
+\subsection{Window-Offset Diagnostic}\label{sec:methods-window}
+
+The Pearson diagnostic of Equation~\ref{eq:pearson} is bounded by
+the day-by-day pairing of the satellite and gauge series, which
+depends on the 24-hour window used to accumulate each daily total.
+The daily IMERG-L archive accumulates over the UTC day, whereas
+the BMKG and CPC-UNI gauges accumulate over the local day ending
+at the morning observation. To quantify the contribution of this
+window definition to the correlation, a window-offset diagnostic
+re-aggregates the half-hourly IMERG-L source \citep{ref:imerghhl07}
+into 24-hour windows starting at each integer-hour offset
+$h \in [-48, +48]$ from $00{:}00$~UTC. For target date~$d$ the
+satellite daily total at offset~$h$ is
+\begin{equation}
+S_d(h) = \tfrac{1}{2}\sum_{k=0}^{47}
+         P\!\left(d_0 + h + \tfrac{k}{2}\,\text{h}\right),
+\label{eq:window}
+\end{equation}
+where $P(\cdot)$ is the half-hourly rain rate in mm/h, the factor
+$\tfrac{1}{2}$ converts each 30-minute rate to a depth, and $d_0$
+is $00{:}00$~UTC on date~$d$. The offset that maximises the
+correlation of Equation~\ref{eq:pearson} between $S_d(h)$ and the
+BMKG daily total, $h^{\star} = \arg\max_h r(h)$, identifies the
+satellite window best aligned with the gauge reporting convention.
+The procedure follows the gauge-timing inference of
+\citet{ref:beck2019}. The gauge observation time is not altered; only
+the satellite aggregation window is shifted. Because the BMKG total
+labelled with a given date covers the 24-hour period ending at that
+morning's observation, it mostly reflects rain that fell on the
+previous calendar day, so the matching satellite window begins
+roughly a day before the UTC archive does
+(Figure~\ref{fig:window-schematic}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figThreeWindowWidth\textwidth]{fig_thesis_03_window_schematic.png}
+\caption[Why a $-23$ h window aligns the satellite with the BMKG gauge day]{Why a $-23$~h window aligns the satellite with the BMKG gauge day.\label{fig:window-schematic}}
+\end{figure}
+
+Because marginal correction preserves the rank order of the daily
+series, the correlation is essentially invariant to the LSEQM+DL
+stages (Section~\ref{sec:discussion-bound}). The diagnostic is
+therefore computed on the raw half-hourly retrieval rather than on
+the corrected product, which isolates the window contribution
+without re-running the pipeline at each of the $97$ offsets. The
+correlation is pooled through additive sufficient statistics, so
+that any aggregation, by pooled station-day pairs, by timezone
+band, by calendar month, or by three-month running season, follows
+without recomputation. Two poolings are reported: the full BMKG
+record ($2001$ to $2021$, the span of the half-hourly archive
+processed for the window diagnostic), which resolves the
+dependence of the recovery on the satellite era, and the GPM era ($2015$ to $2021$),
+which gives the seasonal and per-station climatology over the
+years in which IMERG resolves the diurnal cycle. Timezone bands
+use the operational WIB, WITA, and WIT assignment ($\text{UTC}+7$,
+$+8$, $+9$) recorded for each station.
+
+A monthly re-validation aggregates the daily totals at the
+UTC-day and the matched windows into monthly sums and compares
+them against the BMKG monthly totals. A station-month is retained
+only when no more than five daily values are missing, so that each
+monthly total rests on near-complete coverage. This tests whether
+the window dependence of the daily correlation survives temporal
+aggregation.
+
+
+% ------------------------------------------------------------
+\section{Reproducible Implementation Design}\label{sec:methods-reproducibility}
+% ------------------------------------------------------------
+
+The first three sections describe the pipeline as an algorithm.
+This section describes it as a software artefact. Reproducibility
+is treated here as a parallel methodological contribution of the
+thesis: every result reported in Chapter~\ref{chap:results} maps
+to a specific function in the source codebase, a specific cell
+in a numbered notebook, and a specific configuration value in
+\texttt{config.yml}. The empirical demonstration of end-to-end
+re-runnability is given in
+Section~\ref{sec:results-reproducibility}; this section
+describes the design that supports it.
+
+\subsection{Module Architecture}
+
+The Python implementation is partitioned into ten modules under
+\texttt{src/}, each with a single responsibility:
+\texttt{config} (path and parameter resolution),
+\texttt{io} (NetCDF and CSV input and output),
+\texttt{utility} (land-mask, lat-flip, sentinel handling),
+\texttt{bias\_correction} (LS and EQM stages),
+\texttt{distribution\_fitting} (Gamma and GPD parameter
+estimation via maximum likelihood, with the subsample-averaging
+aggregator for small exceedance samples),
+\texttt{deep\_learning} (CNN architecture, training loop, and
+inference),
+\texttt{station\_density} (confidence-mask construction),
+\texttt{metrics} (the 31-metric verification catalogue),
+\texttt{qa\_framework} (Composite Quality Index assembly), and
+\texttt{station\_validation} (per-station extraction and
+pairing). Each module is importable and exposes a small number
+of named entry points; no inline function definitions appear in
+the notebooks.
+
+\subsection{Configuration-Driven Design}
+
+All paths and parameters are declared in a single YAML file at
+the project root, \texttt{config.yml}. A loader,
+\texttt{initialize\_config()}, resolves placeholders such as
+\texttt{\{main\_dir\}}, \texttt{\{input\_dir\}}, and
+\texttt{\{output\_dir\}} to absolute paths at run time. The
+sensitivity parameters acknowledged earlier in this chapter
+($\alpha = 0.70$, the 80th-percentile GPD threshold, and
+$c_{\text{sat}} = 2$) are exposed as named entries in
+\texttt{config.yml}, so a sensitivity sweep is a configuration
+edit followed by a re-run, with no code changes. The same
+configuration file controls the dataset paths, the output
+directory layout, the metric pillars, the CNN architecture
+hyperparameters, and the per-method output filenames.
+
+\subsection{Notebook Workflow}
+
+The pipeline is exposed through six numbered Jupyter notebooks
+under \texttt{notebooks/}: 01 (data acquisition), 02 (LSEQM+DL
+bias correction), 03 (performance measurement), 04 (QA
+framework), 05 (QA visualisation), and 06 (station validation).
+Each notebook follows a
+consistent style: short Markdown section headers, small code
+cells with a single concern per cell, and calls into the
+\texttt{src/} modules rather than inline implementations. The
+batch-execution cells at the end of each notebook loop over the
+36 dekadal windows with \texttt{try-except} guards so that a
+failure in one window does not interrupt the others. The same
+notebook can be opened in a local Jupyter installation or in
+Google Colab; the behaviour is the same because the configuration
+file is identical across environments.
+
+\subsection{Documentation Site}
+
+The \texttt{docs/} directory is a Quarto project that serves as
+the documentation site for the framework. The site is structured
+into sections that mirror this chapter: \textit{get-started},
+\textit{methodology}, \textit{implementation}, \textit{technical},
+\textit{example (Bali)}, and \textit{FAQ}. Each documentation page
+is cross-linked to the specific notebook cell and source-code
+function it describes, so a reader following the documentation can
+move directly to the runnable artefact and back. The source code,
+notebooks, and documentation are released openly on GitHub under
+the Mozilla Public License 2.0, and the full Indonesia input and
+output data are deposited on Zenodo with a citable DOI
+(Appendix~\ref{app:code}); the documentation site is the
+recommended entry point for any reader who wants to run or extend
+the pipeline.
+
+\subsection{Environment Specification}
+
+The Python environment is declared in \texttt{environment.yml}
+with pinned versions for the core scientific packages
+(\texttt{numpy}, \texttt{xarray}, \texttt{scipy},
+\texttt{scikit-learn}, \texttt{tensorflow}, \texttt{keras},
+\texttt{lmoments3}). The environment was tested on a Windows
+local installation with a Conda environment named
+\texttt{climate}. Hardware-dependent paths in the CNN training
+step are auto-detected at runtime.
+
+Together, these five elements (module architecture, configuration
+file, numbered notebooks, documentation site, and
+pinned environment) form the reproducibility design of the
+framework. Section~\ref{sec:results-reproducibility} demonstrates
+that an end-to-end re-run from the published source reproduces
+the headline numbers in Chapter~\ref{chap:results} to within the
+floating-point tolerance of the underlying libraries.
+
+
 % ------------------------------------------------------------
 \section*{Chapter summary}
 % ------------------------------------------------------------
@@ -1171,7 +1284,7 @@ pipeline degrades gracefully to LSEQM in regions where the
 reference is weak. The implementation is partitioned into
 single-responsibility modules, driven by a single configuration
 file, exposed through six numbered notebooks, and documented
-through a Quarto site. Validation against 171 out-of-sample BMKG stations
+through a Quarto site. Validation against 172 out-of-sample BMKG stations
 pools across 36 dekadal windows and 25 years to give the sample
 size needed for stable distribution fits and small noise floors
 on the headline metrics. The 31-metric verification catalogue is

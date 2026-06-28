@@ -73,6 +73,8 @@ plot_vars = [
 ]
 method_colors = {"ls": "#4393c3", "lseqm": "#f4a582", "lseqmdl": "#d6604d"}
 method_styles = {"ls": "--",      "lseqm": "-.",      "lseqmdl": "-"}
+# square marker on LSEQM so its line stays visible where LSEQM+DL coincides with it
+method_markers = {"ls": "o",      "lseqm": "s",       "lseqmdl": "o"}
 
 fig, axes = plt.subplots(2, 2, figsize=(12, 9), constrained_layout=True)
 month_labels = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"]
@@ -90,8 +92,10 @@ for ax, (var, label, ideal) in zip(axes.ravel(), plot_vars):
         ax.plot(months_x, vals_y,
                 color=method_colors[method],
                 linestyle=method_styles[method],
-                marker="o", markersize=4,
-                label=mlabel, linewidth=1.5)
+                marker=method_markers[method],
+                markersize=5 if method == "lseqm" else 4,
+                label=mlabel, linewidth=1.5,
+                zorder=5 if method == "lseqmdl" else 3)
     if ideal is not None:
         ax.axhline(ideal, color="grey", linestyle=":", linewidth=0.8, alpha=0.5)
     ax.set_title(label, fontweight="bold")
@@ -101,9 +105,6 @@ for ax, (var, label, ideal) in zip(axes.ravel(), plot_vars):
     ax.set_ylabel(label)
     ax.legend(fontsize=7)
     ax.grid(alpha=0.3)
-
-fig.suptitle("Monthly Temporal Stability of Corrections",
-             fontsize=12, fontweight="bold", y=1.06)
 
 fig.savefig(OUT, dpi=200, bbox_inches="tight", facecolor="white")
 print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB)")
