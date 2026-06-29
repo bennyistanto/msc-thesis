@@ -85,12 +85,12 @@ SANTIKAYASA.
 Daily satellite precipitation underpins flood early warning, drought
 monitoring, and water-budget analysis, but the Integrated Multi-satellitE
 Retrievals for Global Precipitation Measurement Late Run (IMERG-L)
-carries systematic biases over the Indonesian Maritime Continent. This thesis evaluates a four-stage hybrid
-bias correction pipeline: Linear Scaling (LS), Empirical Quantile
-Mapping (EQM) with a Gamma fit, Generalized Pareto Distribution (GPD)
-tail adjustment, and a station-density-aware Convolutional Neural
-Network (CNN) refinement, a Deep Learning (DL) architecture, denoted
-LSEQM+DL, applied to IMERG-L over Indonesia for $2001$ to $2025$, with
+carries systematic biases over the Indonesian Maritime Continent. 
+This thesis evaluates a four-stage hybrid bias correction pipeline: 
+Linear Scaling (LS), Empirical Quantile Mapping (EQM) with a Gamma fit, 
+Generalized Pareto Distribution (GPD) tail adjustment, and a station-density-aware 
+Convolutional Neural Network (CNN) refinement, a Deep Learning (DL) architecture, 
+denoted LSEQM+DL, applied to IMERG-L over Indonesia for $2001$ to $2025$, with
 gauge validation against $172$ out-of-sample stations of Indonesia's
 Meteorological, Climatological, and Geophysical Agency (BMKG).
 
@@ -112,9 +112,8 @@ daily satellite and gauge values stays near $0.34$ across all four stages
 and stays in the narrow band $[0.332, 0.348]$ across all fifteen settings
 of a Bali sensitivity sweep over the blending weight, the GPD threshold
 percentile, and the station-density saturation count, none of which was formally
-optimised. This is the
-predicted behaviour of marginal bias correction, where rank preservation
-and variance inflation without skill bound the attainable correlation at
+optimised. This is the predicted behaviour of marginal bias correction, where rank 
+preservation and variance inflation without skill bound the attainable correlation at
 the timing quality of the raw retrieval. Re-aggregating the half-hourly
 IMERG-L source to a 24-hour window matched to the local-day
 morning-observation convention of the BMKG validation network
