@@ -32,11 +32,12 @@ url: "https://github.com/bennyistanto/hybrid-bias-correction"
 # Companion outputs (parent code repository, data archive):
 references:
   - type: software
-    title: "hybrid-bias-correction: LSEQM+DL pipeline source code"
+    title: "Hybrid Bias Correction: Values, Distributions, Extremes - with Neural Refinement"
     authors:
       - family-names: "Istanto"
         given-names: "Benny"
     repository-code: "https://github.com/bennyistanto/hybrid-bias-correction"
+    doi: "10.5281/zenodo.20473508"
   - type: data
     title: "Hybrid Bias Correction of IMERG Late Run V07 over Indonesia (2001-2025): Input Data, Land-Sea Masks, and Corrected Products"
     authors:
