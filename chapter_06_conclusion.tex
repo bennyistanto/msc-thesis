@@ -12,11 +12,12 @@
 
 \chapter{Conclusion}\label{chap:conclusion}
 
-This thesis asked what a marginal-correction bias correction
-framework can and cannot do for a daily satellite precipitation field, and it
-answered the question in two registers: what the framework
-delivers as a scientific result, and what it delivers as a
-reproducible methodological artefact. This chapter summarises
+This thesis set out to present a hybrid bias correction framework
+for daily satellite precipitation and to establish, dimension by
+dimension, what it corrects and where it is bounded. It delivered
+the result in two registers: what the framework achieves as a
+scientific result, and what it provides as a reproducible
+methodological artefact. This chapter summarises
 the findings, states their implications, and sets out
 recommendations for users, researchers, and the institutions that
 maintain the underlying data.
@@ -29,8 +30,8 @@ maintain the underlying data.
 The scientific finding is a stage-resolved account of what the
 LSEQM+DL (Linear Scaling, Empirical Quantile Mapping, Generalized
 Pareto Distribution tail correction, and Deep Learning refinement
-through a Convolutional Neural Network) pipeline can and cannot
-do. Applied to the Integrated Multi-satellitE Retrievals for
+through a Convolutional Neural Network) framework corrects and
+what it leaves unmoved. Applied to the Integrated Multi-satellitE Retrievals for
 Global Precipitation Measurement (GPM) Late Run (IMERG-L) over
 Indonesia for 2001 to 2025 and validated against 172 independent
 Meteorological, Climatological, and Geophysical Agency (BMKG)
@@ -50,7 +51,7 @@ $20$~mm/day threshold that drives flood and drought decisions.
 Each stage moves the metrics matched to its design dimension and
 leaves the others alone.
 
-The result that gives the thesis its title is the one metric that
+The most consequential result is the one metric that
 does not move. The Pearson correlation between paired daily
 satellite and gauge values stays near $0.34$ across all three
 corrected stages, a shift smaller than the single-pixel sampling
@@ -63,8 +64,8 @@ together bound the attainable correlation at the day-by-day
 pairing quality of the raw satellite retrieval, which lies
 upstream of every step in the pipeline. The corrected value of
 $0.348$ sits inside the empirical band of $0.3$ to $0.5$ reported
-for daily IMERG over tropical regions. The answer to the title
-question is therefore precise: a marginal-correction framework
+for daily IMERG over tropical regions. The framework's reach is
+therefore precise: a marginal-correction framework
 can take a daily field all the way to the gauge marginal
 distribution at every percentile, and no distance at all along
 the axis of day-by-day timing.
