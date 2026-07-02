@@ -50,7 +50,8 @@ are consequential everywhere, but they are acute over the
 tropical Maritime Continent, where convective rainfall dominates
 the seasonal cycle and the contributing gauge network is dense
 only over Java and southern Sumatra, thinning sharply toward
-Maluku and Papua \citep{ref:ramadhan2022, ref:chen2008}.
+Maluku and Papua \citep{ref:ramadhan2022, ref:rahmawati2021,
+ref:mashuri2025, ref:chen2008}.
 
 Four families of statistical and machine-learning methods have
 been developed to correct these biases, each addressing a
@@ -108,8 +109,9 @@ recognised in validation studies, which align the accumulation
 period to the gauge convention \citep{ref:xie2022, ref:salio2015,
 ref:tan2019, ref:li2018}, but to our knowledge it has not been
 carried into the bias-correction step: satellite-precipitation bias
-corrections over Indonesia \citep{ref:suhartanto2025,
-ref:ramadhan2024sumatra} and elsewhere \citep{ref:wei2022} adjust
+corrections over Southeast Asia, including the Indonesian
+archipelago \citep{ref:wang2026}, and across the wider region
+\citep{ref:yang2022, ref:iqbal2022, ref:wei2022} adjust
 rainfall magnitudes against a fixed daily window without re-aligning
 it to the gauge reporting convention.
 
@@ -119,12 +121,12 @@ it to the gauge reporting convention.
 % ============================================================
 
 The two gaps combine into a single problem with two faces. On
-the scientific side, the question is not whether a hybrid bias
-correction pipeline improves daily satellite precipitation in
-aggregate, which the literature already establishes, but which
-bias dimension each stage corrects, and the reach of the correction
-along each dimension when judged against independent
-gauges. A pipeline can report a high aggregate score while
+the scientific side, a hybrid bias correction framework of this
+kind is known to improve daily satellite precipitation in
+aggregate, but what it corrects is not resolved dimension by
+dimension: which bias dimension each stage moves, and how far the
+correction reaches along that dimension when judged against
+independent gauges, remain unquantified. A pipeline can report a high aggregate score while
 leaving a specific operationally important dimension unmoved, and
 only a stage-resolved verification against out-of-sample stations
 can reveal this. The day-by-day temporal pairing between
@@ -152,21 +154,24 @@ reproducible artefact that an independent reader can re-execute.
 The study pursues five objectives:
 
 \begin{enumerate}
-    \item To attribute the skill of the LSEQM+DL pipeline
-    stage-by-stage against 172 independent Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) stations,
-    establishing which bias dimension each of the four stages
-    corrects and by how much.
-    \item To test, empirically and theoretically, the bound on
-    the Pearson correlation between corrected daily satellite and
-    gauge values under marginal correction, and to locate the
-    observed value within the empirical band reported for daily
-    IMERG over the tropics.
-    \item To decompose the daily Pearson-correlation ceiling into a
-    recoverable calendar-window component and a residual
-    retrieval-skill component, by re-aggregating the half-hourly
-    satellite source to a window matched to the gauge reporting
-    convention, and to characterise the optimal window across
-    season, space, and satellite era.
+    \item To present the LSEQM+DL framework as an integrated,
+    configuration-driven workflow and apply it to IMERG-L over
+    Indonesia for the 2001 to 2025 record.
+    \item To characterise, stage by stage against 172 independent
+    Indonesian Meteorological, Climatological, and Geophysical
+    Agency (BMKG) stations, which bias dimension each of the four
+    stages corrects and by how much.
+    \item To establish the framework's reach and its limit along
+    the day-by-day timing dimension: to test, empirically and
+    theoretically, the bound on the Pearson correlation between
+    corrected daily satellite and gauge values under marginal
+    correction, locating the observed value within the empirical
+    band reported for daily IMERG over the tropics; and to
+    decompose that ceiling into a recoverable calendar-window
+    component and a residual retrieval-skill component by
+    re-aggregating the half-hourly satellite source to a window
+    matched to the gauge reporting convention, characterising the
+    optimal window across season, space, and satellite era.
     \item To deliver the pipeline as a reproducible, open,
     configuration-driven implementation that an independent reader
     can re-execute end-to-end on commodity hardware.
@@ -175,9 +180,12 @@ The study pursues five objectives:
     serves well from those it does not.
 \end{enumerate}
 
-The benefits follow the objectives. The scientific benefit is
+The benefits follow the objectives. The methodological benefit is
+the delivered framework itself: an integrated, openly released
+implementation that others can apply, recalibrate to another
+region or product, or build on. The scientific benefit is
 attribution clarity: a verification posture that separates a
-structural limit of a method from a failure of a method, so that
+structural limit of the framework from a failure of it, so that
 the corrected product is neither over-trusted nor dismissed. The
 operational benefit is guidance: a clear statement of which
 applications the corrected daily product supports and which it
@@ -274,12 +282,12 @@ checkable.
 \section{Hypotheses}\label{sec:intro-hypotheses}
 % ============================================================
 
-The study tests three hypotheses:
+The study tests three hypotheses about the framework's behaviour:
 
 \begin{description}[noitemsep, topsep=2pt]
-    \item[H1.] Each correction stage moves the verification
-    metric matched to its design dimension toward the gauge
-    target: Linear Scaling moves the mean, Empirical Quantile
+    \item[H1.] The framework corrects as designed, each stage
+    moving the verification metric matched to its design dimension
+    toward the gauge target: Linear Scaling moves the mean, Empirical Quantile
     Mapping moves the distribution shape, the Generalized Pareto
     adjustment moves the upper tail, and the Convolutional Neural
     Network refines the spatial structure of the extremes.
@@ -324,5 +332,5 @@ Chapter~\ref{chap:discussion} develops the theoretical bound on
 the correlation, the interpretation of the optimal aggregation
 window, the operational implications, the reproducibility
 implications, the paths forward, and the limitations.
-Chapter~\ref{chap:conclusion} returns to the title question and
+Chapter~\ref{chap:conclusion} draws the findings together and
 states the recommendations.
