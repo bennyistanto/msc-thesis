@@ -296,13 +296,15 @@
 
 % ============================================================
 % MAIN MATTER (arabic page numbers, from Chapter 1)
-% Force Introduction onto a recto so page 1 is a right-hand (odd) page
-% with the 4 cm binding margin on the left; this is the only place a
-% blank leaf may be inserted, to keep double-sided pagination aligned.
+% From here on every chapter (and the References and Appendix
+% headings) opens on a recto/odd page so the 4 cm binding margin
+% falls on the left, with a blank leaf inserted where needed. The
+% front matter above is typeset openany and is left untouched.
 % ============================================================
 \cleardoublepage
 \pagenumbering{arabic}
 \setcounter{page}{1}
+\makeatletter\@openrighttrue\makeatother
 
 \input{chapter_01_introduction.tex}
 \input{chapter_02_literature_review.tex}
@@ -312,7 +314,8 @@
 \input{chapter_06_conclusion.tex}
 
 % --- References ---
-\clearpage
+\cleardoublepage
+\phantomsection
 \addcontentsline{toc}{chapter}{REFERENCES}
 \ifAPAcite
   \bibliographystyle{ipb}        % IPB English author-year (./ipb.bst)
