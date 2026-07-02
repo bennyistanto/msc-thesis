@@ -28,6 +28,7 @@ Every figure in the thesis, mapped to the script that produces it.
 | 3.4  | Stage 4 CNN architecture                          | _SVG - `paper/images/fig03_cnn_pipeline.svg`_ |
 | 3.5  | Stage demonstration on a synthetic sample         | `fig_03_stage_demonstration.py` |
 | 3.6  | Why a -23 h window aligns satellite and gauge     | `fig_03_window_schematic.py` |
+| 3.7  | Reproducible implementation architecture          | `fig_03_reproducibility.py` |
 | 4.1  | Stage-wise skill (4-panel bars)                   | `fig_04_headline_bars.py` |
 | 4.2  | Threshold-stratified verification (POD/FAR/CSI/ETS)| `fig_04_multi_threshold.py` |
 | 4.3  | Paradox (r vs RMSE/NSE/SDR)                       | `fig_04_paradox.py` |
