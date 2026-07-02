@@ -23,9 +23,10 @@ refinement that constitutes the Deep Learning (DL) stage (Section~\ref{sec:metho
 the station-density-aware blending design
 (Section~\ref{sec:methods-blending}), the out-of-sample validation
 framework (Section~\ref{sec:methods-validation}), the verification
-metric catalogue (Section~\ref{sec:methods-metrics}), and the
-reproducible implementation that supports independent verification
-(Section~\ref{sec:methods-reproducibility}). The algorithmic details
+metric catalogue (Section~\ref{sec:methods-metrics}), the
+window-offset timing diagnostic (Section~\ref{sec:methods-window}),
+and the reproducible implementation that supports independent
+verification (Section~\ref{sec:methods-reproducibility}). The algorithmic details
 summarised here are extended from a parallel manuscript
 \citep{ref:istanto2026mdpi}\MDPIstatus; the present chapter adds
 the reproducibility design and the full 31-metric verification
@@ -38,16 +39,27 @@ framework that the parallel manuscript reports in compressed form.
 
 This research was conducted at the Climatology Laboratory of the
 Department of Geophysics and Meteorology, Faculty of Mathematics and
-Natural Sciences, Bogor Agricultural University, from
+Natural Sciences, Bogor Agricultural University (IPB), from
 March 2024 to February 2026.
 
-Data processing and model development used the Python scientific
+Data processing and model development used the Python programming
+language \citep{ref:vanrossum2009python} and its scientific
 computing stack; the pinned package versions are listed in
 Section~\ref{sec:methods-reproducibility}. Code was written and run in
 Visual Studio Code on a local workstation and re-run on Google Colab
-for cloud-based reproducibility checks, and the thesis was typeset in
-LaTeX. The schematic figures, the conceptual workflow and the Stage~4
-architecture diagram, were prepared in Inkscape.
+for cloud-based reproducibility checks. The thesis was typeset in
+LaTeX using the MiKTeX distribution, with Times New Roman as the body
+font in accordance with the IPB scientific-writing guidelines (Pedoman
+Penulisan Karya Ilmiah, PPKI). The schematic figures, the conceptual
+workflow and the Stage~4 architecture diagram, were prepared in
+Inkscape.
+
+All source code, notebooks, configuration, and the input and output
+data referred to throughout this chapter, including the \texttt{src/}
+modules cited by name in the sections that follow, are openly
+released; the GitHub repository and the archived Zenodo dataset, with
+their citable identifiers, are given in the Code and Data Availability
+statement (Appendix~\ref{app:code}).
 
 
 % ------------------------------------------------------------
@@ -283,7 +295,8 @@ F_{\text{CPC},\Gamma}^{-1}\!
 \label{eq:eqm}
 \end{equation}
 The Gamma family is the standard parametric model for
-daily precipitation on wet days. Its two parameters describe the
+daily precipitation on wet days \citep{ref:wilks2011}. Its two
+parameters describe the
 shape and the scale of the bulk distribution, where most of the
 sample mass concentrates.
 
@@ -706,7 +719,7 @@ P_{\text{final}}(x, y, t) =
 \label{eq:blend}
 \end{equation}
 where the effective blend weight $\alpha_{\text{eff}}$ modulates
-the nominal value $\alpha = 0.70$ by the confidence field:
+the nominal value $\alpha = 0.70$ by the confidence field $C$:
 \begin{equation}
 \alpha_{\text{eff}}(x, y) = 1 - C(x, y) \cdot (1 - \alpha).
 \label{eq:alpha-eff}
@@ -1016,7 +1029,11 @@ percentile-ratio scores (with $Q_{99}$ weighted most heavily),
 $S_{\text{general}}$ the $Q_{25}/Q_{50}/Q_{75}$ scores,
 $S_{\text{var}}$ the standard-deviation-ratio score,
 $S_{\text{KS}}$ the KS-test score, and $S_{\text{event}}$ is the
-combination $0.6\,\text{POD} + 0.4\,(1 - \text{FAR})$. The three
+combination $0.6\,\text{POD} + 0.4\,(1 - \text{FAR})$;
+$S_{\text{RB}}$, $S_{\text{RMSE}}$, $S_{\text{NSE}}$,
+$S_{\text{CSI}}$, and $S_{\text{spell}}$ are the normalised
+relative-bias, RMSE, NSE, CSI, and wet-spell scores, respectively.
+The three
 sub-scores combine into the CQI with the component weights set in
 \texttt{config.yml}:
 \begin{equation}
@@ -1097,7 +1114,9 @@ shifts in Pearson correlation reported in
 Section~\ref{sec:results-correlation}.
 
 
-\subsection{Window-Offset Diagnostic}\label{sec:methods-window}
+% ------------------------------------------------------------
+\section{Window-Offset Timing Diagnostic}\label{sec:methods-window}
+% ------------------------------------------------------------
 
 The Pearson diagnostic of Equation~\ref{eq:pearson} is bounded by
 the day-by-day pairing of the satellite and gauge series, which
@@ -1251,11 +1270,20 @@ the pipeline.
 
 \subsection{Environment Specification}
 
-The Python environment is declared in \texttt{environment.yml}
-with pinned versions for the core scientific packages
-(\texttt{numpy}, \texttt{xarray}, \texttt{scipy},
-\texttt{scikit-learn}, \texttt{tensorflow}, \texttt{keras},
-\texttt{lmoments3}). The environment was tested on a Windows
+\begin{sloppypar}
+The analysis runs on Python~3.12; its environment is declared in
+\texttt{environment.yml} with pinned versions for the core
+scientific packages: array and numerical
+computing with NumPy
+\citep{ref:harris2020numpy} and SciPy \citep{ref:virtanen2020scipy},
+labelled-array and tabular handling with xarray
+\citep{ref:hoyer2017xarray} and pandas \citep{ref:mckinney2010pandas},
+the cross-validation split for the GPD fit with scikit-learn
+\citep{ref:pedregosa2011sklearn}, the CNN with TensorFlow
+\citep{ref:tensorflow2015} and Keras \citep{ref:chollet2015keras},
+the L-moment estimators with \texttt{lmoments3}, and the figures
+with Matplotlib \citep{ref:hunter2007matplotlib}.
+\end{sloppypar} The environment was tested on a Windows
 local installation with a Conda environment named
 \texttt{climate}. Hardware-dependent paths in the CNN training
 step are auto-detected at runtime.
@@ -1267,6 +1295,14 @@ framework. Section~\ref{sec:results-reproducibility} demonstrates
 that an end-to-end re-run from the published source reproduces
 the headline numbers in Chapter~\ref{chap:results} to within the
 floating-point tolerance of the underlying libraries.
+Figure~\ref{fig:reproducibility} maps these five elements and the
+data flow between them.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig_thesis_03_reproducibility.png}
+\caption[Reproducible implementation architecture of the LSEQM+DL framework]{Reproducible implementation architecture of the LSEQM+DL framework.\label{fig:reproducibility}}
+\end{figure}
 
 
 % ------------------------------------------------------------
