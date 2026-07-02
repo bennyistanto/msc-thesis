@@ -8,13 +8,12 @@
 
 set -u
 
-# Bridge the gap for Windows CMD/WSL locally, but ignore during GitHub Actions CI
-if [[ "${GITHUB_ACTIONS:-}" != "true" ]]; then
-  export PATH="/mnt/c/Users/benny/AppData/Local/Programs/MiKTeX/miktex/bin/x64:/c/Users/benny/AppData/Local/Programs/MiKTeX/miktex/bin/x64:$PATH"
-  shopt -s expand_aliases
-  alias pdflatex="pdflatex.exe"
-  alias bibtex="bibtex.exe"
-fi
+# Force bash to see the MiKTeX binaries on Windows
+# Bridge the gap for Windows CMD, WSL, and Git Bash
+export PATH="/mnt/c/Users/benny/AppData/Local/Programs/MiKTeX/miktex/bin/x64:/c/Users/benny/AppData/Local/Programs/MiKTeX/miktex/bin/x64:$PATH"
+shopt -s expand_aliases
+alias pdflatex="pdflatex.exe"
+alias bibtex="bibtex.exe"
 
 cd "$(dirname "$0")"
 
@@ -42,6 +41,12 @@ bibtex main_thesis >/dev/null
 # then restore (B). Idempotent on re-runs because the first sed only
 # matches a bare "et~al." without surrounding \textit{}.
 if [[ -f main_thesis.bbl ]]; then
+  # 0. Un-wrap "{\em<newline>  et~al.}" that BibTeX line-wraps when a long
+  #    author list pushes "{\em" to the line end (seen at the Virtanen/SciPy
+  #    entry). Without this the wrap defeats step 1, step 2 then eats the
+  #    closing brace, and italics leak to the end of the list. GNU sed -z
+  #    lets the pattern span the newline.
+  sed -i -z 's/{\\em[[:space:]]\+et~al\./{\\em et~al./g' main_thesis.bbl
   # 1. Protect already-italic "{\em et~al.}" from being touched.
   sed -i 's/{\\em et~al\.}/__EMETAL_PLACEHOLDER__/g' main_thesis.bbl
   # 2. Wrap bare "et~al." (which now only occurs in bracket labels) in
