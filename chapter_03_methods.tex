@@ -13,7 +13,7 @@
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
 
-\chapter{Methods}\label{chap:methods}
+\chapter{METHODS}\label{chap:methods}
 
 This chapter describes the study area and data
 (Section~\ref{sec:methods-data}), the four-stage hybrid pipeline
@@ -68,8 +68,8 @@ statement (Appendix~\ref{app:code}).
 
 Three datasets enter the framework. The Late Run variant of the
 Integrated Multi-satellitE Retrievals for Global Precipitation
-Measurement (IMERG) Version 7 (V07) is the product to be
-corrected. The CPC Unified Gauge-Based Analysis of Global Daily
+Measurement (IMERG) Version 7 (V07)~\citep{ref:huffman2020} is
+the product to be corrected. The CPC Unified Gauge-Based Analysis of Global Daily
 Precipitation (CPC-UNI) is the correction reference. The
 Indonesian Meteorological, Climatological, and Geophysical Agency
 (BMKG) operates the independent station network used for
@@ -104,13 +104,11 @@ Section~\ref{sec:methods-blending}.
 
 \subsection{IMERG Late Run}
 
-IMERG V07 \citep{ref:hou2014, ref:huffman2020} merges passive
-microwave retrievals from the Global Precipitation Measurement
-(GPM) constellation with geostationary infrared estimates and
-monthly gauge analyses to produce a quasi-global precipitation
-product at $0.1^{\circ}$ (approximately 11~km) and 30-minute
-resolution. Three latency variants are released: Early
-(approximately 4~h), Late (approximately 14~h), and Final
+IMERG V07 provides a quasi-global precipitation product at
+$0.1^{\circ}$ (approximately 11~km) and 30-minute resolution; its
+retrieval architecture is described in
+Section~\ref{sec:lit-imerg}. Three latency variants are released:
+Early (approximately 4~h), Late (approximately 14~h), and Final
 (approximately 3.5~months). The framework operates on the Late
 Run daily product (IMERG-L, \texttt{GPM\_3IMERGDL.07};
 \citealp{ref:imergdl07}) because its 14-hour latency fits within
@@ -158,9 +156,9 @@ same 2001 to 2025 window is used.
 
 \subsection{BMKG Validation Network}
 
-BMKG operates a national synoptic station network whose daily
-precipitation archive serves as the independent validation
-reference. Independence here has a specific meaning. Some BMKG
+BMKG operates a national synoptic station network~\citep{ref:bmkg2006sk32}
+whose daily precipitation archive serves as the independent
+validation reference. Independence here has a specific meaning. Some BMKG
 stations contribute to the global CPC-UNI analysis, so BMKG
 observations are not independent of CPC-UNI in a strict
 statistical sense. However, the validation pipeline compares
@@ -294,11 +292,8 @@ F_{\text{CPC},\Gamma}^{-1}\!
 \left(F_{\text{IMERG},\Gamma}\!\left(P_{\text{LS}}(x, y, t)\right)\right).
 \label{eq:eqm}
 \end{equation}
-The Gamma family is the standard parametric model for
-daily precipitation on wet days \citep{ref:wilks2011}. Its two
-parameters describe the
-shape and the scale of the bulk distribution, where most of the
-sample mass concentrates.
+The two Gamma parameters describe the shape and the scale of the
+bulk distribution, where most of the sample mass concentrates.
 
 Because the gauge reference is coarser than the satellite product,
 the CPC parameters cannot be applied at the IMERG resolution
@@ -343,7 +338,7 @@ reduced false alarm ratio.
 
 The Gamma family fits the bulk of the wet-day sample by design,
 which means its parameters are dominated by light and moderate
-rainfall, the segment that contains most of the sample mass. The
+rainfall, the segment that contains most of the sample mass~\citep{ref:gudmundsson2012}. The
 upper tail, the segment that is operationally meaningful for
 flood and drought thresholds, is fit only as a by-product and is
 systematically too short. The next stage corrects this.
@@ -363,11 +358,10 @@ is systematically too short. Gamma cannot represent the heavy
 tail that real tropical convective rainfall exhibits. Stage~3
 grafts a GPD onto the upper
 tail, fitted explicitly to exceedances above a high threshold.
-The GPD is the canonical extreme-value model in the
-peaks-over-threshold framework: under mild regularity conditions
-the distribution of exceedances above a high threshold converges
-to a GPD with shape and scale parameters $(\xi, \sigma)$
-\citep{ref:coles2001}, with cumulative distribution function
+Following the peaks-over-threshold rationale of
+Section~\ref{sec:lit-gpd}, the tail is modelled by a GPD with
+shape and scale parameters $(\xi, \sigma)$ \citep{ref:coles2001},
+with cumulative distribution function
 \begin{equation}
 F_{\text{GPD}}(x; u, \sigma, \xi) =
 1 - \left[1 + \xi\,\frac{x - u}{\sigma}\right]^{-1/\xi},
@@ -407,7 +401,7 @@ seven steps.
 \end{enumerate}
 
 The replacement in step~6 is a quantile remap through the
-reference tail. For a satellite value $P_{\text{LS}}$ above the
+reference tail~\citep{ref:gudmundsson2012}. For a satellite value $P_{\text{LS}}$ above the
 satellite threshold $u_{\text{sat}}$, the conditional exceedance
 probability within the satellite tail is
 \begin{equation}
@@ -458,7 +452,7 @@ acknowledged in the chapter close.
 
 The 80th-percentile choice carries a hidden assumption: every
 pixel and dekad combination has enough wet days for stable GPD
-fitting. Whether this holds depends on the local wet-day
+fitting~\citep{ref:pickands1975}. Whether this holds depends on the local wet-day
 fraction. To obtain about 30 exceedances at the 80th percentile,
 a pixel needs about 150 wet days in the pooled 250-day sample
 (since $30 / 0.20 = 150$). Wet-day fractions in Indonesia vary
@@ -692,8 +686,8 @@ toward their targets across the four stages.
 \section{Station-Density-Aware Blending}\label{sec:methods-blending}
 % ------------------------------------------------------------
 
-The CNN refinement in Stage~4 is trained against CPC-UNI, and
-the quality of CPC-UNI itself depends on the local density of
+The CNN refinement in Stage~4 is trained against CPC-UNI~\citep{ref:chen2008},
+and the quality of CPC-UNI itself depends on the local density of
 contributing gauges. Over Java and southern Sumatra the
 contributing network is dense and CPC-UNI is a well-constrained
 reference. Over Papua, Maluku, and eastern Nusa Tenggara the
@@ -900,7 +894,7 @@ and Chapter~\ref{chap:discussion}.
 \subsection{Value Adjustment}
 
 Two metrics test whether the corrected satellite reproduces the
-gauge first and second moments. The relative bias (RB) compares the
+gauge first and second moments~\citep{ref:wilks2011}. The relative bias (RB) compares the
 sample means:
 \begin{equation}
 \text{RB} = \frac{\overline{P}_{\text{sat}} - \overline{P}_{\text{obs}}}{\overline{P}_{\text{obs}}},
@@ -964,11 +958,16 @@ distribution, which is the segment that drives flood and drought
 thresholds in operational use. The $Q_{95}$ and $Q_{99}$ ratios
 are the percentile ratio of Equation~\eqref{eq:pctlratio}
 evaluated at $q = 95$ and $q = 99$, with target unity. In
-addition, multi-threshold verification at seven thresholds spanning the
-operational range (1, 5, 10, 20, 50, 100, and 150 mm/day) reports
-the categorical skill of the corrected series, following the
-multi-threshold verification approach of the World Meteorological
-Organization (WMO) standard TD-1485 \citep{ref:wmo1485}. At each threshold, hits $H$, false alarms
+addition, multi-threshold verification reports the categorical
+skill of the corrected series at seven daily thresholds spanning
+the operational range. The thresholds up to 50~mm/day (1, 5, 10,
+20, and 50) follow the multi-threshold verification approach of
+the World Meteorological Organization (WMO) standard TD-1485
+\citep{ref:wmo1485}, while 100 and 150~mm/day extend the range to
+heavy and extreme classes relevant to the Indonesian wet-season
+regime, consistent with the WMO principle that
+extreme-precipitation thresholds are set regionally
+\citep{ref:wmo1310}. At each threshold, hits $H$, false alarms
 $F$, misses $M$, and correct negatives $Z$ are counted from the
 $2 \times 2$ contingency table, from which the threshold-resolved
 probability of detection (POD), critical success index (CSI), and
@@ -990,7 +989,7 @@ value of zero.
 \subsection{Event Detection}
 
 The event-detection pillar reports the contingency-table-based
-categorical metrics aggregated across all wet days, that is,
+categorical metrics~\citep{ref:wilks2011, ref:ebert2007} aggregated across all wet days, that is,
 without an explicit threshold dependence:
 \begin{align}
 \text{POD} &= \frac{H}{H + M}, \label{eq:pod} \\
@@ -1047,6 +1046,13 @@ modification, with the component weights taken from the
 configuration file that the pipeline executes
 ($0.40/0.30/0.30$) rather than the bare function-signature
 default.
+
+For qualitative interpretation the continuous CQI is binned into
+four quality tiers using the boundaries set in \texttt{config.yml}:
+Poor ($<0.40$), Fair ($0.40$ to $0.60$), Good ($0.60$ to $0.80$),
+and Excellent ($\geq 0.80$). These tiers label the spatial maps in
+Section~\ref{sec:results-cqi}; the underlying CQI is retained and
+mapped continuously.
 
 The three-sub-score CQI and the four-pillar verification
 catalogue serve different purposes and group metrics
@@ -1107,7 +1113,7 @@ core finding of Chapter~\ref{chap:results}, and its theoretical
 basis is developed in Chapter~\ref{chap:discussion}.
 
 Sampling uncertainty on Pearson correlation is reported using
-the Fisher $z$-transform standard error
+the Fisher $z$-transform~\citep{ref:wilks2011} standard error
 $\text{SE}(z) = 1/\sqrt{n - 3}$, evaluated at $n \approx 250$ to
 give $\pm 0.06$. This uncertainty band frames the inter-stage
 shifts in Pearson correlation reported in
@@ -1166,8 +1172,10 @@ that any aggregation, by pooled station-day pairs, by timezone
 band, by calendar month, or by three-month running season, follows
 without recomputation. Two poolings are reported: the full BMKG
 record ($2001$ to $2021$, the span of the half-hourly archive
-processed for the window diagnostic), which resolves the
-dependence of the recovery on the satellite era, and the GPM era ($2015$ to $2021$),
+processed for the window diagnostic; $178$ of the $180$ archived
+stations carry valid half-hourly coverage and enter this diagnostic),
+which resolves the dependence of the recovery on the satellite era,
+and the GPM era ($2015$ to $2021$),
 which gives the seasonal and per-station climatology over the
 years in which IMERG resolves the diurnal cycle. Timezone bands
 use the operational WIB, WITA, and WIT assignment ($\text{UTC}+7$,
@@ -1199,7 +1207,7 @@ describes the design that supports it.
 
 \subsection{Module Architecture}
 
-The Python implementation is partitioned into ten modules under
+The Python implementation is partitioned into twelve modules under
 \texttt{src/}, each with a single responsibility:
 \texttt{config} (path and parameter resolution),
 \texttt{io} (NetCDF and CSV input and output),
@@ -1212,9 +1220,11 @@ aggregator for small exceedance samples),
 inference),
 \texttt{station\_density} (confidence-mask construction),
 \texttt{metrics} (the 31-metric verification catalogue),
-\texttt{qa\_framework} (Composite Quality Index assembly), and
-\texttt{station\_validation} (per-station extraction and
-pairing). Each module is importable and exposes a small number
+\texttt{qa\_framework} (Composite Quality Index assembly),
+\texttt{station\_validation} (per-station extraction and pairing),
+\texttt{taylor\_diagram} (Taylor-diagram generation), and
+\texttt{visualisation} (QA and station-validation figure
+generation). Each module is importable and exposes a small number
 of named entry points; no inline function definitions appear in
 the notebooks.
 
@@ -1236,10 +1246,10 @@ hyperparameters, and the per-method output filenames.
 
 \subsection{Notebook Workflow}
 
-The pipeline is exposed through six numbered Jupyter notebooks
-under \texttt{notebooks/}: 01 (data acquisition), 02 (LSEQM+DL
+The pipeline is exposed through six numbered Jupyter
+notebooks~\citep{ref:kluyver2016} under \texttt{notebooks/}: 01 (data acquisition), 02 (LSEQM+DL
 bias correction), 03 (performance measurement), 04 (QA
-framework), 05 (QA visualisation), and 06 (station validation).
+framework), 05 (station validation), and 06 (visualisation).
 Each notebook follows a
 consistent style: short Markdown section headers, small code
 cells with a single concern per cell, and calls into the
