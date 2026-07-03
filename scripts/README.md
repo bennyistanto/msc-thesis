@@ -22,7 +22,7 @@ Every figure in the thesis, mapped to the script that produces it.
 
 | Figure | Title | Script |
 | ------ | ----- | ------ |
-| 3.1  | BMKG station distribution                         | `fig_03_station_map.py` |
+| 3.1  | Study-area data coverage (IMERG/CPC grids + BMKG stations) | `fig_03_coverage.py` |
 | 3.2  | LSEQM+DL conceptual workflow                      | _SVG - `paper/images/fig_thesis_03_pipeline_copy.svg`_ |
 | 3.3  | BCSD reference-parameter disaggregation 0.5->0.1  | `fig_03_bcsd_disaggregation.py` |
 | 3.4  | Stage 4 CNN architecture                          | _SVG - `paper/images/fig03_cnn_pipeline.svg`_ |
