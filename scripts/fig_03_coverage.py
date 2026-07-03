@@ -27,13 +27,14 @@ from matplotlib.colors import ListedColormap
 from matplotlib.patches import Rectangle
 from matplotlib.collections import PatchCollection
 from matplotlib.lines import Line2D
+import matplotlib.patheffects as pe
 
 ROOT = Path(r"C:\Users\benny\OneDrive\Documents\Github\hybrid-bias-correction")
 DATA = ROOT / "data"
 FIGOUT = ROOT / "paper" / "thesis" / "figures"
 
-LON_RANGE = (94.5, 141.5)
-LAT_RANGE = (-11.2, 6.2)
+LON_RANGE = (93.0, 143.0)
+LAT_RANGE = (-13.0, 8.0)
 
 # ----- IMERG-L 0.1 deg land footprint (from ISO3 mask) -----
 mask = xr.open_dataset(DATA / "mask" / "iso3" / "idn_subset.nc")["land"]
@@ -75,8 +76,17 @@ print(f"CPC-UNI 0.5deg land cells : {n_cpc}  (~{n_imerg/n_cpc:.0f} IMERG px each
 print(f"BMKG stations             : {n_st}  regions={present}")
 
 # ============================ figure ============================
-fig, ax = plt.subplots(figsize=(12.5, 5.0))
-plt.subplots_adjust(left=0.045, right=0.995, top=0.985, bottom=0.06)
+fig, ax = plt.subplots(figsize=(12.5, 5.9))
+plt.subplots_adjust(left=0.045, right=0.995, top=0.935, bottom=0.075)
+
+# (0) neighbouring countries as a light-grey land fill (Indonesia excluded,
+#     so its IMERG footprint reads against grey neighbours)
+_nc = next((c for c in wld.columns
+            if wld[c].astype(str).str.contains("Indonesia", case=False, na=False).any()),
+           None)
+_neigh = (wld[~wld[_nc].astype(str).str.contains("Indonesia", case=False, na=False)]
+          if _nc else wld)
+_neigh.plot(ax=ax, facecolor="#e6e6e6", edgecolor="none", zorder=0)
 
 # (1) IMERG 0.1 deg land footprint
 ax.pcolormesh(mlon, mlat, np.where(mland, 1.0, np.nan),
@@ -97,6 +107,27 @@ for r in present:
     s = st[st["region"] == r]
     ax.scatter(s["Lon"], s["Lat"], s=9, c=rcolor[r], edgecolors="black",
                linewidths=0.25, zorder=5, label=r)
+
+# island-group (region) labels for geographic orientation, white-haloed
+REGION_LABELS = [
+    ("Sumatra",            100.013,  0.993),
+    ("Kalimantan",         112.504, -1.498),
+    ("Sulawesi",           120.143, -1.891),
+    ("Jawa",               109.357, -8.481),
+    ("Bali-Nusa Tenggara", 117.684, -10.841),
+    ("Maluku",             128.11, -2.285),
+    ("Papua",              137.945, -2.809),
+]
+for _name, _lo, _la in REGION_LABELS:
+    ax.text(_lo, _la, _name, fontsize=8.5, style="italic", fontweight="bold",
+            color="#1a1a1a", ha="center", va="center", zorder=6,
+            path_effects=[pe.withStroke(linewidth=2.2, foreground="white")])
+
+# equator (0 deg latitude) reference line
+ax.axhline(0.0, color="0.35", linewidth=0.7, linestyle=(0, (7, 4)), zorder=4.5)
+ax.text(LON_RANGE[0] + 0.5, 0.3, "Equator", fontsize=7, style="italic",
+        color="0.3", ha="left", va="bottom", zorder=5,
+        path_effects=[pe.withStroke(linewidth=1.8, foreground="white")])
 
 ax.set_xlim(*LON_RANGE)
 ax.set_ylim(*LAT_RANGE)
@@ -134,6 +165,9 @@ handles += [
 ax.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, -0.145),
           ncol=len(handles), fontsize=6.6, frameon=False,
           handletextpad=0.3, columnspacing=1.0)
+
+fig.suptitle("Study-area data coverage over Indonesia",
+             fontsize=11, fontweight="bold", y=0.99)
 
 OUT = FIGOUT / "fig_thesis_03_coverage.png"
 fig.savefig(OUT, dpi=220, bbox_inches="tight", facecolor="white")
