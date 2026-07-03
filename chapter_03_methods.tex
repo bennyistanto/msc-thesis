@@ -203,16 +203,22 @@ failure, transmission gaps, or stations that came online only
 late in the 2001 to 2021 window. The retained network spans the
 seven major regions of the archipelago: Sumatra, Kalimantan,
 Sulawesi, Java, Bali and Nusa Tenggara, Maluku, and Papua. The
-full archived network is shown in Figure~\ref{fig:station-map},
-which illustrates the gauge-density gradient referred to
+full archived network is shown in Figure~\ref{fig:coverage},
+together with the IMERG-L and CPC-UNI data grids; it illustrates
+the gauge-density gradient referred to
 throughout the remainder of the chapter: the network is
 concentrated over Java and southern Sumatra, with sparser
 coverage over Papua, Maluku, and eastern Nusa Tenggara.
 
-\begin{figure}[H]
+% Fig 3.1: study-area data coverage, dedicated page, image rotated 90 deg to
+% occupy the page height as its width (same approach as Figs 3.2/3.3). The PNG
+% is the original landscape map; LaTeX handles the rotation.
+\begin{figure}[p]
 \centering
-\includegraphics[width=\figThreeOneWidth\textwidth]{fig_thesis_03_station_map.png}
-\caption[Spatial distribution of the 180 archived BMKG stations, color-coded by region]{Spatial distribution of the 180 archived BMKG stations, color-coded by region.\label{fig:station-map}}
+\rotatebox{90}{%
+  \includegraphics[width=\figThreeOneWidth\textheight]{fig_thesis_03_coverage.png}%
+}
+\caption[Study-area data coverage over Indonesia]{Study-area data coverage over Indonesia: the IMERG-L $0.1^{\circ}$ land footprint ($19{,}395$ pixels), the CPC-UNI $0.5^{\circ}$ native calibration grid, and the $180$ archived BMKG stations by region.\label{fig:coverage}}
 \end{figure}
 
 
