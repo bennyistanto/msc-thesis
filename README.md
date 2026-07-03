@@ -1,6 +1,6 @@
 # A Hybrid Bias Correction Framework for Daily Satellite Precipitation
 
-Master's thesis (Bogor Agricultural University, 2026) on the hybrid LSEQM+DL bias correction framework for daily Integrated Multi-satellitE Retrievals for GPM Late Run (IMERG-L) precipitation over Indonesia, with gauge validation against 171 independent BMKG stations.
+Master's thesis (Bogor Agricultural University, 2026) on the hybrid LSEQM+DL bias correction framework for daily Integrated Multi-satellitE Retrievals for GPM Late Run (IMERG-L) precipitation over Indonesia, with gauge validation against 172 independent BMKG stations.
 
 > **Status:** final draft submitted to the IPB Applied Climatology
 > programme. See the parent code repository for the implementation
@@ -26,14 +26,14 @@ This repository holds the LaTeX sources, figures, and figure-generator scripts f
 ```
 .
 ├── main_thesis.tex                  # entry point
-├── frontmatter.tex                  # cover, summary, signatures, ToC, LoT, LoF
+├── frontmatter.tex                  # cover, summary, signatures, ToC, LoT, LoF, LoA
 ├── chapter_01_introduction.tex      # chapter 1
 ├── chapter_02_literature_review.tex # chapter 2
 ├── chapter_03_methods.tex           # chapter 3
 ├── chapter_04_results.tex           # chapter 4
 ├── chapter_05_discussion.tex        # chapter 5
 ├── chapter_06_conclusion.tex        # chapter 6
-├── chapter_99_appendices.tex        # appendices A through G
+├── chapter_99_appendices.tex        # appendices A through H
 ├── biography.tex                    # author biography page
 ├── references.bib                   # bibliography (BibTeX)
 ├── ipb.bst                          # IPB PPKI bibliography style
@@ -64,7 +64,7 @@ This runs the canonical three-pass cycle:
 3. `pdflatex` (populates ToC / LoF / LoT)
 4. `pdflatex` (stabilises cross-references)
 
-The output is `main_thesis.pdf` (~ 110 pages, ~ 9 MB).
+The output is `main_thesis.pdf` (~ 132 pages, ~ 12 MB).
 
 ### Overleaf
 
