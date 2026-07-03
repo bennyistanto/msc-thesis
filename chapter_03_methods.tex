@@ -83,7 +83,8 @@ Chapter~\ref{chap:results}.
 The Indonesian archipelago spans approximately 47 degrees of
 longitude from $95^{\circ}$E (Sabang, northwestern Sumatra) to
 $141^{\circ}$E (Merauke, eastern Papua) and 17 degrees of
-latitude from $6^{\circ}$N to $11^{\circ}$S. It occupies the
+latitude from $6^{\circ}$N to $11^{\circ}$S
+(Figure~\ref{fig:coverage}). It occupies the
 centre of the Maritime Continent, where the convergence of the
 Pacific and Indian Ocean basins drives a deep convective regime
 and where the seasonal cycle is governed by the
@@ -117,7 +118,9 @@ flash-flood warning and reservoir scheduling. The study period
 spans 2001-01-01 to 2025-12-31, providing 25 years of daily
 fields aggregated from the half-hourly native inputs. Native
 IMERG-L files are downloaded as NetCDF and subset to the
-Indonesian bounding box before processing. The same Late Run is
+Indonesian bounding box before processing, yielding the
+$0.1^{\circ}$ land footprint of $19{,}395$ pixels mapped in
+Figure~\ref{fig:coverage}. The same Late Run is
 also used at its native half-hourly resolution
 (\texttt{GPM\_3IMERGHHL.07}; \citealp{ref:imerghhl07}) for the
 window-offset timing diagnostic in
@@ -130,7 +133,9 @@ product the pipeline corrects.
 CPC-UNI \citep{ref:chen2008} is a gauge-based daily precipitation
 analysis produced by the National Oceanic and Atmospheric
 Administration (NOAA) Climate Prediction Center on a
-$0.5^{\circ}$ (approximately 55~km) global land grid. The product
+$0.5^{\circ}$ (approximately 55~km) global land grid, the coarse
+calibration grid drawn against the finer IMERG footprint in
+Figure~\ref{fig:coverage}. The product
 interpolates daily station observations using optimal
 interpolation with a station-density-aware correlation function.
 Indonesian contributions come from BMKG and other Global
