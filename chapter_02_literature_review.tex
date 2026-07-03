@@ -10,7 +10,7 @@
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
 
-\chapter{Literature Review}\label{chap:litreview}
+\chapter{LITERATURE REVIEW}\label{chap:litreview}
 
 This chapter establishes the scientific context for the
 LSEQM+DL (Linear Scaling (LS), Empirical Quantile Mapping (EQM), 
@@ -260,18 +260,19 @@ distinguish the two regimes. The WMO multi-threshold
 verification standard~\citep{ref:wmo1485} reports categorical
 skill at a series of thresholds spanning the operational range,
 exposing the threshold-dependence directly. The framework adopted
-in this study uses seven thresholds spanning this range (1, 5, 10,
-20, 50, 100, and 150~mm/day) and reports separate categorical
-metrics at each.
+in this study reports separate categorical metrics at seven
+thresholds: the first five (1, 5, 10, 20, and 50~mm/day) follow
+the WMO range, while 100 and 150~mm/day are added as heavy and
+extreme classes for the Indonesian wet-season regime, consistent
+with the WMO principle that extreme-precipitation thresholds are
+set regionally~\citep{ref:wmo1310}.
 
 \subsection{Station-Based Out-of-Sample Validation}
 
 The verification reference may itself contain biases. Gauge
 networks have well-documented undercatch behaviour, particularly
 for heavy rainfall and at high-elevation or coastal
-sites~\citep{ref:adam2003}. Gridded gauge analyses such as the
-CPC Unified Gauge-Based Analysis~\citep{ref:chen2008} interpolate
-station observations onto a regular grid and inherit the
+sites~\citep{ref:adam2003}. Gridded gauge analyses inherit the
 station-density gradient: cells with many contributing stations
 are well-constrained, cells with few stations are smooth-field
 reconstructions. A verification that compares the corrected
@@ -506,12 +507,10 @@ precipitation. Extreme-value theory provides a more appropriate
 parametric form for the tail. The GPD is the canonical extreme-value model in the
 peaks-over-threshold framework: under mild regularity
 conditions the distribution of exceedances above a high
-threshold converges to a GPD with shape and scale parameters
-$(\xi, \sigma)$~\citep{ref:pickands1975, ref:coles2001}. The GPD shape parameter
-$\xi$ controls tail heaviness, with $\xi > 0$ indicating a
-heavy Pareto-like tail typical of tropical convective extremes,
-$\xi = 0$ indicating an exponential tail, and $\xi < 0$ indicating
-a bounded tail.
+threshold converges to a GPD~\citep{ref:pickands1975, ref:coles2001}.
+Its shape parameter $\xi$ governs tail heaviness, taking positive
+values for the heavy Pareto-like tails typical of tropical
+convective extremes.
 
 The hybrid bias correction strategy is to fit the Gamma family
 to the full wet-day sample for the bulk distribution, fit the
