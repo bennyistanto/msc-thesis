@@ -1,6 +1,6 @@
 """Thesis Figure 4.5 (re-layout) - "CQI Improvement from Hybrid Bias
 Correction" stacked vertically as 2 rows x 1 column:
-  (a) Per-pixel CQI change LSEQM+DL minus LS (continuous ΔCQI map,
+  (a) Per-pixel CQI change LSEQM+DL minus LSEQM (continuous ΔCQI map,
       Gaussian-smoothed sigma=1.5 to match the original figure).
   (b) LSEQM+DL Quality Category map.
 
@@ -16,7 +16,6 @@ import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.colors import BoundaryNorm, ListedColormap
 from scipy.ndimage import gaussian_filter
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -42,15 +41,15 @@ def load_cqi_clim(stage):
     return np.nanmean(np.stack(stack, axis=0), axis=0), files[0]
 
 
-print("Loading CQI climatology for LS and LSEQM+DL...")
-cqi_ls, sample = load_cqi_clim("ls")
+print("Loading CQI climatology for LSEQM and LSEQM+DL...")
+cqi_eqm, sample = load_cqi_clim("lseqm")
 cqi_dl, _ = load_cqi_clim("lseqmdl")
 
 with xr.open_dataset(sample) as ds:
     lon = ds.lon.values
     lat = ds.lat.values
 
-delta_raw = cqi_dl - cqi_ls
+delta_raw = cqi_dl - cqi_eqm
 
 # Gaussian-smoothed ΔCQI for panel (a) - matches the seminar figure.
 nan_mask = ~np.isfinite(delta_raw)
@@ -71,19 +70,37 @@ print(f"  delta CQI > +0.01: {100 * n_pos / n_total:.1f}%")
 print(f"  delta CQI < -0.01: {100 * n_neg / n_total:.1f}%")
 print(f"  mean delta CQI:    {mean_delta:+.3f}")
 
-# (a) divergent colormap centred on zero
-norm_a = mpl.colors.TwoSlopeNorm(vmin=-0.15, vcenter=0.0, vmax=0.15)
+# (a) divergent colormap centred on zero, stretched to the populated range.
+#     The smoothed delta is non-negative and almost all within [0, +0.02]
+#     (p98 = +0.012, max +0.032); a wide symmetric range washes the map out,
+#     so vmax is set at +0.02 and the few higher pixels saturate.
+norm_a = mpl.colors.TwoSlopeNorm(vmin=-0.01, vcenter=0.0, vmax=0.02)
 cmap_a = mpl.colormaps["RdBu"].copy()
 
-# (b) Category bins and colours mirror the seminar/MDPI figure:
-#     Poor <0.30, Marginal 0.30-0.40, Fair-L 0.40-0.50,
-#     Fair-H 0.50-0.60, Good 0.60-0.70, Excel. >=0.70.
-#     Same 6-tier RdYlGn-style palette as the original.
-CAT_EDGES = [0.0, 0.30, 0.40, 0.50, 0.60, 0.70, 1.001]
-CAT_LABELS = ["Poor", "Marg.", "Fair-L", "Fair-H", "Good", "Excel."]
-CAT_COLORS = ["#d73027", "#fc8d59", "#fee08b", "#d9ef8b", "#91cf60", "#1a9850"]
-cmap_b = ListedColormap(CAT_COLORS)
-norm_b = BoundaryNorm(CAT_EDGES, ncolors=len(CAT_COLORS))
+# (b) Continuous LSEQM+DL CQI on a sequential quality colormap. The 4-tier
+#     boundaries from config.yml / src/qa_framework.py (Poor <0.40, Fair
+#     0.40-0.60, Good 0.60-0.80, Excellent >=0.80) are marked on the colorbar.
+#     The CQI sits in the Fair band almost everywhere, so a continuous map
+#     shows the west-east gradient that hard bins would collapse to one colour.
+# Stretched around the populated range: 27.7% of land sits in [0.50, 0.52)
+# and the central 90% spans 0.435-0.555, so the colour range brackets the
+# bulk (0.40 to 0.58) instead of the full axis. Poor pixels (<0.40, 1.5%)
+# saturate at the low end.
+norm_b = mpl.colors.Normalize(vmin=0.40, vmax=0.58)
+cmap_b = mpl.colormaps["RdYlGn"].copy()
+finite_b = np.isfinite(cqi_dl)
+frac_fair = 100.0 * (((cqi_dl >= 0.40) & (cqi_dl < 0.60) & finite_b).sum()
+                     / finite_b.sum())
+mean_cqi = float(np.nanmean(cqi_dl))
+
+# Smooth the CQI for display with the same NaN-aware Gaussian as panel (a),
+# so the CPC 0.5-degree reference granularity does not read as an irregular
+# grid. The statistics above use the raw field; only the display is smoothed.
+cqi_fill = np.where(finite_b, cqi_dl, 0.0)
+cqi_w = np.where(finite_b, 1.0, 0.0)
+cqi_wsm = gaussian_filter(cqi_w, sigma=1.5)
+cqi_sm = gaussian_filter(cqi_fill, sigma=1.5) / np.where(cqi_wsm == 0, 1.0, cqi_wsm)
+cqi_sm[~finite_b] = np.nan
 
 idn, wld = load_boundaries()
 
@@ -113,36 +130,44 @@ def draw_map(ax, field, *, cmap, norm, title):
 
 
 qm_a = draw_map(axes[0], delta, cmap=cmap_a, norm=norm_a,
-                title=r"(a) $\Delta$CQI: LSEQM+DL minus LS")
-qm_b = draw_map(axes[1], cqi_dl, cmap=cmap_b, norm=norm_b,
-                title="(b) LSEQM+DL Quality Category")
+                title=r"(a) $\Delta$CQI: LSEQM+DL minus LSEQM")
+qm_b = draw_map(axes[1], cqi_sm, cmap=cmap_b, norm=norm_b,
+                title="(b) LSEQM+DL CQI (continuous)")
 
 # Annotation box on panel (a) with the percentages
-axes[0].text(0.985, 0.97,
+axes[0].text(0.015, 0.05,
               f"$\\Delta$CQI > +0.01: {100 * n_pos / n_total:.1f}%\n"
               f"$\\Delta$CQI < $-$0.01: {100 * n_neg / n_total:.1f}%\n"
               f"Mean: {mean_delta:+.3f}",
-              transform=axes[0].transAxes, ha="right", va="top", fontsize=7.5,
-              bbox=dict(facecolor="white", edgecolor="0.7", boxstyle="round,pad=0.25"))
+              transform=axes[0].transAxes, ha="left", va="bottom", fontsize=7,
+              bbox=dict(facecolor="white", edgecolor="0.7",
+                        boxstyle="round,pad=0.25", alpha=0.85))
+
+# Annotation box on panel (b) with the verified Fair-band dominance, placed
+# in the open-ocean SW corner so it does not cover any land data.
+axes[1].text(0.015, 0.05,
+              f"Fair (0.40-0.60): {frac_fair:.1f}%\nMean CQI: {mean_cqi:.3f}",
+              transform=axes[1].transAxes, ha="left", va="bottom", fontsize=7,
+              bbox=dict(facecolor="white", edgecolor="0.7",
+                        boxstyle="round,pad=0.25", alpha=0.85))
 
 # Colorbars
 bbox_a = axes[0].get_position()
 cax_a = fig.add_axes([bbox_a.x0 + 0.18, bbox_a.y0 - 0.045,
                        bbox_a.width - 0.36, 0.013])
 cbar_a = fig.colorbar(qm_a, cax=cax_a, orientation="horizontal",
-                       extend="both", ticks=[-0.15, -0.075, 0, 0.075, 0.15])
+                       extend="both", ticks=[-0.01, 0.0, 0.01, 0.02])
 cbar_a.set_label(r"$\Delta$ CQI", fontsize=9)
 cbar_a.ax.tick_params(labelsize=8)
 
 bbox_b = axes[1].get_position()
-cax_b = fig.add_axes([bbox_b.x0 + 0.10, bbox_b.y0 - 0.045,
-                       bbox_b.width - 0.20, 0.013])
-# Tick positions at the midpoint of each category interval.
-mid_ticks = [(CAT_EDGES[i] + CAT_EDGES[i + 1]) / 2
-             for i in range(len(CAT_LABELS))]
+cax_b = fig.add_axes([bbox_b.x0 + 0.18, bbox_b.y0 - 0.045,
+                       bbox_b.width - 0.36, 0.013])
 cbar_b = fig.colorbar(qm_b, cax=cax_b, orientation="horizontal",
-                       ticks=mid_ticks)
-cbar_b.ax.set_xticklabels(CAT_LABELS, fontsize=7.5)
+                       extend="both", ticks=[0.40, 0.45, 0.50, 0.55])
+cbar_b.ax.set_xticklabels(["0.40\nPoor|Fair", "0.45", "0.50", "0.55"],
+                          fontsize=7)
+cbar_b.set_label("CQI (Fair tier: 0.40 to 0.60)", fontsize=9)
 
 fig.suptitle("CQI Improvement from Hybrid Bias Correction",
              fontsize=9, fontweight="bold", y=0.99)
