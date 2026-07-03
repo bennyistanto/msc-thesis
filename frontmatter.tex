@@ -90,9 +90,9 @@ This thesis evaluates a four-stage hybrid bias correction pipeline:
 Linear Scaling (LS), Empirical Quantile Mapping (EQM) with a Gamma fit, 
 Generalized Pareto Distribution (GPD) tail adjustment, and a station-density-aware 
 Convolutional Neural Network (CNN) refinement, a Deep Learning (DL) architecture, 
-denoted LSEQM+DL, applied to IMERG-L over Indonesia for $2001$ to $2025$, with
+denoted LSEQM+DL, applied to IMERG-L over Indonesia across $2001$ to $2025$, with
 gauge validation against $172$ out-of-sample stations of Indonesia's
-Meteorological, Climatological, and Geophysical Agency (BMKG).
+Meteorological, Climatological, and Geophysical Agency (BMKG) over $2001$ to $2021$.
 
 Against the out-of-sample BMKG network, three of the four verification
 pillars move close to the gauge target. Relative bias drops from
@@ -108,7 +108,7 @@ threshold ($0.097$ versus $0.062$), the regime in which BMKG flood
 early-warning advisories operate.
 
 One diagnostic does not move. The Pearson correlation between paired
-daily satellite and gauge values stays near $0.34$ across all four stages
+daily satellite and gauge values stays near $0.34$ across all three corrected stages
 and stays in the narrow band $[0.332, 0.348]$ across all fifteen settings
 of a Bali sensitivity sweep over the blending weight, the GPD threshold
 percentile, and the station-density saturation count, none of which was formally
@@ -169,9 +169,10 @@ dengan \emph{Generalized Pareto Distribution} (GPD), dan penyempurnaan
 berbasis \emph{Convolutional Neural Network} (CNN) yang
 mempertimbangkan kerapatan stasiun, sebuah arsitektur \emph{Deep
 Learning} (DL), disingkat LSEQM+DL. \emph{Pipeline} diterapkan pada
-IMERG-L di Indonesia untuk periode $2001$ hingga $2025$, dengan
-validasi terhadap $172$ stasiun Badan Meteorologi, Klimatologi, dan
-Geofisika (BMKG) yang tidak digunakan dalam koreksi.
+IMERG-L di Indonesia untuk periode $2001$ hingga $2025$, dan
+divalidasi untuk periode $2001$ hingga $2021$ terhadap $172$ stasiun
+Badan Meteorologi, Klimatologi, dan Geofisika (BMKG) yang tidak
+digunakan dalam koreksi.
 
 Terhadap jaringan BMKG yang dipisahkan untuk validasi, tiga dari empat
 pilar verifikasi bergerak mendekati target pengamatan stasiun: bias
@@ -190,7 +191,7 @@ banjir BMKG.
 
 Satu diagnostik tidak berubah. Korelasi Pearson antara nilai harian
 satelit dan stasiun yang berpasangan tetap di sekitar $0{,}34$ pada
-keempat tahap, dan berada dalam pita sempit $[0{,}332;~0{,}348]$ untuk
+ketiga tahap terkoreksi, dan berada dalam pita sempit $[0{,}332;~0{,}348]$ untuk
 seluruh lima belas konfigurasi \emph{sweep} sensitivitas Bali (bobot
 pencampuran, ambang GPD, dan saturasi kerapatan stasiun). Hal ini
 sesuai dengan teori koreksi bias berbasis sebaran marginal: karena
@@ -374,14 +375,18 @@ Benny Istanto
 % ----- Tables of contents / tables / figures / appendices -----
 \tableofcontents
 \clearpage
+% LIST OF TABLES / FIGURES / APPENDICES flow continuously (PPKI): the three
+% lists are not forced onto separate pages. A discardable \vspace separates
+% each from the previous list; it is absorbed if a natural page break lands
+% between them.
 \phantomsection
 \addcontentsline{toc}{chapter}{LIST OF TABLES}
 \listoftables
-\clearpage
+\vspace{1.5\baselineskip}
 \phantomsection
 \addcontentsline{toc}{chapter}{LIST OF FIGURES}
 \listoffigures
-\clearpage
+\vspace{1.5\baselineskip}
 \phantomsection
 \addcontentsline{toc}{chapter}{LIST OF APPENDICES}
 \listofappx
