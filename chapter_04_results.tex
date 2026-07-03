@@ -13,7 +13,7 @@
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
 
-\chapter{Results}\label{chap:results}
+\chapter{RESULTS}\label{chap:results}
 
 This chapter reports the empirical performance of the LSEQM+DL (Linear Scaling (LS), Empirical Quantile Mapping (EQM), Generalized Pareto Distribution (GPD), and Convolutional Neural Network (CNN) refinement, a Deep Learning (DL) architecture)
 framework against 172 independent Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) stations, pooled across
@@ -352,15 +352,20 @@ where in the archipelago the correction is doing the most work.
 
 The aggregate event-detection metrics in
 Table~\ref{tab:headline} mask a threshold-dependent reversal in
-detection skill. Skill is broken out at the World Meteorological Organization (WMO)
-multi-threshold verification thresholds in
-Figure~\ref{fig:threshold-skill}. These follow the WMO
-classifications \citep{ref:wmo1132}: $1$~mm (measurable), $5$~mm
-(light), $10$~mm (moderate), $20$~mm (moderate-heavy), $50$~mm
-(heavy), and $100$~mm (very heavy). The $150$~mm/day extreme class
-is omitted because no station reaches the minimum of ten
-exceedances required for stable categorical verification in any
-dekad of the record. At the
+detection skill. Skill is broken out at a series of daily
+thresholds in Figure~\ref{fig:threshold-skill}. Thresholds up to
+$50$~mm/day follow the World Meteorological Organization (WMO)
+multi-threshold verification practice \citep{ref:wmo1485,
+ref:wmo1132}, while $100$ and $150$~mm/day are added as heavy and
+extreme classes relevant to the Indonesian wet-season regime,
+consistent with the WMO principle that extreme-precipitation
+thresholds are set regionally \citep{ref:wmo1310}. The thresholds
+are labelled here by their conventional daily-rainfall intensity
+descriptors: $1$~mm (measurable), $5$~mm (light), $10$~mm
+(moderate), $20$~mm (moderate-heavy), $50$~mm (heavy), and
+$100$~mm (very heavy). The $150$~mm/day extreme class is omitted
+because no station reaches the minimum of ten exceedances required
+for stable categorical verification in any dekad of the record. At the
 $1$ and $5~\mathrm{mm/day}$ thresholds LS retains a higher POD
 than LSEQM+DL, consistent with LS preserving the IMERG-L tendency
 to over-detect light rain and therefore scoring more hits at the
@@ -396,7 +401,7 @@ station locations.\label{fig:threshold-skill}}
 \section{Pearson Correlation Across Stages}\label{sec:results-correlation}
 % ============================================================
 
-One metric does not move across the four stages. The Pearson
+One metric does not move across the three corrected stages. The Pearson
 correlation between paired daily satellite and CPC-UNI values,
 computed at each pixel and pooled across the dekad, is $0.343$
 for LS, $0.345$ for LSEQM, and $0.348$ for LSEQM+DL. The total
@@ -410,8 +415,8 @@ chapter in four panels. Pearson $r$, root mean square error
 (RMSE), and Nash-Sutcliffe efficiency (NSE)
 \citep{ref:nashsutcliffe1970} are temporal-skill diagnostics
 measured here against the in-sample CPC-UNI target, and they do
-not improve across the four correction stages: $r$ stays near
-$0.34$ across all stages, RMSE rises from $13.1$ to $14.1$~mm/day
+not improve across the three corrected stages: $r$ stays near
+$0.34$ across all three, RMSE rises from $13.1$ to $14.1$~mm/day
 because the correction widens spread without re-aligning timing,
 and NSE moves from $-0.27$ to $-0.52$. The standard-deviation
 ratio, an amplitude diagnostic measured against the independent
@@ -440,7 +445,7 @@ marginal correction has no mechanism to shift a value from one
 day to its neighbour, so by construction it cannot lift the
 three temporal-skill metrics. The visual asymmetry between the
 amplitude-pillar improvement and the temporal-skill diagnostics
-is the central observation of this paper;
+is the central observation of this thesis;
 Section~\ref{sec:discussion-bound} develops the theoretical
 basis for the bound, and the empirical value $r \approx 0.348$
 sits inside the $0.3$ to $0.5$ band reported for daily IMERG
@@ -465,8 +470,7 @@ components, the half-hourly IMERG-L source is re-aggregated into
 $h \in [-48, +48]$ from $00{:}00$~UTC and correlated against the
 BMKG daily totals (Section~\ref{sec:methods-window}). The
 diagnostic operates on the raw retrieval rather than the corrected
-product; the offset search follows the gauge-timing procedure of
-\citet{ref:beck2019}. The diagnostic pools the $178$ of the $180$
+product. The diagnostic pools the $178$ of the $180$
 BMKG stations that carry valid half-hourly coverage, a different
 subset from the $172$ stations used for the dekadal
 correction-metric validation.
@@ -477,9 +481,12 @@ $h = 0$, the UTC-day alignment the daily archive uses, to
 $r = 0.57$ at $h = -23$, the window that matches the local-day
 gauge convention. This UTC-day value of $0.20$ is lower than the
 full-record headline of $r \approx 0.34$
-(Section~\ref{sec:results-correlation}) because the full record
-blends the GPM era with the earlier, timing-imprecise era, a point
-Section~\ref{sec:discussion-subdaily} returns to. The recovery is
+(Section~\ref{sec:results-correlation}) for two reasons: the full
+record blends the GPM era with the earlier, timing-imprecise era,
+and the window diagnostic pairs against the independent BMKG gauges
+rather than the CPC-UNI reference used in
+Section~\ref{sec:results-correlation}. The era difference dominates,
+a point Section~\ref{sec:discussion-subdaily} returns to. The recovery is
 conditional on the satellite era. Before the full GPM
 constellation, the years through $2013$, whose IMERG inputs derive
 from the sparser TRMM-era sensor set, re-windowing does not lift
@@ -609,23 +616,28 @@ LSEQM and LSEQM+DL maps are nearly indistinguishable there.
 
 Figure~\ref{fig:cqi-improvement} isolates the LSEQM+DL
 contribution by mapping the per-pixel CQI change from LSEQM to
-LSEQM+DL (panel~a) and classifying the LSEQM+DL CQI into six
-quality tiers (panel~b) that run from Poor ($<0.3$) to Excellent
-($\geq 0.7$). The LSEQM+DL improvement is
-positive and modest over most of the domain, with the largest
-gains concentrated in the densely gauged western islands where
-the CNN refinement is most active. The categorical view shows
-that the LSEQM+DL product reaches the Good or Excellent tier
-across roughly half of the Indonesian land mass, while sparsely
-gauged eastern regions sit in the Fair-Low to Marginal tiers,
-consistent with the framework's documented graceful degradation
-under the confidence-mask design.
+LSEQM+DL (panel~a) and the LSEQM+DL CQI itself (panel~b) against
+the four operational quality tiers (Poor $<0.4$, Fair $0.4$ to $0.6$,
+Good $0.6$ to $0.8$, Excellent $\geq 0.8$). The change from the CNN
+step is small and never negative: it stays within $\pm 0.01$ CQI
+across most of the domain and rises to modest positive values over
+the densely gauged western islands where the refinement is most
+active (mean $+0.003$, exceeding $+0.01$ over $3.8\%$ of pixels and
+falling below $-0.01$ over none). The CQI map places the product in
+the Fair band ($0.40$ to $0.60$) across $98.5\%$ of the land mass
+(mean $0.503$), with a west-east gradient that tracks gauge
+density: higher within the Fair band over Java, Sumatra, and the
+well-observed interiors, and dropping into the Poor tier over the
+$1.5\%$ of pixels in the most sparsely gauged east. It does not
+reach the Good or Excellent tier anywhere; against the sparse CPC
+reference the attainable CQI is bounded within the Fair band,
+consistent with the confidence mask reverting toward LSEQM where
+stations are sparse.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\figFourFiveWidth\textwidth]{fig_thesis_04_cqi_improvement.png}
-\caption[Per-pixel CQI change from LSEQM to LSEQM+DL]{(a) Per-pixel CQI change from LSEQM to LSEQM+DL,
-smoothed spatially for clarity.\label{fig:cqi-improvement}}
+\caption[CQI change and continuous quality for LSEQM+DL]{(a) Per-pixel CQI change from LSEQM to LSEQM+DL; (b) LSEQM+DL CQI, within the Fair tier (0.40 to 0.60) almost everywhere; both panels spatially smoothed.\label{fig:cqi-improvement}}
 \end{figure}
 
 The spatial pattern carries an important operational reading.
@@ -721,7 +733,7 @@ to February) when absolute precipitation magnitudes are
 largest, which is a property of any squared-error metric on a
 distribution with a wet-season fat tail rather than a
 correction artefact. The KS $p$-value remains above the
-$10\%$ acceptance threshold for both LSEQM and LSEQM+DL across
+$5\%$ acceptance threshold for both LSEQM and LSEQM+DL across
 all months except the deepest wet-season months, where the
 high counts of heavy-rain days reduce the test power. CSI
 shows a modest seasonal cycle but the method ordering
@@ -839,7 +851,7 @@ Section~\ref{sec:results-headline} that LSEQM+DL moves value
 adjustment, distribution alignment, and tail preservation toward
 the gauge target. Second, the Pearson correlation stays in the
 narrow band $[0.332, 0.348]$ across all fifteen settings, a
-spread of $0.015$. No setting shifts the daily correlation by
+spread of $0.016$. No setting shifts the daily correlation by
 more than this amount, consistent with the interpretation of
 Section~\ref{sec:results-correlation} that the daily correlation
 is bounded by the timing skill of the raw retrieval rather than
@@ -927,7 +939,7 @@ subdomain across all $36$ dekadal windows.\label{tab:colab-runtime}}
 Notebook & Stage & Batch runtime (min) \\
 \midrule
 02 & LSEQM+DL bias correction (per-dekad CNN training) & 16.3 \\
-03 & Verification metric computation ($31$ metrics)    & 45.5 \\
+03 & Verification metric computation ($31$ metrics)    & 45.4 \\
 04 & Quality assessment (CQI sub-scores)               &  6.9 \\
 05 & Station validation against BMKG                   &  0.5 \\
 06 & Visualisation                                     &  3.0 \\
