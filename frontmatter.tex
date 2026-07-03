@@ -158,81 +158,82 @@ Presipitasi Satelit Harian. Dibimbing oleh RIZALDI BOER dan I PUTU
 SANTIKAYASA.
 
 \medskip
-Produk presipitasi satelit harian menopang peringatan dini banjir,
+Produk presipitasi satelit harian menjadi landasan bagi peringatan dini banjir,
 pemantauan kekeringan, dan analisis neraca air; namun, \emph{Integrated
 Multi-satellitE Retrievals for Global Precipitation Measurement}
 \emph{Late Run} (IMERG-L) mengandung bias sistematis di Benua Maritim
 Indonesia. Penelitian ini mengevaluasi \emph{pipeline} koreksi bias
 hibrida empat tahap: \emph{Linear Scaling} (LS), \emph{Empirical
-Quantile Mapping} (EQM) berbasis sebaran Gamma, penyesuaian ekor
-dengan \emph{Generalized Pareto Distribution} (GPD), dan penyempurnaan
-berbasis \emph{Convolutional Neural Network} (CNN) yang
+Quantile Mapping} (EQM) berbasis distribusi Gamma, penyesuaian nilai ekstrem 
+(ekor distribusi) dengan \emph{Generalized Pareto Distribution} (GPD), dan 
+penyempurnaan berbasis \emph{Convolutional Neural Network} (CNN) yang
 mempertimbangkan kerapatan stasiun, sebuah arsitektur \emph{Deep
 Learning} (DL), disingkat LSEQM+DL. \emph{Pipeline} diterapkan pada
 IMERG-L di Indonesia untuk periode $2001$ hingga $2025$, dan
 divalidasi untuk periode $2001$ hingga $2021$ terhadap $172$ stasiun
 Badan Meteorologi, Klimatologi, dan Geofisika (BMKG) yang tidak
-digunakan dalam koreksi.
+digunakan dalam sampel koreksi.
 
-Terhadap jaringan BMKG yang dipisahkan untuk validasi, tiga dari empat
-pilar verifikasi bergerak mendekati target pengamatan stasiun: bias
-relatif dari $-11{,}4\%$ (LS) menjadi $-0{,}6\%$ (LSEQM+DL), rasio
-simpangan baku dari $0{,}71$ menuju $1{,}00$, nilai-$p$
-Kolmogorov-Smirnov dari $0{,}01\%$ menjadi $19\%$, serta rasio
-persentil ke-$95$ dan ke-$99$ dari $0{,}74$ dan $0{,}71$ menuju
-$1{,}05$ dan $1{,}01$. Pendeteksian kejadian menunjukkan
-\emph{trade-off} yang dirancang: produk terkoreksi mendeteksi lebih
-sedikit kejadian hujan ringan di bawah $10$~mm/hari, namun mencapai
-keberhasilan kritis yang lebih tinggi pada setiap ambang di atas
-$20$~mm/hari, dengan peningkatan \emph{Critical Success Index}
-sebesar $56\%$ pada ambang $50$~mm/hari ($0{,}097$ dibanding
-$0{,}062$), yaitu rentang ambang yang relevan dengan peringatan dini
-banjir BMKG.
+Terhadap jaringan stasiun independen BMKG tersebut, tiga dari empat
+pilar verifikasi menunjukkan hasil yang semakin mendekati nilai observasi penakar hujan:
+bias relatif turun dari $-11{,}4\%$ (LS) menjadi $-0{,}6\%$ (LSEQM+DL), rasio
+simpangan baku bergerak dari $0{,}71$ menuju $1{,}00$, nilai-$p$
+Kolmogorov-Smirnov naik dari $0{,}01\%$ menjadi $19\%$, serta rasio
+persentil ke-$95$ dan ke-$99$ bergeser dari $0{,}74$ dan $0{,}71$ menuju
+$1{,}05$ dan $1{,}01$. Hasil deteksi kejadian menunjukkan adanya \emph{trade-off} 
+yang dirancang dalam sistem: produk terkoreksi mendeteksi lebih sedikit kejadian hujan ringan 
+(di bawah $10$~mm/hari) dibandingkan dengan data \emph{retrieval} mentahnya, namun 
+mencapai tingkat keberhasilan deteksi yang lebih tinggi 
+pada setiap ambang batas di atas $20$~mm/hari. Terdapat peningkatan 
+\emph{Critical Success Index} sebesar $56\%$ pada ambang $50$~mm/hari ($0{,}097$ 
+berbanding $0{,}062$), yang merupakan rentang operasional yang digunakan dalam 
+peringatan dini banjir BMKG.
 
-Satu diagnostik tidak berubah. Korelasi Pearson antara nilai harian
-satelit dan stasiun yang berpasangan tetap di sekitar $0{,}34$ pada
-ketiga tahap terkoreksi, dan berada dalam pita sempit $[0{,}332;~0{,}348]$ untuk
-seluruh lima belas konfigurasi \emph{sweep} sensitivitas Bali (bobot
-pencampuran, ambang GPD, dan saturasi kerapatan stasiun). Hal ini
-sesuai dengan teori koreksi bias berbasis sebaran marginal: karena
+Namun, terdapat satu metrik diagnostik yang tidak mengalami perubahan. 
+Korelasi Pearson antara nilai harian satelit dan stasiun yang berpasangan tetap 
+berada di sekitar $0{,}34$ pada ketiga tahap terkoreksi, dan bertahan dalam 
+rentang yang sempit $[0{,}332;~0{,}348]$ untuk seluruh lima belas konfigurasi 
+uji sensitivitas Bali (bobot pencampuran, ambang GPD, dan saturasi kerapatan stasiun). 
+Hal ini sesuai dengan prediksi perilaku koreksi bias berbasis distribusi marginal: karena
 koreksi mempertahankan urutan peringkat data, korelasi harian dibatasi
-oleh ketepatan waktu \emph{retrieval} satelit mentah, bukan oleh metode
-koreksinya. Ketika data IMERG-L setengah-jaman disusun ulang ke dalam
-jendela 24 jam yang mengikuti konvensi pengamatan pagi setempat
-yang dipakai jaringan validasi BMKG, sebagian besar batas korelasi ini ternyata
-berasal dari ketidaksesuaian jendela kalender antara satelit dan
+oleh ketepatan waktu \emph{retrieval} dari data satelit, terlepas dari keahlian metode
+koreksinya. Ketika data IMERG-L dengan interval setengah-jam diagregasi ulang ke dalam
+interval 24 jam yang mengikuti konvensi pengamatan pagi waktu setempat
+dari jaringan validasi BMKG, terlihat bahwa sebagian besar batas atas korelasi ini 
+berasal dari ketidaksesuaian rentang waktu kalender antara satelit dan
 stasiun. Pada era GPM ($2015$ hingga $2021$), korelasi gabungan naik
-dari $r = 0{,}20$ pada jendela hari Waktu Universal Terkoordinasi (UTC)
-menjadi $r = 0{,}57$ pada jendela $-23$ jam yang selaras, dengan median
-per-stasiun $0{,}56$; pergeseran $-23$ jam ini sama untuk seluruh dua
-belas musim bergulir tiga-bulanan dan ketiga zona waktu Indonesia,
-sedangkan besar korelasi yang dipulihkan bervariasi dari $0{,}56$ di
+dari $r = 0{,}20$ pada periode harian Waktu Universal Terkoordinasi (UTC)
+menjadi $r = 0{,}57$ pada interval $-23$ jam yang selaras, dengan median
+per-stasiun sebesar $0{,}56$; pergeseran $-23$ jam yang sama ini merupakan nilai optimal 
+untuk seluruh dua belas musim bergulir tiga-bulanan dan ketiga zona waktu Indonesia,
+sementara besar korelasi yang berhasil dipulihkan bervariasi dari $0{,}56$ di
 zona barat (WIB) hingga $0{,}62$ di zona timur (WIT). Pemulihan ini
-hanya muncul pada era GPM, ketika \emph{retrieval} sudah mampu menangkap
-siklus diurnal; karena itu nilai $0{,}34$ untuk seluruh rekaman
-sebenarnya merupakan campuran era ini dengan era awal yang ketepatan
-waktunya masih rendah. Ketergantungan terhadap jendela ini lenyap pada
-skala bulanan, ketika korelasi mencapai sekitar $0{,}80$ tanpa memandang
-pilihan jendela, sehingga batas korelasi harian sesungguhnya terletak
-pada pemasangan waktu hari per hari, bukan pada jumlah hujan yang
-ditangkap produk. Penyusunan ulang jendela ini hanya satu langkah
-praproses di luar \emph{pipeline} koreksi, memerlukan data
-setengah-jaman, dan ditetapkan sebagai langkah lanjutan yang paling siap
-diterapkan; dengan demikian produk terkoreksi sudah sesuai untuk
-aplikasi yang bergantung pada sifat sebaran harian, yaitu ranah yang
-tidak terpengaruh oleh penyusunan ulang tersebut.
+hanya terbatas pada era GPM, ketika \emph{retrieval} sudah mampu merekam
+siklus diurnal; oleh karena itu nilai $0{,}34$ pada keseluruhan periode data
+sebenarnya merupakan campuran antara era ini dengan era awal yang ketepatan
+waktunya masih rendah. Ketergantungan terhadap rentang waktu ini hilang pada
+agregasi bulanan, di mana korelasi mencapai sekitar $0{,}80$ tanpa memandang
+batasan pengamatan tersebut, sehingga mengonfirmasi bahwa batas korelasi harian 
+sesungguhnya terletak pada pencocokan waktu dari hari ke hari, bukan pada 
+volume curah hujan yang ditangkap oleh produk. Agregasi ulang interval observasi 
+ini merupakan satu langkah praproses tunggal di luar \emph{pipeline} koreksi, 
+yang memerlukan data interval setengah jam, dan diidentifikasi sebagai langkah 
+lanjutan yang paling dapat ditindaklanjuti secara operasional; dengan demikian,
+produk terkoreksi yang dihasilkan sudah sesuai untuk berbagai aplikasi yang 
+bergantung pada distribusi harian, yaitu ranah yang tidak terpengaruh oleh
+agregasi ulang tersebut.
 
-\emph{Pipeline} dirilis sebagai implementasi terbuka berbasis berkas
-konfigurasi; reproduktibilitasnya ditunjukkan dengan mengeksekusi
-ulang hasil utama secara menyeluruh pada infrastruktur awan gratis:
-\emph{subdomain} Bali ($9 \times 14$ piksel pada $0{,}1^{\circ}$, $80$
-piksel daratan, $36$ jendela dekadik $2001$-$2025$) selesai dalam
-$72{,}1$ menit pada \emph{Central Processing Unit} standar
-Google Colab.
+\emph{Pipeline} ini dirilis sebagai implementasi terbuka berbasis 
+konfigurasi yang reproduktibilitasnya didemonstrasikan dengan menjalankan
+ulang hasil utama dari awal hingga akhir pada infrastruktur komputasi awan gratis:
+\emph{subdomain} Bali ($9 \times 14$ grid pada resolusi $0{,}1^{\circ}$, $80$
+piksel yang berada di daratan, seluruh $36$ periode dasarian dari tahun $2001$ hingga $2025$) 
+berhasil diselesaikan dalam $72{,}1$ menit pada \emph{runtime Central Processing Unit} 
+standar di Google Colab.
 
 \medskip
 \noindent Kata kunci: IMERG, koreksi bias hibrida, presipitasi satelit harian,
-reproduktibilitas, validasi stasiun
+reproduktibilitas, validasi stasiun penakar hujan
 \clearpage
 
 % ----- Copyright notice (bottom of page; prohibition spans full margin) -----
