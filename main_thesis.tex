@@ -327,6 +327,14 @@
 % --- Appendices ---
 \input{chapter_99_appendices.tex}
 
+% Restore chapter-level bookmarks (the appendix file demoted them so A-H nest
+% under APPENDICES) so BIOGRAPHY sits at the outline top level again.
+\makeatletter
+\renewcommand{\toclevel@chapter}{0}%
+\renewcommand{\toclevel@section}{1}%
+\renewcommand{\toclevel@subsection}{2}%
+\makeatother
+
 % --- Biography (last page) ---
 \input{biography.tex}
 
