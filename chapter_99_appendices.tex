@@ -24,6 +24,16 @@
   {\fontsize{14}{17}\selectfont\bfseries APPENDICES}
 \end{center}
 \addcontentsline{toc}{chapter}{APPENDICES}
+% Nest the appendix chapters (A-H) UNDER the APPENDICES bookmark: demote their
+% hyperref outline levels by one (chapter->1, section->2, subsection->3) so the
+% PDF bookmark panel shows them inside APPENDICES. Reset before the biography in
+% main_thesis.tex so BIOGRAPHY returns to the top level. Printed TOC/LoA layout
+% is unaffected (this only changes the bookmark nesting).
+\makeatletter
+\renewcommand{\toclevel@chapter}{1}%
+\renewcommand{\toclevel@section}{2}%
+\renewcommand{\toclevel@subsection}{3}%
+\makeatother
 \vspace{\baselineskip}
 
 \appendix
