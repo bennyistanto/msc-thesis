@@ -23,6 +23,9 @@
 
 % ----- Page 1: Cover -----
 \thispagestyle{empty}
+% PDF outline anchor for the cover: invisible in the document, gives a
+% "back to the beginning" target at the top of the bookmark panel.
+\pdfbookmark[0]{COVER}{cover-bookmark}
 \vspace*{1cm}   % 3 cm top margin + 2 cm = 5 cm from the top edge
 \begin{center}
   {\fontsize{14}{17}\selectfont\bfseries
@@ -76,6 +79,7 @@ G2501222008
 \thispagestyle{empty}\null\clearpage
 
 % ----- Summary (English) -----
+\pdfbookmark[0]{SUMMARY}{summary-bookmark}
 \chapter*{SUMMARY}\thispagestyle{empty}
 \noindent BENNY ISTANTO. A Hybrid Bias Correction Framework for
 Daily Satellite Precipitation. Supervised by RIZALDI BOER and I PUTU
@@ -152,6 +156,7 @@ hybrid bias correction, IMERG, reproducibility
 \clearpage
 
 % ----- Ringkasan (Bahasa Indonesia) -----
+\pdfbookmark[0]{RINGKASAN}{ringkasan-bookmark}
 \chapter*{RINGKASAN}\thispagestyle{empty}
 \noindent BENNY ISTANTO. Kerangka Koreksi Bias Hibrida untuk
 Presipitasi Satelit Harian. Dibimbing oleh RIZALDI BOER dan I PUTU
@@ -299,6 +304,7 @@ Thesis Exam:
 % ----- Validation / approval page -----
 \clearpage
 \thispagestyle{empty}
+\pdfbookmark[0]{VALIDATION PAGE}{validation-bookmark}
 \noindent Thesis title: A Hybrid Bias Correction Framework for
 Daily Satellite Precipitation\\
 Name: Benny Istanto\\
@@ -374,6 +380,9 @@ Benny Istanto
 \pagestyle{fancy}
 
 % ----- Tables of contents / tables / figures / appendices -----
+% Bookmark the TOC itself (it is not listed inside the printed TOC, but a PDF
+% outline entry keeps it consistent with the LoT / LoF / LoA bookmarks).
+\pdfbookmark[0]{TABLE OF CONTENTS}{toc-bookmark}
 \tableofcontents
 \clearpage
 % LIST OF TABLES / FIGURES / APPENDICES flow continuously (PPKI): the three
