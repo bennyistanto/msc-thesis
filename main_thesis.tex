@@ -279,7 +279,7 @@
 % and skips it when followed by punctuation (";", "."), avoiding the
 % LaTeX rule that swallows whitespace right after a control word.
 \usepackage{xspace}
-\newcommand{\MDPIstatus}{ (under review at Remote Sensing)\xspace}
+\newcommand{\MDPIstatus}{\xspace}
 
 % needspace: keep a block of N \baselineskip together; if N lines do
 % not fit on the current page, break the page now. Used for the
@@ -336,6 +336,7 @@
 \makeatother
 
 % --- Biography (last page) ---
+\cleardoublepage
 \input{biography.tex}
 
 \end{document}
