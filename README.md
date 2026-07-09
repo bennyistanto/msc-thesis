@@ -14,7 +14,7 @@ Faculty of Mathematics and Natural Sciences</br>
 Bogor Agricultural University</br>
 Bogor, Indonesia
 
-Supervised by Prof. Dr. Ir. Rizaldi Boer, M.S. and Dr. I Putu Santikayasa, S.Si., M.Sc.
+Supervised by [Prof. Dr. Ir. Rizaldi Boer, M.S.](https://scholar.google.com/citations?user=jTPXEp8AAAAJ&hl=en) and [Dr. I Putu Santikayasa, S.Si., M.Sc.](https://scholar.google.com/citations?user=DcQ58z8AAAAJ&hl=en)
 
 ## What this repository contains
 
@@ -22,6 +22,7 @@ This repository holds the LaTeX sources, figures, and figure-generator scripts f
 
 - Parent code repository: <https://github.com/bennyistanto/hybrid-bias-correction>
 - Data archive: deposited on Zenodo (DOI in Appendix B of the thesis)
+- Companion paper (peer-reviewed): Istanto, B.; Boer, R.; Santikayasa, I.P. A Modular and Transferable Framework for Enhancing Satellite-Derived Daily Precipitation: Adjusting Values, Aligning Distributions, and Preserving Extremes. *Remote Sens.* 2026, 18, 2298. <https://doi.org/10.3390/rs18142298>
 
 ```
 .
