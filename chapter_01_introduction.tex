@@ -82,17 +82,13 @@ dimension a given pipeline actually corrects, and whether the
 reported skill survives a comparison against truly out-of-sample
 observations.
 
-The second is a reproducibility gap. The
-reproducibility discourse in computational science and the FAIR
-(Findable, Accessible, Interoperable, Reusable) principles for
-scientific data have made independent
-verifiability a methodological expectation
-\citep{ref:peng2011, ref:stodden2014, ref:wilkinson2016}. Yet
-the bias correction literature has adopted it unevenly: many
+The second is a reproducibility gap. Independent verifiability has
+become a methodological expectation in computational science
+\citep{ref:peng2011, ref:stodden2014, ref:wilkinson2016}, but the
+bias correction literature has adopted it unevenly: many
 influential studies publish a method without releasing the code
-or data, leaving any claim of reproduction to a reader who must
-re-implement the method from the paper alone. This thesis is
-organised around closing both gaps at once.
+or data. This thesis is organised around closing both gaps at
+once.
 
 Within the first of these gaps, one bias dimension is especially
 prone to being hidden by an aggregate score, and it is the focus of
@@ -325,21 +321,13 @@ window-offset timing diagnostic
 (Section~\ref{sec:methods-window}), and the reproducible
 implementation.
 
-Chapter~\ref{chap:results} first establishes how the three
-datasets agree with one another before any correction, and
-separates their genuine disagreement from the calendar label each
-archive assigns (Section~\ref{sec:results-intercomparison}). It
-then reports the stage-wise headline skill,
-the stage attribution, the threshold-dependent detection, the
-correlation result, the temporal-alignment and
-optimal-aggregation-window analysis, the spatial skill
-distribution, the per-station Taylor analysis, the temporal
-stability, the sensitivity discussion, and the reproducibility
-evaluation.
-Chapter~\ref{chap:discussion} develops the theoretical bound on
-the correlation, the interpretation of the optimal aggregation
-window, the operational implications, the reproducibility
-implications, the paths forward, and the limitations.
+Chapter~\ref{chap:results} reports the empirical results, from the
+agreement among the three datasets before any correction
+(Section~\ref{sec:results-intercomparison}) through to the
+reproducibility evaluation.
+Chapter~\ref{chap:discussion} interprets them: the theoretical bound
+on the correlation, the optimal aggregation window, and the
+operational, reproducibility and methodological implications.
 Chapter~\ref{chap:conclusion} draws the findings together and
 states the recommendations.
 The appendices hold the supporting material in the same order:
