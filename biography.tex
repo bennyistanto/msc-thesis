@@ -1,20 +1,25 @@
 % ============================================================
-% biography.tex - Biography page (last page after appendices)
+% biography.tex - CURRICULUM VITAE, the final page after the appendices.
 %
-% Purpose: author biography in the IPB PPKI single-page format.
+% Content follows PPKI 3.3.2 and Appendix 14b: birth, education, career, and a
+% publication-history sentence naming the journal that carried the companion
+% paper. Set as \chapter* so the title takes the standard chapter treatment.
+% main_thesis.tex issues the page break before \input.
 % Included by main_thesis.tex.
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
-\clearpage
-\thispagestyle{fancy}
+\chapter*{Curriculum Vitae}\thispagestyle{fancy}
 \phantomsection
-\begin{center}
-  {\fontsize{14}{17}\selectfont\bfseries BIOGRAPHY}
-\end{center}
-\addcontentsline{toc}{chapter}{BIOGRAPHY}
+\addcontentsline{toc}{chapter}{CURRICULUM VITAE}
 
 The author was born in Tuban, East Java, in 1982. He earned his undergraduate degree 
 in Meteorology from Bogor Agricultural University in 2006. Over the past 15 years, he 
 has worked extensively in climate analytics and geospatial technology for international 
 organizations, including a decade with the United Nations and five years with the World Bank Group. 
 In 2022, he began his graduate studies in Applied Climatology at Bogor Agricultural University.
+
+During the master's program, the scientific paper entitled ``A Modular and Transferable
+Framework for Enhancing Satellite-Derived Daily Precipitation: Adjusting Values, Aligning
+Distributions, and Preserving Extremes'' was published in \emph{Remote Sensing}
+18(14):2298 (doi:10.3390/rs18142298), co-authored with both supervisors. This scientific
+paper was part of the author's master's program.

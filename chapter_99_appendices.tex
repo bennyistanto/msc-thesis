@@ -2,13 +2,14 @@
 % chapter_99_appendices.tex - Appendices A through H
 %
 % Purpose: archival back-matter material kept separate from the body
-%          chapters: data sources, code+data availability, full
-%          configuration template, per-station verification table,
-%          reproducibility checklist, glossary, and the spatial atlas.
-% Sections: A Data Catalogue, B Code and Data Availability,
-%           C Configuration Template, D Per-Station Verification,
-%           E Reproducibility Checklist, F Glossary, G Spatial Atlas,
+%          chapters. Ordered to follow the thesis story: reference aid
+%          first, then data, then implementation, then extended results.
+% Sections: A Glossary, B Data Catalogue, C Configuration Template,
+%           D Code and Data Availability, E Reproducibility Checklist,
+%           F Per-Station Verification, G Spatial Atlas,
 %           H Supplementary Temporal-Alignment Diagnostics.
+%           Cross-references go through \ref{app:...} so the letters renumber
+%           automatically; never hardcode them.
 % Numbering: \thefigure / \thetable / \theequation prefix re-set to
 %            the appendix letter so figures land as G.1, G.2, ...
 %            instead of clashing with the Chapter 4 numbering.
@@ -16,14 +17,20 @@
 % License: CC BY 4.0 (see ../LICENSE).
 % ============================================================
 
-% ----- APPENDICES divider: title at top of page (opens on a recto) -----
+% ----- APPENDICES divider: a page of its own (opens on a recto) -----
+% PPKI: the word APPENDICES sits alone on an odd page, centred both
+% horizontally and vertically, 14pt bold. The appendix content (A. DATA
+% CATALOGUE onward) starts on the FOLLOWING page, so the \clearpage at the end
+% of this block is load-bearing, not cosmetic.
 \cleardoublepage
 \thispagestyle{fancy}
 \phantomsection
+\addcontentsline{toc}{chapter}{APPENDICES}
+\vspace*{\fill}
 \begin{center}
   {\fontsize{14}{17}\selectfont\bfseries APPENDICES}
 \end{center}
-\addcontentsline{toc}{chapter}{APPENDICES}
+\vspace*{\fill}
 % Nest the appendix chapters (A-H) UNDER the APPENDICES bookmark: demote their
 % hyperref outline levels by one (chapter->1, section->2, subsection->3) so the
 % PDF bookmark panel shows them inside APPENDICES. Reset before the biography in
@@ -34,7 +41,8 @@
 \renewcommand{\toclevel@section}{2}%
 \renewcommand{\toclevel@subsection}{3}%
 \makeatother
-\vspace{\baselineskip}
+% End the divider page; the first appendix opens on the next one.
+\clearpage
 
 \appendix
 % In the appendix the chapter counter restarts; the body-chapter numbering
@@ -47,9 +55,9 @@
 \renewcommand{\theequation}{\Alph{chapter}.\arabic{equation}}
 % Make the appendices flow continuously: remove the forced page break that
 % \chapter normally issues, so each appendix follows the previous one on the
-% same page (a new page is taken only when the content runs over). This patch
-% is applied here, after the main chapters, so only appendices A-F are
-% affected; the biography uses its own explicit \clearpage.
+% same page (a new page is taken only when the content runs over). Applied
+% here, after the main chapters, so only the appendices are affected;
+% main_thesis.tex restores the body chapter style afterwards.
 \makeatletter
 \patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
 \makeatother
@@ -58,6 +66,49 @@
   {\normalfont\fontsize{14}{17}\selectfont\bfseries}
   {\thechapter.}{0.6em}{\MakeUppercase}
 \titlespacing*{\chapter}{0pt}{1.5\baselineskip}{6pt}
+
+% ============================================================
+\chapter{Glossary}\label{app:glossary}
+\addcontentsline{apx}{appx}{\protect\numberline{Appendix~\thechapter}Glossary}
+% ============================================================
+
+% Glossary as a real two-column layout. Tunable widths:
+%   labelwidth = width of the acronym (left) column
+%   leftmargin = where the definition (right) column starts
+%   (text width - leftmargin) = effective definition column width
+% At 14 cm text width, leftmargin = 3.5 cm leaves 10.5 cm for definitions.
+\begin{description}[noitemsep, topsep=2pt, align=left, style=multiline,
+    labelindent=0pt, leftmargin=3.5cm, labelwidth=3.3cm, labelsep=0.2cm]
+    \item[BMKG] Meteorological, Climatological, and Geophysical Agency.
+    \item[BSQS] Basic Statistical Quality sub-score.
+    \item[CNN] Convolutional Neural Network.
+    \item[CPC-UNI] CPC Unified Gauge-Based Analysis of Global Daily Precipitation.
+    \item[CQI] Composite Quality Index.
+    \item[CRMSE] Centred root mean square error.
+    \item[CSI] Critical Success Index.
+    \item[DQS] Distribution Quality sub-score.
+    \item[EQM] Empirical Quantile Mapping.
+    \item[ETS] Equitable Threat Score.
+    \item[FAR] False Alarm Ratio.
+    \item[GPD] Generalized Pareto Distribution.
+    \item[GPM] Global Precipitation Measurement mission.
+    \item[IMERG] Integrated Multi-satellitE Retrievals for GPM.
+    \item[IMERG-L/F ] IMERG Late Run / Final Run.
+    \item[KS] Kolmogorov-Smirnov (test).
+    \item[LS] Linear Scaling.
+    \item[LSEQM+DL] The four-stage hybrid pipeline (LS, EQM, GPD, CNN).
+    \item[MLE] Maximum likelihood estimation.
+    \item[NSE] Nash-Sutcliffe Efficiency.
+    \item[POD] Probability of Detection.
+    \item[RB] Relative Bias.
+    \item[RMSE] Root Mean Square Error.
+    \item[SDR] Standard Deviation Ratio.
+    \item[TQS] Temporal Quality sub-score.
+    \item[TRMM] Tropical Rainfall Measuring Mission.
+    \item[UTC] Coordinated Universal Time.
+    \item[WMO] World Meteorological Organization.
+\end{description}
+
 
 % ============================================================
 \chapter{Data Catalogue}\label{app:data}
@@ -77,7 +128,9 @@ $0.1^{\circ}$) is retained as an independent benchmark but is not
 used in the correction. The Climate Prediction Center (CPC)
 Unified Gauge-Based Analysis of Global Daily Precipitation
 (CPC-UNI, $0.5^{\circ}$) is the correction reference
-\citep{ref:chen2008}. Satellite data were obtained from the
+\citep{ref:chen2008}.
+
+Satellite data were obtained from the
 National Aeronautics and Space Administration (NASA) Goddard Earth
 Sciences Data and Information Services Center (GES DISC); CPC-UNI
 from the National Oceanic and Atmospheric Administration (NOAA)
@@ -103,9 +156,32 @@ filters reduce it to the 172 used in validation:
     window.
 \end{enumerate}
 
-Together these drop 8 of 180 stations, leaving 172 for the
-per-station Taylor diagrams, multi-threshold verification, and
-station-level summaries.
+Together these drop 8 of the 180 archived stations, leaving 172 for
+the dekadal correction metrics, the multi-threshold verification,
+and the dry-day summaries.
+
+Analyses with different coverage requirements retain different
+subsets of the same archive, and the counts should not be
+interchanged:
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+Analysis & Stations \\
+\midrule
+Archived BMKG network & 180 \\
+Within the study window; per-station Taylor; half-hourly window diagnostic & 178 \\
+Day-label scan & 177 \\
+Dekadal correction metrics; multi-threshold; dry-day & 172 \\
+Valid per-dekad correlation (monthly Taylor) & 171 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+The $0.1^{\circ}$ grid resolves the 180 stations onto 169 distinct
+pixels, since some stations share a pixel; at the CPC-UNI
+$0.5^{\circ}$ resolution they fall in 134 cells.
 
 \section{Sentinel handling}
 
@@ -122,33 +198,6 @@ All threshold-based verification in this thesis uses the
 sentinel-filtered observations. A different station archive with a
 different sentinel convention (for example $9999$ or $-999$) would
 require the sentinel value to be reset in the configuration.
-
-
-% ============================================================
-\chapter{Code and Data Availability}\label{app:code}
-\addcontentsline{apx}{appx}{\protect\numberline{Appendix~\thechapter}Code and Data Availability}
-% ============================================================
-
-The framework is released as an open implementation. The source
-code, the six numbered notebooks, and the Quarto documentation
-site are hosted on GitHub at
-\url{https://github.com/bennyistanto/hybrid-bias-correction}
-under the Mozilla Public License 2.0. The notebooks open directly
-in Google Colab from the repository, and a province-scale Bali
-example dataset is bundled in the repository so the pipeline can be
-run without any external download.
-
-The full Indonesia operational inputs (IMERG, CPC, and BMKG for
-2001 to 2025, approximately $1.7$~GB) and the complete outputs
-(corrected NetCDFs, metrics, quality assessment, station
-validation, and figures, approximately $40$~GB) are deposited on
-Zenodo with a citable DOI:
-\url{https://doi.org/10.5281/zenodo.20287847}. To reproduce the
-Indonesia results, a reader clones the repository, downloads the
-Zenodo bundle, points \texttt{config.yml} at the extracted
-directories, and runs the notebooks. The companion paper is published in
-\emph{Remote Sensing} \citep{ref:istanto2026mdpi}
-(\url{https://doi.org/10.3390/rs18142298}).
 
 
 % ============================================================
@@ -191,10 +240,124 @@ quality_assessment:
 \enlargethispage{\baselineskip}%   keep the short closing paragraph on the same page as the verbatim
 The three sensitivity parameters identified in
 Chapter~\ref{chap:methods} (\texttt{blend\_alpha},
-\texttt{gpd\_threshold\_percentile}, \texttt{saturation\_count})
-are all set here, which is what makes the sensitivity sweep of
-Section~\ref{sec:results-sensitivity} a configuration change 
+\texttt{gpd\_threshold\_percentile}, \texttt{saturation\_count}),
+none of which was formally optimised, are all set here, which is
+what makes the sensitivity sweep of
+Section~\ref{sec:results-sensitivity} a configuration change
 rather than a code change.
+
+
+% ============================================================
+\chapter{Code and Data Availability}\label{app:code}
+\addcontentsline{apx}{appx}{\protect\numberline{Appendix~\thechapter}Code and Data Availability}
+% ============================================================
+
+The framework is released as an open implementation. The source
+code, the six numbered notebooks, and the Quarto documentation
+site are hosted on GitHub at
+\url{https://github.com/bennyistanto/hybrid-bias-correction}
+under the Mozilla Public License 2.0. The notebooks open directly
+in Google Colab from the repository, and a province-scale Bali
+example dataset is bundled in the repository so the pipeline can be
+run without any external download. Because the repository continues
+to develop, the citable record is an archived snapshot of it on
+Zenodo, all-versions DOI:
+\url{https://doi.org/10.5281/zenodo.20473507}.
+
+The full Indonesia operational inputs (IMERG, CPC, and BMKG for
+2001 to 2025, approximately $1.7$~GB) and the complete outputs
+(corrected NetCDFs, metrics, quality assessment, station
+validation, and figures, together with the $36$ per-dekad CNN
+models, approximately $40$~GB) are held in a separate data deposit,
+along with the derived arrays behind the temporal-alignment
+analysis of Section~\ref{sec:methods-window}:
+\url{https://doi.org/10.5281/zenodo.21640696}. That DOI names the
+exact deposit version this thesis was written against.
+To reproduce the
+Indonesia results, a reader clones the repository, downloads the
+Zenodo bundle, points \texttt{config.yml} at the extracted
+directories, and runs the notebooks. The companion paper is published in
+\emph{Remote Sensing} \citep{ref:istanto2026mdpi}
+(\url{https://doi.org/10.3390/rs18142298}).
+
+
+% ============================================================
+\chapter{Reproducibility Checklist}\label{app:repro}
+\addcontentsline{apx}{appx}{\protect\numberline{Appendix~\thechapter}Reproducibility Checklist}
+% ============================================================
+
+This checklist records what an independent reader needs in order
+to reproduce the results, following the reproducibility design of
+Section~\ref{sec:methods-reproducibility} and the empirical
+evaluation of Section~\ref{sec:results-reproducibility}.
+
+\medskip\noindent\textbf{Datasets and access.}
+IMERG-L and IMERG-F V07 from NASA GES DISC; CPC-UNI from NOAA PSL;
+BMKG station records as bundled (Bali example) or via the Zenodo
+deposit (full Indonesia):
+\url{https://doi.org/10.5281/zenodo.21640696}.
+
+\medskip\noindent\textbf{Window diagnostics.}
+The temporal-alignment results are the one part of this work that
+the notebook pipeline does not produce. They are computed from the
+half-hourly IMERG-L archive rather than the daily inputs, by way of
+a per-station half-hourly cache and a set of derived offset arrays
+holding additive sufficient statistics keyed by the offset $h$.
+Reproducing these figures therefore requires either the half-hourly
+archive or those derived arrays; the arrays, the scripts that
+generate and consume them, and the dependencies between them are
+documented with the data deposit.
+
+\medskip\noindent\textbf{Software environment (verified run).}
+Python $3.12$ on the Google Colab default image; TensorFlow
+$2.20.0$; NumPy $2.0.2$; netCDF4 $1.7.4$; xarray, SciPy, and
+scikit-learn from the Colab image. No pinned requirements file
+beyond a single supplementary install was needed because the
+remaining dependencies are pre-installed on Colab.
+
+\medskip\noindent\textbf{Hardware tested.}
+Free-tier Google Colab, standard CPU runtime with no hardware
+accelerator; the two heaviest notebooks used the no-cost high-RAM
+runtime option.
+
+\medskip\noindent\textbf{Expected runtime.}
+For the Bali subdomain ($126$-cell grid, $80$ land pixels) across
+all $36$ dekadal windows, the notebook sequence
+nb02 to nb06 completes in $72.1$ minutes
+(Table~\ref{tab:colab-runtime}). The preparatory notebooks nb00
+(area-of-interest definition) and nb01 (data download) are
+excluded: both scale with the extent of the domain requested and
+with network throughput, so neither produces a runtime another
+user could reproduce or meaningfully compare. The full Indonesian
+domain scales up with pixel count and is correspondingly longer.
+
+\medskip\noindent\textbf{Determinism.}
+The statistical stages (LS, EQM, GPD) are deterministic given the
+inputs. The CNN training uses a fixed random seed set in the
+configuration; minor run-to-run variation at the level of
+floating-point tolerance can remain from non-deterministic GPU or
+threaded CPU operations, but the Bali run reported here used the
+CPU runtime. A formal bit-equivalence assertion between the Colab
+and local outputs is identified in
+Section~\ref{sec:results-reproducibility} as the next
+reproducibility deliverable.
+
+\medskip\noindent\textbf{Run order.}
+Notebook 01 (data acquisition or example bundle), then 02 (LSEQM+DL
+correction), 03 (metrics), 04 (quality assessment), 05 (station
+validation), 06 (visualisation). Only the setup cell of each
+notebook and the upstream corrected outputs are prerequisites.
+
+The re-run reported in Section~\ref{sec:results-reproducibility}
+uses the Bali subdomain shown below, chosen because it is small
+enough to complete on a free cloud instance while still
+exercising every stage of the pipeline.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourEightWidth\textwidth]{fig_thesis_04_bali_coverage.png}
+\caption[The Bali reproducibility subdomain]{The Bali reproducibility subdomain\label{fig:bali-coverage}}
+\end{figure}
 
 
 % ============================================================
@@ -204,15 +367,26 @@ rather than a code change.
 
 Table~\ref{tab:perstation-bali} reports the per-station Taylor
 statistics for the four BMKG stations on Bali, computed against
-the daily station records over 2001 to 2021. The table illustrates
+the daily station records over the whole 2001 to 2021 record at
+the archived UTC date label, without the day-label matching of
+Section~\ref{sec:results-intercomparison}. The table illustrates
 the correlation pattern at the level of individual stations: the
-Pearson correlation barely moves between the raw IMERG-L and the
+Pearson correlation stays close between the raw IMERG-L and the
 corrected LSEQM+DL series, while the standard deviation of the
-corrected series moves toward the observed standard deviation. The
-single-station daily samples are smaller and noisier than the
-pooled 172-station Indonesia result, but the same pattern is
-visible. The full per-station tables for all 172 Indonesia
-stations are in the Zenodo release.
+corrected series moves toward the observed standard deviation.
+
+Two comparisons should not be drawn from these four rows. They are
+individual stations, not a network summary: the per-station median
+over the 178 stations of this diagnostic is $0.286$ for IMERG-L and
+$0.280$ for LSEQM+DL, and the coincidence between that median and
+the Kahang-Kahang entry is arithmetic accident. They are also
+measured at the archived label, so they are not comparable with the
+$0.57$ reported at the matched label in
+Chapter~\ref{chap:results}. The two stations that decline,
+Kahang-Kahang and Jembrana, do so by more than the sampling noise
+of a full-record sample and are discussed with the
+representativeness argument below. The full per-station tables are
+in the Zenodo release.
 Table~\ref{tab:perstation-bali} reports, per station, the correlation
 ($r$) against the daily station record for raw IMERG-L and corrected
 LSEQM+DL, the observed and LSEQM+DL standard deviations ($\sigma$, in
@@ -220,7 +394,7 @@ mm/day), and the LSEQM+DL bias (mm/day).
 
 \begin{table}[H]
 \centering
-\caption{Per-station Taylor statistics for the four Bali BMKG stations.\label{tab:perstation-bali}}
+\caption{Per-station Taylor statistics for the four Bali BMKG stations\label{tab:perstation-bali}}
 \begingroup\small
 \begin{tabular}{@{}lccccc@{}}
 \toprule
@@ -267,100 +441,6 @@ mark each distribution's median).\label{fig:noise-selection}}
 
 
 % ============================================================
-\chapter{Reproducibility Checklist}\label{app:repro}
-\addcontentsline{apx}{appx}{\protect\numberline{Appendix~\thechapter}Reproducibility Checklist}
-% ============================================================
-
-This checklist records what an independent reader needs in order
-to reproduce the results, following the reproducibility design of
-Section~\ref{sec:methods-reproducibility} and the empirical
-evaluation of Section~\ref{sec:results-reproducibility}.
-
-\medskip\noindent\textbf{Datasets and access.}
-IMERG-L and IMERG-F V07 from NASA GES DISC; CPC-UNI from NOAA PSL;
-BMKG station records as bundled (Bali example) or via the Zenodo
-deposit (full Indonesia). DOI:
-\url{https://doi.org/10.5281/zenodo.20287847}.
-
-\medskip\noindent\textbf{Software environment (verified run).}
-Python $3.12$ on the Google Colab default image; TensorFlow
-$2.20.0$; NumPy $2.0.2$; netCDF4 $1.7.4$; xarray, SciPy, and
-scikit-learn from the Colab image. No pinned requirements file
-beyond a single supplementary install was needed because the
-remaining dependencies are pre-installed on Colab.
-
-\medskip\noindent\textbf{Hardware tested.}
-Free-tier Google Colab, standard CPU runtime with no hardware
-accelerator; the two heaviest notebooks used the no-cost high-RAM
-runtime option.
-
-\medskip\noindent\textbf{Expected runtime.}
-For the Bali subdomain ($126$-cell grid, $80$ land pixels) across
-all $36$ dekadal windows, the end-to-end notebook sequence
-(nb02 to nb06) completes in $72.1$ minutes
-(Table~\ref{tab:colab-runtime}). The full Indonesian domain scales
-up with pixel count and is correspondingly longer.
-
-\medskip\noindent\textbf{Determinism.}
-The statistical stages (LS, EQM, GPD) are deterministic given the
-inputs. The CNN training uses a fixed random seed set in the
-configuration; minor run-to-run variation at the level of
-floating-point tolerance can remain from non-deterministic GPU or
-threaded CPU operations, but the Bali run reported here used the
-CPU runtime. A formal bit-equivalence assertion between the Colab
-and local outputs is identified in
-Section~\ref{sec:results-reproducibility} as the next
-reproducibility deliverable.
-
-\medskip\noindent\textbf{Run order.}
-Notebook 01 (data acquisition or example bundle), then 02 (LSEQM+DL
-correction), 03 (metrics), 04 (quality assessment), 05 (station
-validation), 06 (visualisation). Only the setup cell of each
-notebook and the upstream corrected outputs are prerequisites.
-
-
-% ============================================================
-\chapter{Glossary}\label{app:glossary}
-\addcontentsline{apx}{appx}{\protect\numberline{Appendix~\thechapter}Glossary}
-% ============================================================
-
-% Glossary as a real two-column layout. Tunable widths:
-%   labelwidth = width of the acronym (left) column
-%   leftmargin = where the definition (right) column starts
-%   (text width - leftmargin) = effective definition column width
-% At 14 cm text width, leftmargin = 3.5 cm leaves 10.5 cm for definitions.
-\begin{description}[noitemsep, topsep=2pt, align=left, style=multiline,
-    labelindent=0pt, leftmargin=3.5cm, labelwidth=3.3cm, labelsep=0.2cm]
-    \item[BMKG] Meteorological, Climatological, and Geophysical Agency.
-    \item[BSQS] Basic Statistical Quality sub-score.
-    \item[CNN] Convolutional Neural Network.
-    \item[CPC-UNI] CPC Unified Gauge-Based Analysis of Global Daily Precipitation.
-    \item[CQI] Composite Quality Index.
-    \item[CRMSE] Centred root mean square error.
-    \item[CSI] Critical Success Index.
-    \item[DQS] Distribution Quality sub-score.
-    \item[EQM] Empirical Quantile Mapping.
-    \item[ETS] Equitable Threat Score.
-    \item[FAR] False Alarm Ratio.
-    \item[GPD] Generalized Pareto Distribution.
-    \item[GPM] Global Precipitation Measurement mission.
-    \item[IMERG] Integrated Multi-satellitE Retrievals for GPM.
-    \item[IMERG-L/F ] IMERG Late Run / Final Run.
-    \item[KS] Kolmogorov-Smirnov (test).
-    \item[LS] Linear Scaling.
-    \item[LSEQM+DL] The four-stage hybrid pipeline (LS, EQM, GPD, CNN).
-    \item[MLE] Maximum likelihood estimation.
-    \item[NSE] Nash-Sutcliffe Efficiency.
-    \item[POD] Probability of Detection.
-    \item[RB] Relative Bias.
-    \item[RMSE] Root Mean Square Error.
-    \item[SDR] Standard Deviation Ratio.
-    \item[TQS] Temporal Quality sub-score.
-    \item[WMO] World Meteorological Organization.
-\end{description}
-
-
-% ============================================================
 \chapter{Spatial Atlas}\label{app:atlas}
 \addcontentsline{apx}{appx}{\protect\numberline{Appendix~\thechapter}Spatial Atlas}
 % ============================================================
@@ -368,9 +448,9 @@ notebook and the upstream corrected outputs are prerequisites.
 % --- Tunable per-figure widths (fraction of \textwidth, 0.50 to 1.00) ---
 % Adjust any of these to make a single figure smaller (more compact, leaves
 % more vertical room on the page) or larger (more readable detail).
-\newcommand{\atlasGoneWidth}{1.0}   % G.1 difference maps
-\newcommand{\atlasGtwoWidth}{1.0}   % G.2 three-day x three-product
-\newcommand{\atlasGthreeWidth}{1.0} % G.3 pillar metrics
+\newcommand{\atlasGoneWidth}{0.95}   % G.1 difference maps
+\newcommand{\atlasGtwoWidth}{0.95}   % G.2 three-day x three-product
+\newcommand{\atlasGthreeWidth}{0.95} % G.3 pillar metrics
 \newcommand{\atlasGfourWidth}{0.95}  % G.4 six-product comparison
 \newcommand{\atlasGfiveWidth}{0.95}  % G.5 station overlay
 
@@ -393,7 +473,7 @@ pipeline, largest where the correction does the most work).
 \begin{figure}[H]
 \centering
 \includegraphics[width=\atlasGoneWidth\textwidth]{fig_thesis_G1_differences.png}
-\caption[Difference maps locating the correction residual]{Difference maps for $1$~January~$2025$ (mm/day).\label{fig:atlas-diff}}
+\caption[Difference maps locating the correction residual]{Difference maps for $1$~January~$2025$ (mm/day)\label{fig:atlas-diff}}
 \end{figure}
 
 Figure~\ref{fig:atlas-threedays} contrasts three days (the start,
@@ -406,7 +486,7 @@ pattern while bringing the daily amount toward the gauge target.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\atlasGtwoWidth\textwidth]{fig_thesis_G2_three_days.png}
-\caption[Three-day daily contrast across products]{Three-day daily contrast across products for dekad~$1$ of January~$2025$.\label{fig:atlas-threedays}}
+\caption[Three-day daily contrast across products]{Three-day daily contrast across products for dekad~$1$ of January~$2025$\label{fig:atlas-threedays}}
 \end{figure}
 
 Figure~\ref{fig:atlas-pillars} maps the four verification pillars
@@ -419,7 +499,7 @@ unity otherwise) reads as neutral colour.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\atlasGthreeWidth\textwidth]{fig_thesis_G3_pillar_metrics.png}
-\caption[Per-pillar climatological metric maps across correction stages]{Per-pixel climatological metric maps for the four verification pillars across the three correction stages.\label{fig:atlas-pillars}}
+\caption[Per-pillar climatological metric maps across correction stages]{Per-pixel climatological metric maps for the four verification pillars across the three correction stages\label{fig:atlas-pillars}}
 \end{figure}
 
 Figure~\ref{fig:atlas-six} maps six daily products on a shared colour
@@ -432,7 +512,7 @@ from raw retrieval to gauge reference.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\atlasGfourWidth\textwidth]{fig_thesis_G4_six_products.png}
-\caption[Six-product comparison for 1 January 2025]{Six-product daily precipitation map for $1$~January~$2025$.\label{fig:atlas-six}}
+\caption[Six-product comparison for 1 January 2025]{Six-product daily precipitation map for $1$~January~$2025$\label{fig:atlas-six}}
 \end{figure}
 
 Figure~\ref{fig:atlas-stations} overlays the BMKG validation stations
@@ -445,7 +525,18 @@ gridded product agrees with the station.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\atlasGfiveWidth\textwidth]{fig_thesis_G5_station_overlay.png}
-\caption[Station-overlay maps for dekad-1-January climatology]{Dekad-$1$-of-January climatological mean precipitation (mm/day, $2001$ to $2025$ average) for four products with the BMKG validation stations overlaid.\label{fig:atlas-stations}}
+\caption[Station-overlay maps for dekad-1-January climatology]{Dekad-$1$-of-January climatological mean precipitation (mm/day, $2001$ to $2025$ average) for four products with the BMKG validation stations overlaid\label{fig:atlas-stations}}
+\end{figure}
+
+The final map isolates the Stage-4 contribution to spatial
+quality. It is reported here rather than in
+Section~\ref{sec:results-cqi} because the change it shows is
+small, and the values that matter are stated numerically there.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourFiveWidth\textwidth]{fig_thesis_04_cqi_improvement.png}
+\caption[CQI change and continuous quality for LSEQM+DL]{(a) Per-pixel CQI change from LSEQM to LSEQM+DL; (b) LSEQM+DL CQI, within the Fair tier (0.40 to 0.60) almost everywhere; both panels spatially smoothed.\label{fig:cqi-improvement}}
 \end{figure}
 
 
@@ -468,7 +559,7 @@ per-timezone-band pooled correlation the main-text figure omits.
 \includegraphics[width=\gridTrmmWidth\textwidth]{fig_thesis_H1_gridded_trmm.png}
 \caption[Gridded window offset against CPC-UNI, TRMM-input era]{Gridded
 window-offset diagnostic against CPC-UNI over the TRMM-input era ($2001$ to
-$2013$).\label{fig:grid-trmm}}
+$2013$)\label{fig:grid-trmm}}
 \end{figure}
 
 Each figure maps the optimal aggregation-window offset $h^\star$
@@ -488,13 +579,22 @@ with CPC gauge density.
 \centering
 \includegraphics[width=\gridGpmWidth\textwidth]{fig_thesis_H2_gridded_gpm.png}
 \caption[Gridded window offset against CPC-UNI, GPM era]{Gridded window-offset
-diagnostic against CPC-UNI over the GPM era ($2015$ to
-$2025$).\label{fig:grid-gpm}}
+diagnostic against CPC-UNI over the GPM era, $2015$ to
+$2025$\label{fig:grid-gpm}}
 \end{figure}
+
+This diagnostic runs to $2025$ because both the satellite archive
+and CPC-UNI extend that far. The station-based diagnostics of
+Chapter~\ref{chap:results} end in $2021$, where the BMKG archive
+ends, so their GPM era is $2015$ to $2021$. The two windows give
+similar results here, a pooled whole-domain correlation of $0.325$
+to $2025$ against $0.334$ to $2021$, but the window should be
+stated whenever either value is quoted.
 
 The optimum is the same in the timing-imprecise TRMM-input era
 (Figure~\ref{fig:grid-trmm}) as in the GPM era
-(Figure~\ref{fig:grid-gpm}), confirming that the offset is a
+(Figure~\ref{fig:grid-gpm}), which is consistent with the offset
+being a
 property of the gauge-labelling convention rather than of the
 satellite retrieval skill. The absolute correlation against the
 smoothed $0.5^\circ$ analysis is muted in both eras and so does
@@ -503,3 +603,30 @@ Section~\ref{sec:results-window}, while the spatial coverage that
 the gridded reference adds, beyond the BMKG station locations,
 shows the offset to be uniform across the gauge-constrained part
 of the archipelago.
+
+The two figures below support the stability claims made in
+Section~\ref{sec:results-window}. They are reported here rather
+than in the body because each is a robustness check on a result
+already stated numerically there: the peak offset does not move
+with season, and it does not move with longitude.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourTenWidth\textwidth]{fig_thesis_04_window_seasonal.png}
+\caption[GPM-era window-offset correlation and seasonal stability]{GPM-era
+window-offset correlation by timezone band (a) and the
+season-invariance of the peak offset~$h^{\star}$ across the twelve
+three-month running seasons (b)\label{fig:window-seasonal}}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFourElevenWidth\textwidth]{fig_thesis_04_window_map.png}
+\caption[Per-station optimal window offset and correlation lift]{Per-station
+peak offset~$h^{\star}$ across Indonesia (a) and the per-station
+correlation lift from the UTC-day to the matched window, ordered by
+longitude and coloured by timezone band (b)\label{fig:window-map}}
+\end{figure}
+
+% The deep-learning refinement footprint is presented in
+% Section~\ref{sec:results-stages}, Figure~\ref{fig:cnn-footprint}.

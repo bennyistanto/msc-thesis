@@ -50,8 +50,7 @@ are consequential everywhere, but they are acute over the
 tropical Maritime Continent, where convective rainfall dominates
 the seasonal cycle and the contributing gauge network is dense
 only over Java and southern Sumatra, thinning sharply toward
-Maluku and Papua \citep{ref:ramadhan2022, ref:rahmawati2021,
-ref:mashuri2025, ref:chen2008}.
+Maluku and Papua \citep{ref:chen2008, ref:rahmawati2021, ref:ramadhan2022, ref:mashuri2025}.
 
 Four families of statistical and machine-learning methods have
 been developed to correct these biases, each addressing a
@@ -81,12 +80,14 @@ result against gauges that are independent of the correction
 reference. As a consequence, it is often unclear which bias
 dimension a given pipeline actually corrects, and whether the
 reported skill survives a comparison against truly out-of-sample
-observations. The second is a reproducibility gap. The
+observations.
+
+The second is a reproducibility gap. The
 reproducibility discourse in computational science and the FAIR
 (Findable, Accessible, Interoperable, Reusable) principles for
 scientific data have made independent
 verifiability a methodological expectation
-\citep{ref:peng2011, ref:stodden2014, ref:wilkinson2016}, yet
+\citep{ref:peng2011, ref:stodden2014, ref:wilkinson2016}. Yet
 the bias correction literature has adopted it unevenly: many
 influential studies publish a method without releasing the code
 or data, leaving any claim of reproduction to a reader who must
@@ -99,15 +100,13 @@ a specific contribution here. Bias correction and gauge merging are
 most established at the monthly scale, where satellite and gauge
 totals correlate strongly; at the daily scale the day-to-day
 correlation is markedly lower and is repeatedly cited as the
-limiting factor \citep{ref:ramadhan2022ts, ref:ramadhan2023,
-ref:tang2020}. Part of
+limiting factor \citep{ref:tang2020, ref:ramadhan2022ts, ref:ramadhan2023}. Part of
 that low daily correlation is not a deficiency of the satellite but
 a mismatch of accumulation windows: the satellite archive
 accumulates over the UTC day, whereas gauges report over the local
 day ending at a fixed morning observation. The mismatch is
 recognised in validation studies, which align the accumulation
-period to the gauge convention \citep{ref:xie2022, ref:salio2015,
-ref:tan2019, ref:li2018}, but to our knowledge it has not been
+period to the gauge convention \citep{ref:salio2015, ref:li2018, ref:tan2019, ref:xie2022}. Yet to our knowledge it has not been
 carried into the bias-correction step: satellite-precipitation bias
 corrections over Southeast Asia, including the Indonesian
 archipelago \citep{ref:wang2026}, and across the wider region
@@ -123,7 +122,7 @@ it to the gauge reporting convention.
 The two gaps combine into a single problem with two faces. On
 the scientific side, a hybrid bias correction framework of this
 kind is known to improve daily satellite precipitation in
-aggregate, but what it corrects is not resolved dimension by
+aggregate. But what it corrects is not resolved dimension by
 dimension: which bias dimension each stage moves, and how far the
 correction reaches along that dimension when judged against
 independent gauges, remain unquantified. A pipeline can report a high aggregate score while
@@ -131,8 +130,8 @@ leaving a specific operationally important dimension unmoved, and
 only a stage-resolved verification against out-of-sample stations
 can reveal this. The day-by-day temporal pairing between
 satellite and gauge is the dimension most at risk of being
-obscured by an aggregate score, because it is bounded by the raw
-retrieval and cannot be lifted by a marginal correction, yet it
+obscured by an aggregate score, because it stays pinned close to
+the value of the raw retrieval under a marginal correction. Yet it
 is the dimension that timing-sensitive applications depend on.
 
 On the methodological side, the problem is that a verification
@@ -151,33 +150,29 @@ reproducible artefact that an independent reader can re-execute.
 \section{Objectives and Benefits}\label{sec:intro-objectives}
 % ============================================================
 
-The study pursues five objectives:
+The study pursues three objectives:
 
 \begin{enumerate}
     \item To present the LSEQM+DL framework as an integrated,
-    configuration-driven workflow and apply it to IMERG-L over
-    Indonesia for the 2001 to 2025 record.
-    \item To characterise, stage by stage against 172 independent
-    Indonesian Meteorological, Climatological, and Geophysical
-    Agency (BMKG) stations, which bias dimension each of the four
-    stages corrects and by how much.
+    configuration-driven workflow applied to IMERG-L over Indonesia
+    for the 2001 to 2025 record, and to characterise, stage by
+    stage, which bias dimension each stage corrects, against the
+    Climate Prediction Center (CPC) Unified Gauge-Based Analysis of
+    Global Daily Precipitation (CPC-UNI) as the calibration reference
+    and the 172 independent Indonesian Meteorological,
+    Climatological, and Geophysical Agency (BMKG) stations.
     \item To establish the framework's reach and its limit along
     the day-by-day timing dimension: to test, empirically and
-    theoretically, the bound on the Pearson correlation between
-    corrected daily satellite and gauge values under marginal
-    correction, locating the observed value within the empirical
-    band reported for daily IMERG over the tropics; and to
-    decompose that ceiling into a recoverable calendar-window
-    component and a residual retrieval-skill component by
-    re-aggregating the half-hourly satellite source to a window
-    matched to the gauge reporting convention, characterising the
-    optimal window across season, space, and satellite era.
+    theoretically, the limit on the corrected daily correlation
+    under marginal correction, and to decompose that limit into a
+    recoverable calendar-window component and a residual
+    retrieval-skill component by matching the satellite aggregation
+    to the gauge reporting convention.
     \item To deliver the pipeline as a reproducible, open,
     configuration-driven implementation that an independent reader
-    can re-execute end-to-end on commodity hardware.
-    \item To document the operational implications of the result,
-    distinguishing the application classes the corrected product
-    serves well from those it does not.
+    can re-execute end-to-end on commodity hardware, and to document
+    the operational application classes the corrected product serves
+    and those it does not.
 \end{enumerate}
 
 The benefits follow the objectives. The methodological benefit is
@@ -203,8 +198,7 @@ own terms.
 The study corrects IMERG-L over the Indonesian domain
 ($95$ to $141^{\circ}$E, $11^{\circ}$S to $6^{\circ}$N) at the
 native $0.1^{\circ}$ daily resolution, calibrated against the
-Climate Prediction Center (CPC) Unified Gauge-Based Analysis of Global Daily
-Precipitation (CPC-UNI) gauge analysis and validated against 172 BMKG stations.
+CPC-UNI gauge analysis and validated against 172 BMKG stations.
 The temporal unit is the dekad (the three 10-day periods within
 each month), and statistics are pooled across the 36 dekadal
 windows of the 2001 to 2025 record. The four-stage LSEQM+DL
@@ -230,13 +224,13 @@ The strongest constraint on the attainable result is the quality
 of the reference. The pipeline calibrates against CPC-UNI, which
 is itself a gauge-interpolated analysis with known undercatch of
 heavy rainfall in sparse-gauge regions and smoothing at its
-$0.5^{\circ}$ resolution. The corrected product cannot be better
-than the reference it is calibrated against, except where the
-independent BMKG comparison reveals that the correction has moved
-the product closer to the true gauge distribution than CPC-UNI
-itself. This constraint, and the upstream timing accuracy of the
-raw retrieval, bound the result in ways no post-processing can
-remove.
+$0.5^{\circ}$ resolution. The corrected product inherits the
+properties of the reference it is calibrated against, so the
+independent BMKG comparison is what establishes whether the
+correction has moved the daily distribution toward the station
+records rather than only toward CPC-UNI. This constraint, and the
+upstream timing accuracy of the raw retrieval, limit the result in
+ways no post-processing can remove.
 
 
 % ============================================================
@@ -250,16 +244,17 @@ contribution.
 \medskip\noindent\textbf{Verification.}
 The explicit, stage-resolved demonstration, both empirical and
 theoretical, that the Pearson correlation between corrected daily
-satellite and gauge values is bounded by the raw satellite timing
+satellite and reference values is set by the raw satellite timing
 rather than by the correction method, while the same pipeline moves
 every marginal-distribution metric to the gauge target. Reporting
-the unchanged correlation alongside the corrected distribution, and
+the correlation that stays pinned near its raw value alongside the
+corrected distribution, and
 explaining the contrast as structural rather than as failure, is
 what separates this from an aggregate skill report.
 
 \medskip\noindent\textbf{Diagnostic.}
-The decomposition of that timing bound. The daily correlation
-ceiling is shown to be dominated, in the GPM era, by the
+The decomposition of that timing limit. The low daily correlation
+against the independent gauges is shown to be dominated, in the GPM era, by the
 calendar-window mismatch between the UTC-day satellite archive and
 the local-day gauge convention, and is partly recoverable by
 re-aggregating the satellite to a gauge-matched window. The
@@ -291,19 +286,23 @@ The study tests three hypotheses about the framework's behaviour:
     Mapping moves the distribution shape, the Generalized Pareto
     adjustment moves the upper tail, and the Convolutional Neural
     Network refines the spatial structure of the extremes.
-    \item[H2.] The Pearson correlation between corrected daily
-    satellite and gauge values does not improve across the
-    correction stages by a margin exceeding the single-pixel
-    sampling uncertainty, because marginal correction preserves
-    the rank order of the satellite series and is bounded by the
-    day-by-day pairing quality of the raw retrieval.
-    \item[H3.] In the GPM era, the daily Pearson correlation is
-    suppressed primarily by the calendar-window mismatch between the
+    \item[H2.] The daily Pearson correlation between the corrected
+    satellite series and its reference does not improve across the
+    correction stages by a margin exceeding the sampling
+    uncertainty, because marginal correction introduces no rank
+    reversals and so largely preserves the day-by-day pairing of the raw
+    retrieval. This is tested against both the in-sample CPC-UNI
+    target and the independent BMKG stations, and at both the
+    archived and the gauge-matched date label.
+    \item[H3.] In the GPM era, the daily Pearson correlation against
+    the BMKG stations is suppressed substantially by the
+    calendar-window mismatch between the
     UTC-day satellite archive and the local-day gauge convention, so
-    that re-aggregating the satellite to a gauge-matched window
-    recovers a large part of the correlation; the recovery is absent
-    in the earlier era, in which the retrieval does not resolve the
-    diurnal cycle.
+    that matching the satellite to the gauge date label
+    recovers a large part of the correlation. The recovery is
+    specific to that era: in the earlier record the correlation is
+    close to flat between the two labels, which is consistent with a
+    retrieval that does not resolve the diurnal cycle.
 \end{description}
 
 
@@ -317,11 +316,20 @@ products, the bias dimensions and verification standards, the
 bias correction method families, the theoretical bounds on
 marginal correction, the reproducible-research literature, and
 the Maritime Continent context.
-Chapter~\ref{chap:methods} describes the study area and data, the
-four-stage LSEQM+DL pipeline, the station-density-aware blending,
-the reproducible implementation, the validation framework, and
-the verification metric catalogue.
-Chapter~\ref{chap:results} reports the stage-wise headline skill,
+Chapter~\ref{chap:methods} describes the study area and data,
+including the suitability of the calibration reference
+(Section~\ref{sec:methods-reference-quality}), the four-stage
+LSEQM+DL pipeline, the station-density-aware blending, the
+validation framework, the verification metric catalogue, the
+window-offset timing diagnostic
+(Section~\ref{sec:methods-window}), and the reproducible
+implementation.
+
+Chapter~\ref{chap:results} first establishes how the three
+datasets agree with one another before any correction, and
+separates their genuine disagreement from the calendar label each
+archive assigns (Section~\ref{sec:results-intercomparison}). It
+then reports the stage-wise headline skill,
 the stage attribution, the threshold-dependent detection, the
 correlation result, the temporal-alignment and
 optimal-aggregation-window analysis, the spatial skill
@@ -334,3 +342,10 @@ window, the operational implications, the reproducibility
 implications, the paths forward, and the limitations.
 Chapter~\ref{chap:conclusion} draws the findings together and
 states the recommendations.
+The appendices hold the supporting material in the same order:
+Appendix~\ref{app:glossary} lists the abbreviations used
+throughout, Appendices~\ref{app:data} to~\ref{app:repro} document
+the data, the configuration, the released code, and the steps
+needed to re-run the pipeline, and
+Appendices~\ref{app:stations} to~\ref{app:window} carry the
+extended per-station, spatial, and temporal-alignment results.

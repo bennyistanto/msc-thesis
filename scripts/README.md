@@ -81,6 +81,16 @@ figure-generating script.
   `temp/subdaily_lag` (data archive); adjust the `ROOT` constant there to point
   at your local checkout.
 
+## Manuscript QA
+
+- `sweep_paragraph_guard.py` - reports paragraphs over 180 words or 6 sentences
+  and sentences over 45 words. Run as
+  `python scripts/sweep_paragraph_guard.py chapter_*.tex` from `paper/thesis`.
+  Thresholds are constants at the top of the script. Clean parallel
+  enumerations (panel keys, module lists, metric lists) are exempt by
+  convention, so read the sentence hits rather than treating the count as a
+  target. Produces no figure.
+
 ## Dependencies
 
 Standard scientific Python stack: numpy, pandas, xarray, scipy, matplotlib, and
@@ -100,3 +110,28 @@ repository's `environment.yml` / `requirements.txt`.
   the two day-lag / per-station-distribution figures (5.5, D.1) additionally read
   the half-hourly station cache and recompute on every run. Regenerating the
   sweep outputs from raw inputs requires the half-hourly IMERG-L archive.
+
+## Intermediate data provenance
+
+Six `.npz` arrays sit between the raw archive and the shipped figure scripts.
+They live in `temp/subdaily_lag/`, which is **gitignored**, so a clean clone
+cannot regenerate the figures that depend on them without either the raw
+archive or the deposited copies.
+
+| Array | Produced by | Chain status |
+| ----- | ----------- | ------------ |
+| `cpc_corr_dist.npz` | `build_cpc_corr_dist.py` (this directory) | reproducible from `data/output/metrics_lseqmdl/` |
+| `convention_conflict.npz` | `temp/subdaily_lag/fig_convention_conflict.py` | reproducible from the hh cache |
+| `subdaily_seasonal_results_2001_2021.npz` | `temp/subdaily_lag/build_subdaily_seasonal.py` | reproducible from the hh cache |
+| `subdaily_seasonal_results_2015_2021.npz` | `temp/subdaily_lag/build_subdaily_seasonal.py` | reproducible from the hh cache |
+| `gridded_cpc_window_stats_2001_2013.npz` | `temp/subdaily_lag/make_trmm_2013.py` | reproducible: both inputs present |
+| `gridded_cpc_window_stats_2015_2025.npz` | `temp/subdaily_lag/merge_gpm_full.py` | **not reproducible**: input `gridded_cpc_window_stats_2022_2025.npz` is absent |
+
+Shared code in `temp/subdaily_lag/`, imported rather than duplicated:
+`gridded_cpc_window.py` exports `reduce_one`, `plot_gridded`, `OUT`, `H` to both
+merge scripts; `subdaily_stats.py` exports `r_from_stats`; `build_subdaily_seasonal.py`
+exports `windowed_cumsum`. The window stats are additive sufficient statistics,
+which is why era-specific results are merged and differenced rather than recomputed.
+
+The half-hourly station cache is `temp/subdaily_lag/hh_cache/hh_cache_<year>.npz`,
+21 yearly shards (2001 to 2021, about 256 MB) written by `build_station_hh_cache.py`.

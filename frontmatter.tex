@@ -93,8 +93,8 @@ carries systematic biases over the Indonesian Maritime Continent.
 This thesis evaluates a four-stage hybrid bias correction pipeline: 
 Linear Scaling (LS), Empirical Quantile Mapping (EQM) with a Gamma fit, 
 Generalized Pareto Distribution (GPD) tail adjustment, and a station-density-aware 
-Convolutional Neural Network (CNN) refinement, a Deep Learning (DL) architecture, 
-denoted LSEQM+DL, applied to IMERG-L over Indonesia across $2001$ to $2025$, with
+Convolutional Neural Network (CNN) refinement, a Deep Learning (DL) architecture,
+denoted LSEQM+DL. The pipeline is applied to IMERG-L over Indonesia across $2001$ to $2025$, with
 gauge validation against $172$ out-of-sample stations of Indonesia's
 Meteorological, Climatological, and Geophysical Agency (BMKG) over $2001$ to $2021$.
 
@@ -102,57 +102,74 @@ Against the out-of-sample BMKG network, three of the four verification
 pillars move close to the gauge target. Relative bias drops from
 $-11.4\%$ for the raw Linear-Scaling stage to $-0.6\%$ for LSEQM+DL, the
 standard-deviation ratio moves from $0.71$ to $1.00$, the
-Kolmogorov-Smirnov $p$-value rises from $0.01\%$ to $19\%$, and the
+Kolmogorov-Smirnov $p$-value rises from $0.01\%$ to $19.1\%$, and the
 ratios at the $95$th and $99$th percentiles move from $0.74$ and $0.71$
 to $1.05$ and $1.01$. Event detection shows a designed trade-off: the
-corrected product detects fewer light-rain events than the raw retrieval
-below $10$~mm/day but achieves higher critical success at every threshold
-above $20$~mm/day, with a $56\%$ Critical Success Index gain at the $50$~mm/day
-threshold ($0.097$ versus $0.062$), the regime in which BMKG flood
-early-warning advisories operate.
+full pipeline detects fewer light-rain events than the Linear-Scaling
+stage at and below $10$~mm/day but achieves higher critical success at
+every threshold from $20$~mm/day upward, with a $45\%$ Critical Success
+Index gain at the $50$~mm/day threshold ($0.091$ versus $0.062$). The
+crossover coincides with the internationally standardised
+very-heavy-precipitation-day threshold of $20$~mm/day, the regime in
+which flood and drought decisions are made.
 
-One diagnostic does not move. The Pearson correlation between paired
-daily satellite and gauge values stays near $0.34$ across all three corrected stages
-and stays in the narrow band $[0.332, 0.348]$ across all fifteen settings
+One diagnostic barely moves. Measured per pixel against the in-sample
+CPC-UNI target, the Pearson correlation between paired daily values
+stays near $0.35$ across all three corrected stages. It also stays in
+the narrow band $[0.332, 0.348]$ across all fifteen settings
 of a Bali sensitivity sweep over the blending weight, the GPD threshold
 percentile, and the station-density saturation count, none of which was formally
-optimised. This is the predicted behaviour of marginal bias correction, where rank 
-preservation and variance inflation without skill bound the attainable correlation at
-the timing quality of the raw retrieval. Re-aggregating the half-hourly
-IMERG-L source to a 24-hour window matched to the local-day
-morning-observation convention of the BMKG validation network
-locates most of this ceiling in a satellite-gauge calendar-window
-mismatch: over the GPM era ($2015$ to
-$2021$) the pooled correlation rises from $r = 0.20$ at the Coordinated
-Universal Time (UTC) daily window to $r = 0.57$ at the matched
-$-23$-hour window, with a per-station median of $0.56$. The same
+optimised. This is the predicted behaviour of marginal bias correction, where rank
+preservation and variance inflation without time-dependent skill leave the
+correlation pinned close to that of the raw retrieval.
+
+A separate and distinct effect governs the comparison against the
+independent BMKG stations, whose daily totals close at the morning
+observation and carry a date label one day later than the UTC-dated
+satellite and CPC-UNI archives. The satellite can be matched to that
+label in two ways: by shifting the date of the daily archive by one
+day, or by re-aggregating the half-hourly source to a $-23$-hour
+window. Either raises
+the pooled correlation over the GPM era ($2015$ to $2021$) from
+$r = 0.20$ to $r = 0.57$, with a per-station median of $0.56$. The
+daily archive alone recovers almost all of the gain, so the
+half-hourly source is not required. The CPC-UNI calibration
+correlation carries no such offset and is not improved by the shift.
+Nor does the correction itself improve the day-by-day timing once the
+labels are matched, which places the remaining ceiling in the timing
+of the raw retrieval rather than in the calendar alone.
+
+The same
 $-23$-hour offset is optimal in all twelve three-month running seasons
 and all three Indonesian time zones, while the recovered band
-correlation ranges from $0.56$ in the western zone (WIB) to $0.62$ in
-the eastern zone (WIT). The recovery is confined to the GPM era, in
+correlation ranges from $0.55$ in the western and central zones (WIB and
+WITA) to $0.61$ in the eastern zone (WIT). The recovery is confined to the GPM era, in
 which the retrieval resolves the diurnal cycle, so the full-record
-$0.34$ blends this era with the earlier, timing-imprecise era; the
-window dependence dissolves under monthly aggregation, where the
+correlation against BMKG blends this era with the earlier, timing-imprecise era.
+The window dependence dissolves under monthly aggregation, where the
 correlation is near $0.80$ regardless of window, placing the daily
 ceiling in the timing of the day-by-day pairing rather than in the
-rainfall the product captures. This window re-aggregation is a
+rainfall the product captures.
+
+This date-label matching is a
 single-stage pre-processing change outside the correction pipeline,
-requiring the half-hourly source, and is identified as the most
-operationally actionable next step; the corrected product is suitable as
+recoverable from the daily archive alone, and is identified as the most
+operationally actionable next step. The corrected product is suitable as
 delivered for applications that depend on the daily distribution, the
 regime the re-aggregation leaves unchanged.
 
 The pipeline is released as an open, configuration-driven
-implementation whose reproducibility is demonstrated by re-executing
-the headline results end-to-end on free cloud infrastructure: the Bali
-subdomain ($9 \times 14$ grid at $0.1^{\circ}$, $80$ land pixels, all
-$36$ dekadal windows of the $2001$ to $2025$ record) completes in
-$72.1$ minutes on a standard Google Colab Central Processing Unit
-runtime.
+implementation, and its reproducibility is demonstrated by
+re-executing the headline results on free cloud
+infrastructure. The correction, verification, validation and
+visualisation sequence over the Bali subdomain ($9 \times 14$ grid at
+$0.1^{\circ}$, $80$ land pixels, all $36$ dekadal windows of the
+$2001$ to $2025$ record) completes in $72.1$ minutes on a standard
+Google Colab Central Processing Unit runtime.
 
 \medskip
-\noindent Keywords: daily satellite precipitation, gauge validation,
-hybrid bias correction, IMERG, reproducibility
+\keywordline{Keywords: }{daily satellite precipitation, gauge validation,
+hybrid bias correction, IMERG, reproducibility}
 \clearpage
 
 % ----- Ringkasan (Bahasa Indonesia) -----
@@ -183,62 +200,78 @@ Terhadap jaringan stasiun independen BMKG tersebut, tiga dari empat
 pilar verifikasi menunjukkan hasil yang semakin mendekati nilai observasi penakar hujan:
 bias relatif turun dari $-11{,}4\%$ (LS) menjadi $-0{,}6\%$ (LSEQM+DL), rasio
 simpangan baku bergerak dari $0{,}71$ menuju $1{,}00$, nilai-$p$
-Kolmogorov-Smirnov naik dari $0{,}01\%$ menjadi $19\%$, serta rasio
+Kolmogorov-Smirnov naik dari $0{,}01\%$ menjadi $19{,}1\%$, serta rasio
 persentil ke-$95$ dan ke-$99$ bergeser dari $0{,}74$ dan $0{,}71$ menuju
 $1{,}05$ dan $1{,}01$. Hasil deteksi kejadian menunjukkan adanya \emph{trade-off} 
-yang dirancang dalam sistem: produk terkoreksi mendeteksi lebih sedikit kejadian hujan ringan 
-(di bawah $10$~mm/hari) dibandingkan dengan data \emph{retrieval} mentahnya, namun 
-mencapai tingkat keberhasilan deteksi yang lebih tinggi 
-pada setiap ambang batas di atas $20$~mm/hari. Terdapat peningkatan 
-\emph{Critical Success Index} sebesar $56\%$ pada ambang $50$~mm/hari ($0{,}097$ 
-berbanding $0{,}062$), yang merupakan rentang operasional yang digunakan dalam 
-peringatan dini banjir BMKG.
+yang dirancang dalam sistem: pipeline penuh mendeteksi lebih sedikit kejadian hujan ringan
+(pada dan di bawah $10$~mm/hari) dibandingkan dengan tahap Linear Scaling, namun
+mencapai tingkat keberhasilan deteksi yang lebih tinggi
+pada setiap ambang batas mulai $20$~mm/hari ke atas. Terdapat peningkatan
+\emph{Critical Success Index} sebesar $45\%$ pada ambang $50$~mm/hari ($0{,}091$
+berbanding $0{,}062$). Titik silang ini berimpit dengan ambang hujan sangat
+lebat $20$~mm/hari yang baku secara internasional, yaitu rentang yang menjadi
+dasar pengambilan keputusan kebencanaan banjir dan kekeringan.
 
-Namun, terdapat satu metrik diagnostik yang tidak mengalami perubahan. 
-Korelasi Pearson antara nilai harian satelit dan stasiun yang berpasangan tetap 
-berada di sekitar $0{,}34$ pada ketiga tahap terkoreksi, dan bertahan dalam 
-rentang yang sempit $[0{,}332;~0{,}348]$ untuk seluruh lima belas konfigurasi 
-uji sensitivitas Bali (bobot pencampuran, ambang GPD, dan saturasi kerapatan stasiun). 
+Namun, terdapat satu metrik diagnostik yang nyaris tidak berubah.
+Diukur per piksel terhadap target kalibrasi CPC-UNI, korelasi Pearson antara
+nilai harian yang berpasangan tetap
+berada di sekitar $0{,}35$ pada ketiga tahap terkoreksi. Nilai ini juga bertahan dalam
+rentang yang sempit $[0{,}332;~0{,}348]$ untuk seluruh lima belas konfigurasi
+uji sensitivitas Bali (bobot pencampuran, ambang GPD, dan saturasi kerapatan stasiun),
+yang ketiganya belum dioptimalkan secara formal.
 Hal ini sesuai dengan prediksi perilaku koreksi bias berbasis distribusi marginal: karena
-koreksi mempertahankan urutan peringkat data, korelasi harian dibatasi
-oleh ketepatan waktu \emph{retrieval} dari data satelit, terlepas dari keahlian metode
-koreksinya. Ketika data IMERG-L dengan interval setengah-jam diagregasi ulang ke dalam
-interval 24 jam yang mengikuti konvensi pengamatan pagi waktu setempat
-dari jaringan validasi BMKG, terlihat bahwa sebagian besar batas atas korelasi ini 
-berasal dari ketidaksesuaian rentang waktu kalender antara satelit dan
-stasiun. Pada era GPM ($2015$ hingga $2021$), korelasi gabungan naik
-dari $r = 0{,}20$ pada periode harian Waktu Universal Terkoordinasi (UTC)
-menjadi $r = 0{,}57$ pada interval $-23$ jam yang selaras, dengan median
-per-stasiun sebesar $0{,}56$; pergeseran $-23$ jam yang sama ini merupakan nilai optimal 
+koreksi tidak membalik urutan peringkat data, korelasi harian tetap melekat
+pada ketepatan waktu \emph{retrieval} dari data satelit, terlepas dari keahlian metode
+koreksinya.
+
+Efek yang berbeda dan terpisah berlaku pada perbandingan terhadap jaringan
+independen BMKG, yang total hariannya ditutup pada pengamatan pagi dan diberi
+label tanggal satu hari lebih lambat daripada arsip satelit dan CPC-UNI yang
+bertanggal UTC. Satelit dapat diselaraskan dengan label tersebut melalui dua
+cara: menggeser tanggal arsip harian sebesar satu hari, atau mengagregasi
+ulang sumber setengah-jam ke interval $-23$ jam. Keduanya menaikkan korelasi
+gabungan pada era GPM ($2015$ hingga $2021$)
+dari $r = 0{,}20$ menjadi $r = 0{,}57$, dengan median
+per-stasiun sebesar $0{,}56$. Arsip harian saja sudah memulihkan hampir seluruh
+peningkatan tersebut, sehingga sumber setengah-jam tidak diperlukan. Korelasi
+kalibrasi CPC-UNI tidak memiliki pergeseran semacam itu dan tidak membaik oleh
+penyelarasan ini. Koreksi bias itu sendiri juga tidak memperbaiki ketepatan
+waktu harian setelah label diselaraskan, sehingga batas yang tersisa terletak
+pada ketepatan waktu \emph{retrieval} mentah, bukan semata pada penanggalan.
+
+Pergeseran $-23$ jam yang sama ini merupakan nilai optimal
 untuk seluruh dua belas musim bergulir tiga-bulanan dan ketiga zona waktu Indonesia,
-sementara besar korelasi yang berhasil dipulihkan bervariasi dari $0{,}56$ di
-zona barat (WIB) hingga $0{,}62$ di zona timur (WIT). Pemulihan ini
+sementara besar korelasi yang berhasil dipulihkan bervariasi dari $0{,}55$ di
+zona barat dan tengah (WIB dan WITA) hingga $0{,}61$ di zona timur (WIT). Pemulihan ini
 hanya terbatas pada era GPM, ketika \emph{retrieval} sudah mampu merekam
-siklus diurnal; oleh karena itu nilai $0{,}34$ pada keseluruhan periode data
+siklus diurnal; oleh karena itu korelasi terhadap BMKG pada keseluruhan periode data
 sebenarnya merupakan campuran antara era ini dengan era awal yang ketepatan
 waktunya masih rendah. Ketergantungan terhadap rentang waktu ini hilang pada
 agregasi bulanan, di mana korelasi mencapai sekitar $0{,}80$ tanpa memandang
-batasan pengamatan tersebut, sehingga mengonfirmasi bahwa batas korelasi harian 
-sesungguhnya terletak pada pencocokan waktu dari hari ke hari, bukan pada 
-volume curah hujan yang ditangkap oleh produk. Agregasi ulang interval observasi 
-ini merupakan satu langkah praproses tunggal di luar \emph{pipeline} koreksi, 
-yang memerlukan data interval setengah jam, dan diidentifikasi sebagai langkah 
-lanjutan yang paling dapat ditindaklanjuti secara operasional; dengan demikian,
-produk terkoreksi yang dihasilkan sudah sesuai untuk berbagai aplikasi yang 
+batasan pengamatan tersebut, sehingga mengonfirmasi bahwa batas korelasi harian
+sesungguhnya terletak pada pencocokan waktu dari hari ke hari, bukan pada
+volume curah hujan yang ditangkap oleh produk.
+
+Pencocokan label tanggal
+ini merupakan satu langkah praproses tunggal di luar \emph{pipeline} koreksi,
+yang dapat dipulihkan dari arsip harian saja, dan diidentifikasi sebagai langkah
+lanjutan yang paling dapat ditindaklanjuti secara operasional. Dengan demikian,
+produk terkoreksi yang dihasilkan sudah sesuai untuk berbagai aplikasi yang
 bergantung pada distribusi harian, yaitu ranah yang tidak terpengaruh oleh
 agregasi ulang tersebut.
 
 \emph{Pipeline} ini dirilis sebagai implementasi terbuka berbasis 
 konfigurasi yang reproduktibilitasnya didemonstrasikan dengan menjalankan
-ulang hasil utama dari awal hingga akhir pada infrastruktur komputasi awan gratis:
+ulang hasil utama pada infrastruktur komputasi awan gratis. Tahapan koreksi,
+verifikasi, validasi, dan visualisasi untuk
 \emph{subdomain} Bali ($9 \times 14$ grid pada resolusi $0{,}1^{\circ}$, $80$
-piksel yang berada di daratan, seluruh $36$ periode dasarian dari tahun $2001$ hingga $2025$) 
-berhasil diselesaikan dalam $72{,}1$ menit pada \emph{runtime Central Processing Unit} 
+piksel yang berada di daratan, seluruh $36$ periode dasarian dari tahun $2001$ hingga $2025$)
+berhasil diselesaikan dalam $72{,}1$ menit pada \emph{runtime Central Processing Unit}
 standar di Google Colab.
 
 \medskip
-\noindent Kata kunci: IMERG, koreksi bias hibrida, presipitasi satelit harian,
-reproduktibilitas, validasi stasiun penakar hujan
+\keywordline{Kata kunci: }{IMERG, koreksi bias hibrida, presipitasi satelit harian,
+reproduktibilitas, validasi stasiun penakar hujan}
 \clearpage
 
 % ----- Copyright notice (bottom of page; prohibition spans full margin) -----
@@ -297,7 +330,7 @@ Thesis Exam:
 \medskip
 \noindent
 \begin{tabular}{@{}p{0.6cm}l@{}}
-1 & [Examiner full name and title] \\[\baselineskip]
+1 & Prof. Dr. Ir. Agus Buono, M.Si., M.Kom. \\[\baselineskip]
 \end{tabular}
 \clearpage
 
@@ -305,10 +338,16 @@ Thesis Exam:
 \clearpage
 \thispagestyle{empty}
 \pdfbookmark[0]{VALIDATION PAGE}{validation-bookmark}
-\noindent Thesis title: A Hybrid Bias Correction Framework for
-Daily Satellite Precipitation\\
-Name: Benny Istanto\\
-Student ID: G2501222008
+% PPKI: the three values share one left edge, set from the widest label, so a
+% wrapped title line starts under the title itself rather than at the margin.
+\newlength{\ppkiapprovallabel}
+\settowidth{\ppkiapprovallabel}{Student ID:~~}
+\noindent
+\begin{tabular}{@{}p{\ppkiapprovallabel}@{}p{\dimexpr\textwidth-\ppkiapprovallabel\relax}@{}}
+Thesis title: & A Hybrid Bias Correction Framework for Daily Satellite Precipitation \\
+Name:         & Benny Istanto \\
+Student ID:   & G2501222008 \\
+\end{tabular}
 
 \vspace{3cm}
 \begin{center}Approved by\end{center}
@@ -333,7 +372,7 @@ Dr. Berry Juliandi, S.Si., M.Si.\\
 Staff ID. 19780723 200701 1 001 \hfill \rule{4cm}{0.4pt}
 
 \vspace{5cm}
-\noindent Examination date: \rule{3cm}{0.4pt} \hfill
+\noindent Examination date: 20 July 2026 \hfill
 Completion date: \rule{3cm}{0.4pt}
 \clearpage
 
@@ -352,13 +391,16 @@ and the code prove useful to others working on satellite precipitation,
 and that they make a modest contribution to science.
 
 I am grateful to Bogor Agricultural University, and to the Applied
-Climatology Study Program of the Faculty of Mathematics and Natural
-Sciences, for the education and the opportunity to carry out this work.
-My deepest thanks go to my supervisors, Prof. Dr. Ir. Rizaldi Boer, MS.
-and Dr. I Putu Santikayasa, S.Si., M.Sc., for their guidance, patience,
-and insight throughout this research. Furthermore, I extend my gratitude 
-to all unnamed individuals who provided direct or indirect assistance 
-throughout the course of this study.
+Climatology Study Program of the Department of Geophysics and Meteorology, 
+Faculty of Mathematics and Natural Sciences, for the education and 
+the opportunity to carry out this work. My deepest thanks go to my supervisors, 
+Prof. Dr. Ir. Rizaldi Boer, MS. and Dr. I Putu Santikayasa, S.Si., M.Sc., 
+for their guidance, patience, and insight throughout this research. 
+I also thank Prof. Dr. Ir. Agus Buono, M.Si., M.Kom., who served as external 
+examiner. The constructive feedback of all three examiners sharpened the 
+argument and improved the way this study is told. Furthermore, I extend 
+my gratitude to all unnamed individuals who provided direct or indirect 
+assistance throughout the course of this study.
 
 Finally, my heartfelt thanks to my wife Kiki Kartikasari, and daughter
 Wijanging Ngelmu Dyatmika, for their constant support and patience.
@@ -376,15 +418,24 @@ Benny Istanto
 % ----- restore the two-sided mirror geometry for TOC onward -----
 \restoregeometry
 
-% ----- roman page numbers become visible from here (TOC onward) -----
-\pagestyle{fancy}
-
 % ----- Tables of contents / tables / figures / appendices -----
+% PPKI: the TABLE OF CONTENTS carries no printed page number. \pagestyle{empty}
+% covers every TOC page (it can run to more than one); the page COUNTER keeps
+% advancing, so LIST OF TABLES onward numbers exactly as before. Roman numbers
+% become visible again immediately after.
+\pagestyle{empty}
 % Bookmark the TOC itself (it is not listed inside the printed TOC, but a PDF
 % outline entry keeps it consistent with the LoT / LoF / LoA bookmarks).
 \pdfbookmark[0]{TABLE OF CONTENTS}{toc-bookmark}
+% \tableofcontents issues a \chapter*, which forces \thispagestyle{plain} on the
+% FIRST TOC page and so overrides the \pagestyle{empty} above; that is why the
+% first page kept printing its number while later TOC pages did not. Writing the
+% override into the .toc file makes it execute as the TOC is typeset, which is
+% the only hook that lands on that first page.
+\addtocontents{toc}{\protect\thispagestyle{empty}}
 \tableofcontents
 \clearpage
+\pagestyle{fancy}
 % LIST OF TABLES / FIGURES / APPENDICES flow continuously (PPKI): the three
 % lists are not forced onto separate pages. A discardable \vspace separates
 % each from the previous list; it is absorbed if a natural page break lands

@@ -49,15 +49,30 @@
 \usepackage{titlesec}
 \usepackage{fancyhdr}
 \usepackage{caption}
-% IPB caption style: bold label ("Figure 4.1." / "Table 4.1"), normal-weight
-% title, 10pt (= \footnotesize in a 12pt document). Figure label ends with a
-% period; table label separated by a space.
-\captionsetup[figure]{labelfont=bf, textfont=normalfont, labelsep=period,
-                      font=footnotesize, justification=justified,
-                      singlelinecheck=false}
-\captionsetup[table]{labelfont=bf, textfont=normalfont, labelsep=space,
-                     font=footnotesize, justification=justified,
-                     singlelinecheck=false}
+% IPB PPKI caption style:
+%   - body size (12pt), not bold, for both the number and the caption text
+%   - number and caption separated by "dua ketukan", two character spaces =
+%     6pt, with no period after the number ("Table 4.1<gap>Caption")
+%   - wrapped lines start under the first letter of the caption text
+%     (format=hang, so the indent tracks the label width)
+\DeclareCaptionLabelSeparator{ppkitab}{\hspace{6pt}}
+\captionsetup[figure]{labelfont=normalfont, textfont=normalfont,
+                      labelsep=ppkitab, font=normalsize, format=hang,
+                      justification=justified, singlelinecheck=false}
+\captionsetup[table]{labelfont=normalfont, textfont=normalfont,
+                     labelsep=ppkitab, font=normalsize, format=hang,
+                     justification=justified, singlelinecheck=false}
+% PPKI: the Summary/Ringkasan keyword list hangs, so a wrapped second line
+% starts under the FIRST KEYWORD rather than returning to the margin. The
+% indent is measured from the label passed in, so "Keywords: " and
+% "Kata kunci: " each get their own width. The label sits in a box of exactly
+% that width, which stops justification stretching the space after the colon
+% and shifting the first keyword off the hanging indent.
+\newlength{\ppkikwindent}
+\newcommand{\keywordline}[2]{%
+  \settowidth{\ppkikwindent}{#1}%
+  \noindent\hangindent\ppkikwindent\hangafter=1
+  \makebox[\ppkikwindent][l]{#1}#2\par}
 % Uniform 6pt spacing around floats (after tables, after figures) and
 % caption skips, matching the 6pt used around headings.
 \setlength{\textfloatsep}{6pt plus 1pt minus 1pt}
@@ -74,7 +89,15 @@
 
 % natbib loaded before hyperref. Options chosen by the APAcite toggle above.
 \ifAPAcite
-  \usepackage[authoryear,round]{natbib}   % IPB / APA mode: (Author Year)
+  % PPKI ch VII: the name-year system is CSE 2014, not APA.
+  %   1. No comma between name and year: "(Xyz 2014)", "(Xyz and Abc 2012)",
+  %      "(Xyz et al. 2016)". A comma separates only years of one author,
+  %      "(Xyz 2014, 2015)". natbib's default aysep is a comma, so clear it.
+  %   2. Multi-source citations run chronologically, earliest first, and not
+  %      alphabetically, so `sort` stays off and the key order inside each
+  %      \citep{} carries the chronology.
+  \usepackage[authoryear,round]{natbib}
+  \setcitestyle{aysep={}}
 \else
   \usepackage[numbers]{natbib}             % MDPI mode: [N], in citation order
 \fi
@@ -88,7 +111,11 @@
   pdfkeywords={daily satellite precipitation, gauge validation, hybrid bias correction, IMERG, reproducibility}
 }
 \setcounter{secnumdepth}{2}  % number to subsection (3 levels: I, 1.1, 1.1.1)
-\setcounter{tocdepth}{2}
+% PPKI: the TABLE OF CONTENTS lists two heading levels only, chapter and 1.1.
+% This changes the LISTING only. secnumdepth above is untouched, so every 1.1.1
+% subsection keeps its heading and its number in the body; it simply is not
+% enumerated in the TOC.
+\setcounter{tocdepth}{1}
 
 % --- display equations at 11pt (inline math stays at body size) ---
 \AtBeginEnvironment{equation}{\fontsize{11}{14.5}\selectfont}
@@ -103,6 +130,13 @@
 % the official IPB template.
 \raggedbottom
 
+% Prevent orphan (single first line at page bottom) and widow (single last
+% line at page top) lines. Safe under \raggedbottom: pages just end one line
+% earlier instead of stretching, matching the IPB look.
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+
 % --- first line of every paragraph (incl. first after a heading) indents
 %     1 cm, justified (PPKI) ---
 \usepackage{indentfirst}
@@ -114,15 +148,10 @@
 \renewcommand{\_}{\textunderscore\allowbreak}
 \setlength{\emergencystretch}{1em}
 
-% Single-spaced reference list: remove the extra vertical gap between
-% entries, AND pin the bibliography's left margin to the body text margin
-% so the first reference page is not visually shifted relative to the
-% continuation pages (this otherwise happens because natbib's \list
-% inherits a leftmargin that interacts with the chapter-opening layout).
-% Bibliography environment: emit the REFERENCES heading ourselves, then
-% set up a \list with explicit geometry. This avoids natbib's interaction
-% with \indentfirst + \titleformat[hang] that was visibly shifting the
-% first refs page by ~2 character columns relative to continuation pages.
+% Bibliography environment: emit the REFERENCES heading here, then set up a
+% \list with explicit geometry. This pins the reference list's left margin to
+% the body text margin, so the first reference page aligns with the
+% continuation pages, and removes the extra vertical gap between entries.
 % IPB PPKI bibliography indent: first line flush with body margin, continuation
 % lines indented 1cm. natbib's \bibhang controls the hanging indent depth, and
 % \bibsep controls vertical spacing between entries.
@@ -138,8 +167,13 @@
 %     centred 14pt bold titles, NO dot leaders, chapter entries not bold.
 %     (Adopted from the official IPB LaTeX template, tocloft block.) ---
 \usepackage{tocloft}
+% The trailing \hfill needs a non-discardable box after it. TeX throws away
+% glue at the end of a paragraph, so a bare \hfill before \par is discarded and
+% only the LEADING \hfill survives, which pushes the title flush right instead
+% of centring it. \null gives the glue something to push against. Without this
+% the TABLE OF CONTENTS title sits hard against the right margin.
 \renewcommand{\cfttoctitlefont}{\hfill\fontsize{14}{17}\selectfont\bfseries}
-\renewcommand{\cftaftertoctitle}{\hfill}
+\renewcommand{\cftaftertoctitle}{\hfill\null}
 \renewcommand{\cftlottitlefont}{\hfill\fontsize{14}{17}\selectfont\bfseries}
 \renewcommand{\cftafterlottitle}{\hfill}
 \renewcommand{\cftloftitlefont}{\hfill\fontsize{14}{17}\selectfont\bfseries}
@@ -165,9 +199,14 @@
 \setlength{\cftbeforetoctitleskip}{0pt}
 \setlength{\cftbeforelottitleskip}{0pt}
 \setlength{\cftbeforeloftitleskip}{0pt}
-\setlength{\cftaftertoctitleskip}{12pt}
-\setlength{\cftafterlottitleskip}{12pt}
-\setlength{\cftafterloftitleskip}{12pt}
+% PPKI Appendix 11a annotates the TOC title "(double spaces)": the gap below a
+% list title matches the gap below a chapter title, so both are 2\baselineskip.
+% The TOC subtracts \cftbeforechapskip because its first entry is a
+% chapter-level line carrying that 6pt lead; the other lists open on a
+% non-chapter entry and need no compensation.
+\setlength{\cftaftertoctitleskip}{\dimexpr 2\baselineskip - \cftbeforechapskip\relax}
+\setlength{\cftafterlottitleskip}{2\baselineskip}
+\setlength{\cftafterloftitleskip}{2\baselineskip}
 % IPB English list titles. Use \AtBeginDocument because babel's English
 % hook resets these names at \begin{document}, overriding a plain
 % preamble \renewcommand. \bibname becomes REFERENCES (not BIBLIOGRAPHY).
@@ -188,7 +227,7 @@
 \setlength{\cftappxindent}{0pt}
 \setlength{\cftappxnumwidth}{6.5em}
 \setlength{\cftbeforeapxtitleskip}{0pt}   % LoA title at the top margin
-\setlength{\cftafterapxtitleskip}{12pt}
+\setlength{\cftafterapxtitleskip}{2\baselineskip}   % "double spaces", as above
 
 % --- IPB numbering: chapter title shows ROMAN; sub-numbering uses the
 %     ARABIC chapter index (so sections read 1.1, 2.1, 3.3.1 while the
@@ -203,22 +242,58 @@
 \renewcommand{\theequation}{\arabic{chapter}.\arabic{equation}}
 
 % --- chapter title: 14pt, bold, CAPS, centred, Roman number, no period ---
+% The \leftskip reset in each {format} arg (run in vertical mode before the
+% heading) keeps every heading flush; the subsection's [after-code] then sets a
+% 0.5cm left block indent for the body that follows it (IPB PPKI level-3 style).
 \titleformat{\chapter}[hang]
-  {\normalfont\fontsize{14}{17}\bfseries\filcenter}
+  {\global\leftskip=0pt\global\InHthreefalse\normalfont\fontsize{14}{17}\bfseries\filcenter}
   {\thechapter}{1ex}{\MakeUppercase}
 \titlespacing*{\chapter}{0pt}{0pt}{2\baselineskip}
 
 % --- subchapter (section): 12pt, bold, Title Case, left.
-%     6pt space above (from the preceding paragraph) and 6pt below. ---
+%     PPKI Appendix 16 rule 10: double spaces above (from the chapter title or
+%     the paragraph above), single space below. \titlespacing adds space on top
+%     of the normal 14.45pt line advance, so 12pt above puts the heading roughly
+%     two line-heights below the previous baseline. ---
 \titleformat{\section}
-  {\normalfont\normalsize\bfseries}{\thesection}{1em}{}
-\titlespacing*{\section}{0pt}{6pt}{6pt}
+  {\global\leftskip=0pt\global\InHthreefalse\normalfont\normalsize\bfseries}{\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{12pt}{6pt}
 
 % --- sub-subchapter (subsection): 12pt, NOT bold, Title Case, left.
-%     6pt above and 6pt below. ---
+%     6pt above and 6pt below. Body under it indented 0.5cm (IPB level-3).
+%     \global escapes titlesec's heading group so the 0.5cm persists into the
+%     body; every chapter/section/subsection heading resets it to 0pt first.
+%     \InHthreetrue flags that following floats belong to this subsection. ---
 \titleformat{\subsection}
-  {\normalfont\normalsize}{\thesubsection}{1em}{}
+  {\global\leftskip=0.5cm\global\InHthreetrue\normalfont\normalsize}{\thesubsection}{1em}{}[\global\leftskip=0.5cm]
 \titlespacing*{\subsection}{0pt}{6pt}{6pt}
+
+% --- IPB level-3 floats: figures/tables that belong to a subsection are
+%     left-aligned at 0.5cm (image, table body, and caption) to sit flush with
+%     the indented H3 text block. The flag is set by the subsection heading and
+%     cleared by chapter/section headings; each figure/table reads it at its
+%     \begin (source position under the H3), so it holds even if the float
+%     drifts to another page. Inside such a float, \centering is redefined to
+%     ragged-left-at-0.5cm so the existing \centering calls left-align. ---
+\newif\ifInHthree
+\newcommand{\HthreeFloatIndent}{%
+  % shrink the working width by 0.5cm so a width=\textwidth graphic still fits,
+  % push content 0.5cm to the right (redefined \centering left-aligns there),
+  % and indent the caption 0.5cm via the caption package (it ignores \leftskip).
+  % The caption margin is set symmetrically because the caption package swaps
+  % left and right margins on verso pages in twoside mode; an asymmetric
+  % {0.5cm,0pt} therefore indents from the right on even pages, leaving the
+  % caption at the margin while the table body still indents. Equal margins make
+  % the swap a no-op, so the left edge lines up with the float on both parities,
+  % at the cost of the caption wrapping 0.5cm early on the right.
+  \advance\textwidth-0.5cm\relax
+  \setlength{\leftskip}{0.5cm}%
+  \renewcommand{\centering}{\parindent0pt\relax\leftskip0.5cm\relax
+    \rightskip0pt plus 1fil\relax\parfillskip0pt plus 1fil\relax}%
+  \captionsetup{margin={0.5cm,0.5cm}}%
+}
+\AtBeginEnvironment{figure}{\ifInHthree\HthreeFloatIndent\fi}
+\AtBeginEnvironment{table}{\ifInHthree\HthreeFloatIndent\fi}
 
 % --- page numbers: top outer corner (mirror), nothing in footer ---
 \pagestyle{fancy}
@@ -252,18 +327,21 @@
 \newcommand{\figThreeThreeWidth}{0.92} % Fig 3.3 CNN workflow (rotated)
 \newcommand{\figThreeFourWidth}{1.0}   % Fig 3.4 stage demonstration
 \newcommand{\figThreeWindowWidth}{1.0} % Fig 3.x window-offset timing schematic
+\newcommand{\figThreeFrameworkWidth}{0.82} % research framework (kerangka penelitian), square
+\newcommand{\figThreeExecWidth}{0.88}  % execution flowchart (ANSI, portrait)
 % Chapter 4: Results
 \newcommand{\figFourOneWidth}{1.0}     % Fig 4.1 headline bars
 \newcommand{\figFourTwoWidth}{1.0}     % Fig 4.2 multi-threshold
 \newcommand{\figFourThreeWidth}{1.0}   % Fig 4.3 paradox
 \newcommand{\figFourFourWidth}{0.9}    % Fig 4.4 CQI spatial
-\newcommand{\figFourFiveWidth}{0.92}    % Fig 4.5 CQI improvement
+\newcommand{\figFourFiveWidth}{0.92}    % now Fig G.6 CQI improvement (moved to Appendix G)
 \newcommand{\figFourSixWidth}{1.0}     % Fig 4.6 Taylor by station
 \newcommand{\figFourSevenWidth}{1.0}   % Fig 4.7 temporal stability
-\newcommand{\figFourEightWidth}{0.92}  % Fig 4.8 Bali coverage
+\newcommand{\figFourEightWidth}{0.92}  % now Fig E.1 Bali coverage (moved to Appendix E)
 \newcommand{\figFourNineWidth}{1.0}    % Fig 4.9 window recovery / era curve
-\newcommand{\figFourTenWidth}{1.0}     % Fig 4.10 seasonal window landscape
-\newcommand{\figFourElevenWidth}{1.0}  % Fig 4.11 per-station window map
+\newcommand{\figFourTenWidth}{1.0}     % now Fig H.3 seasonal window landscape (moved to Appendix H)
+\newcommand{\figFourElevenWidth}{1.0}  % now Fig H.4 per-station window map (moved to Appendix H)
+\newcommand{\figFourCnnWidth}{1.0}     % CNN refinement footprint (per-year bars)
 % Chapter 5: Discussion
 \newcommand{\figFiveOneWidth}{1.0}     % Fig 5.1 bound schematic
 \newcommand{\figFiveTwoWidth}{1.0}     % Fig 5.2 Taylor monthly
@@ -334,6 +412,14 @@
 \renewcommand{\toclevel@section}{1}%
 \renewcommand{\toclevel@subsection}{2}%
 \makeatother
+
+% Restore the body chapter heading style, which chapter_99_appendices.tex
+% replaces with the appendix look. Anything included after the appendices needs
+% this. Keep in sync with the \titleformat/\titlespacing block in the preamble.
+\titleformat{\chapter}[hang]
+  {\global\leftskip=0pt\global\InHthreefalse\normalfont\fontsize{14}{17}\bfseries\filcenter}
+  {\thechapter}{1ex}{\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{0pt}{2\baselineskip}
 
 % --- Biography (last page) ---
 \cleardoublepage

@@ -195,7 +195,7 @@ FUNCTION {format.names}
         { namesleft #1 >
             { ", " * t * }
             { t "others" =
-                { " {\em et~al.}" * }
+                { ", {\em et~al.}" * }
                 { ", " * t * }
               if$
             }
@@ -836,13 +836,13 @@ FUNCTION {format.lab.names}
 }
 
 FUNCTION {author.key.label}
-{ author empty$
-    { key empty$
+{ key empty$
+    { author empty$
         { cite$ #1 #3 substring$ }
-        'key
+        { author format.lab.names }
       if$
     }
-    { author format.lab.names }
+    'key   % organisational authors: use key (e.g. WMO) as the short in-text label
   if$
 }
 
@@ -889,8 +889,9 @@ FUNCTION {calc.label}
   *
   year field.or.null purify$ #-1 #4 substring$
   *
-  ")" *
   'label :=
+  % NOTE: closing ")" is added in reverse.pass, so the year-suffix
+  % (\natexlab{a/b}) lands INSIDE the parens: (2022a) not (2022)a.
 }
 
 FUNCTION {sort.format.names}
@@ -1028,7 +1029,10 @@ FUNCTION {reverse.pass}
     { "a" 'extra.label := }
     'skip$
   if$
-  label extra.label * 'label :=
+  extra.label empty$
+    { label ")" * 'label := }
+    { label "{\natexlab{" * extra.label * "}}" * ")" * 'label := }
+  if$
   extra.label 'next.extra :=
 }
 

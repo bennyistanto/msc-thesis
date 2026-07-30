@@ -5,8 +5,8 @@
 %          predicted Pearson-r bound under marginal correction, and
 %          the operational + reproducibility implications.
 % Sections: 5.1 Theoretical Bound on Pearson Correlation,
-%           5.2 Empirical Diagnostic of the Pearson r Ceiling (Sub-Daily
-%           Aggregation Window), 5.3 Operational Implications,
+%           5.2 Interpreting the Optimal Aggregation Window,
+%           5.3 Operational Implications,
 %           5.4 Reproducibility Implications, 5.5 Paths Forward,
 %           5.6 Limitations and Constraints.
 % Included by main_thesis.tex.
@@ -21,13 +21,20 @@ move close to the gauge target while the temporal-skill
 diagnostics stay flat. This chapter argues that the pattern is
 the predicted behaviour of any marginal correction family when
 scored against an external paired-time-series reference, not a
-failure of the correction stages. The four pillars (value
+failure of the correction stages.
+
+The four pillars (value
 adjustment, distribution alignment, extreme preservation, event
 detection) all move close to the gauge target, with several
 metrics matching to two decimal places against the independent
-Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) network. The temporal-skill diagnostics (Pearson $r$, Root Mean Square Error (RMSE),
-Nash-Sutcliffe Efficiency (NSE)) stay flat: $r$ near $0.34$ across all three corrected stages,
-RMSE rising slightly, NSE drifting further from unity. The chapter
+Indonesian Meteorological, Climatological, and Geophysical Agency (BMKG) network.
+The temporal-skill diagnostics stay flat, and they are measured
+in sample against CPC-UNI rather than against the stations:
+Pearson $r$ holds near $0.35$ across all three corrected stages,
+Root Mean Square Error (RMSE) rises slightly, and
+Nash-Sutcliffe Efficiency (NSE) drifts further from unity. Against
+the independent stations the same correlation holds near $0.24$
+when constructed the same way. The chapter
 explains why this is structural, what it implies for users, what
 the open release of the framework code enables in terms of
 independent re-verification and extension, where the next
@@ -36,9 +43,10 @@ bounded.
 
 The argument has six parts.
 Section~\ref{sec:discussion-bound} states the theoretical bound on
-Pearson $r$ under marginal correction and locates the observed
-value of $r \approx 0.34$ inside the empirical band reported for
-daily Integrated Multi-satellitE Retrievals for Global Precipitation Measurement (IMERG) over the tropics.
+Pearson $r$ under marginal correction and compares the in-sample
+value of $r \approx 0.35$ against CPC-UNI with the empirical band
+reported for
+daily Integrated Multi-satellitE Retrievals for Global Precipitation Measurement (IMERG) over the Indonesian Maritime Continent \citep{ref:ramadhan2022ts}.
 Section~\ref{sec:discussion-subdaily} reports a half-hourly
 empirical diagnostic, using the IMERG-L source, that quantifies
 how much of the apparent $r$ ceiling is attributable to a
@@ -49,6 +57,7 @@ Section~\ref{sec:discussion-ops} translates the bound into
 operational guidance, distinguishing applications that depend on
 distributional properties from those that depend on day-specific
 timing.
+
 Section~\ref{sec:discussion-reproducibility} discusses the
 implications of the parallel reproducibility contribution: an
 open-source pipeline with notebook-level provenance that enables
@@ -79,33 +88,69 @@ Chapter~\ref{chap:methods}: Linear Scaling (LS), Empirical
 Quantile Mapping (EQM), a Generalized Pareto Distribution (GPD)
 tail step, and a Convolutional Neural Network (CNN) refinement,
 the last a Deep Learning (DL) architecture.
-Figure~\ref{fig:bound-schematic} states the argument in two
-panels: panel~(a) illustrates the rank-preservation mechanism on
-a synthetic single-pixel paired series, and panel~(b) shows the
-two-track bound on the headline numbers reported in
-Table~\ref{tab:headline}.
+
+Figure~\ref{fig:bound-schematic} states the argument in three
+panels, demonstrated on the archive itself rather than on an
+idealised example. Panel~(a) shows the rank-preservation mechanism
+over January 2021 at Stasiun Meteorologi Kalianget (Jawa): the
+gauge peaks on days 4 and 6 and the satellite on day 7. Although
+the month is fitted as three dekads with their own
+mappings, the corrected series re-orders nothing within any dekad,
+so the only four crossings fall at the dekad hand-overs while the
+spread moves to the gauge ($0.69$ to $0.95$). Panel~(b) generalises
+to a single dekad-of-year across the whole record at that station
+(every 1 to 10 January, 2001 to 2021, $n = 195$), where one
+correction mapping applies: corrected against raw is a
+near-monotone rising curve, the gauge a surrounding cloud, and
+$r$ stays flat, $0.368$ to $0.357$, at this station under the
+archived UTC label. Panel~(c) places these beside
+the in-sample values of Table~\ref{tab:headline-cpc}, a per-pixel
+spatial median over the land pixels averaged across the 36 dekadal
+windows.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\figFiveOneWidth\textwidth]{fig_thesis_05_bound_schematic.png}
-\caption[Schematic of the theoretical bound on Pearson $r$ under marginal correction]{Schematic of the theoretical bound on Pearson $r$ under
-marginal correction.\label{fig:bound-schematic}}
+\caption[The theoretical bound on Pearson $r$ under marginal correction]{The theoretical bound on Pearson $r$ under marginal
+correction, on real data at one station and over the validation
+network\label{fig:bound-schematic}}
 \end{figure}
 
-The first component is rank preservation. Strictly monotonic
-quantile mapping, the family to which empirical quantile mapping
+The first component is rank preservation. Monotone,
+rank-preserving quantile mapping, the family to which empirical quantile mapping
 with Gamma kernels and GPD tail adjustment both belong, preserves the rank order of values at each
 location \citep{ref:cannon2015}. If the satellite reports a higher
-value on day $i$ than on day $j$ before correction, it will report
-a higher value on day $i$ than on day $j$ after correction. The
+value on day $i$ than on day $j$ before correction, and both days
+fall in the same dekad, it will report a value no lower on day $i$
+than on day $j$ after correction; across a dekad boundary a
+different mapping applies, which produces the dekad-boundary
+crossings visible in Figure~\ref{fig:bound-schematic}a. The
 day-by-day pairing of satellite values to gauge values is fixed by
 the satellite product itself; no operation in a marginal correction
-pipeline can move a value from one day to its neighbour. The CNN
-refinement stage relaxes the strict rank-preservation property at
+pipeline can move a value from one day to its neighbour. The mapping
+is monotone but not strictly so, because dry-day frequency matching
+sends a substantial fraction of low-rain days to exactly zero: this
+creates ties, but no reversals, so the day-ordering is preserved
+without the map being one-to-one.
+
+The CNN
+refinement stage relaxes the rank-preservation property at
 each pixel because the $3 \times 3$ convolution mixes information
 from neighbouring pixels at the same timestep, but it does not
 reorder the time series at a single pixel beyond the small
-residual it learns to add on top of LSEQM. Because the residual
+residual it learns to add on top of LSEQM. The size of that
+relaxation is measurable. At the station of
+Figure~\ref{fig:bound-schematic}, over the $195$ paired days of the
+first January dekad shown in panel~(b) and with the raw series
+sorted ascending, LSEQM reorders none of the $194$ adjacent pairs,
+whereas LSEQM+DL
+reorders six and introduces roughly $1$~mm of spread at equal raw
+value across the $21.5\%$ of days the refinement touches. The
+relaxation is therefore real but marginal, and it buys no temporal
+skill: $r$ against the gauge moves from $0.368$ to $0.357$ on that
+sample.
+
+Because the residual
 training target is the LSEQM-to-Climate Prediction Center (CPC) Unified Gauge-Based Analysis of Global Daily Precipitation (CPC-UNI) difference rather than
 a free reconstruction, the temporal ordering at each pixel after
 the CNN refinement remains a small perturbation of the LSEQM
@@ -120,38 +165,63 @@ applications \citep{ref:maraun2013} established that quantile
 mapping widens spread to match the marginal target without
 improving time-dependent skill, because spread alignment and
 day-by-day pairing are independent properties of a paired
-series. The Pearson correlation is invariant under monotone
-affine rescaling of either series, so even a perfect spread
-match has no purchase on $r$. The combination of rank
+series. Within a single dekad at a pixel, Linear Scaling is a
+positive rescaling, which leaves the Pearson correlation exactly
+where it was; the nonlinear EQM and GPD stages introduce no rank
+reversals, so they cannot re-pair a satellite day with a different
+gauge day. The exact invariance under Linear Scaling holds only at
+that granularity.
+
+A correlation pooled across dekads and pixels
+mixes samples that each carry a different scaling factor, so the
+pooled value shifts slightly even under Linear Scaling: against the
+BMKG stations it moves by $+0.003$
+(Section~\ref{sec:results-intercomparison}).
+Neither step fixes the Pearson correlation exactly, because the map
+is nonlinear and dry-day matching creates ties, but in practice the
+correlation is observed to move only within single-pixel sampling
+uncertainty. Even a perfect spread match therefore has little
+purchase on $r$. The combination of rank
 preservation and spread-without-skill yields the headline
 proposition of this chapter:
 
-% Keep the indented proposition together on one page: ~7 lines of
+% Keep the indented proposition together on one page: ~8 lines of
 % quote text + small breathing room. If less than that remains on the
 % current page, force a break so the whole block lives on the next.
-\needspace{8\baselineskip}
+\needspace{10\baselineskip}
 \begin{quote}
-\emph{Under any strictly monotonic marginal correction, the
-Pearson correlation between the corrected satellite series and an
-external paired gauge series is bounded above by the Pearson
-correlation between the raw satellite series and the same gauge
-series, up to the small rank-changing contribution of the
-spatial CNN refinement.}
+\emph{A monotone, rank-preserving marginal correction cannot
+re-order a satellite series in time, so it cannot manufacture
+day-by-day agreement with an external paired gauge that the raw
+series does not already have. The Pearson correlation is therefore
+held near its raw value; the residual movement comes only from the
+nonlinear reshaping of amplitudes and the small rank-changing
+contribution of the spatial CNN refinement, and is observed to
+stay within single-pixel sampling uncertainty.}
 \end{quote}
 
 \noindent The proposition is what the four-pillar pattern and the
 flat $r$ pattern are jointly expressing.
 
-The bound is empirically supported by locating $r \approx 0.34$
-inside the $0.3$ to $0.5$ range documented for daily IMERG over
-the tropics, which rises substantially only at dekadal or monthly
-aggregation (Section~\ref{sec:lit-bounds}). The corrected
-LSEQM+DL value of $0.348$ sits inside this empirical band. The ceiling has two
+The bound is not a claim that $r \approx 0.35$ is the value a daily
+product must take. Reported daily correlations vary widely with the
+setting: against the dense Chinese gauge analysis the median for
+IMERG is near $0.75$, while over the Indonesian Maritime Continent
+the daily value is lower and rises substantially only at dekadal or
+monthly aggregation (Section~\ref{sec:lit-bounds}). The corrected
+LSEQM+DL value of $0.348$, measured per pixel against the
+in-sample CPC-UNI target at the native UTC window and averaged over
+the $36$ dekadal windows, sits at the low end of that spread. What
+the bound asserts is narrower and is what the stage comparison
+tests: whatever the starting value, marginal correction does not
+raise it.
+
+The ceiling has two
 contributors. The first is a calendar-window component: the
 UTC-dated IMERG-L archive coincides with the CPC-UNI calibration
 label but is offset by about one day from the local-day BMKG
-morning-observation label, so against BMKG the daily correlation
-is suppressed under UTC alignment and recovered by re-aggregating
+morning-observation label. Against BMKG the daily correlation
+is therefore suppressed under UTC alignment and recovered by re-aggregating
 the satellite to the local-observation window: a fixable metadata
 artefact rather than a satellite limit, quantified in
 Section~\ref{sec:discussion-subdaily}. The second is the residual
@@ -160,7 +230,9 @@ of every step in the pipeline and requires methods outside the
 marginal correction family
 (Section~\ref{sec:discussion-paths}).
 Section~\ref{sec:discussion-ops} returns to the operational
-significance of this split. The pattern is
+significance of this split.
+
+The pattern is
 also stable across the calendar year.
 Figure~\ref{fig:taylor-monthly} aggregates the BMKG Taylor
 analysis by month and shows that the angular position of the
@@ -174,23 +246,33 @@ sample composition.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\figFiveTwoWidth\textwidth]{fig_thesis_05_taylor_monthly.png}
-\caption[Monthly Taylor diagram aggregated across the $172$ BMKG validation stations]{Monthly Taylor diagram aggregated across the $172$ BMKG
-validation stations.\label{fig:taylor-monthly}}
+\caption[Monthly Taylor diagram aggregated across the BMKG validation stations]{Monthly Taylor diagram aggregated across the $171$ BMKG
+stations carrying a valid per-dekad correlation\label{fig:taylor-monthly}}
 \end{figure}
 
 A complementary reading uses the canonical decomposition of the
-mean squared error into bias, spread, and covariance components
-\citep{ref:gupta2009}. The bias component is moved cleanly
-by the Linear Scaling stage, and the spread component is moved
-toward unity by the EQM stage acting on the daily distribution.
-The covariance component, proportional to
-$r \times \sigma_{\text{sat}} \times \sigma_{\text{gauge}}$, is
+mean squared error into a bias term, a spread-mismatch term, and a
+correlation-residual term \citep{ref:gupta2009}. The bias term is
+moved cleanly by the Linear Scaling stage, and the spread-mismatch
+term is driven toward zero by the EQM stage as the
+standard-deviation ratio moves to unity and beyond. The
+correlation-residual
+term, equal to
+$2\,\sigma_{\text{sat}}\,\sigma_{\text{gauge}}\,(1-r)$, is
 the mechanism through which the RMSE actually increases between
 LS ($13.1$ mm per day) and LSEQM+DL ($14.1$ mm per day). Once the
-satellite spread is inflated to match the gauge spread without
-any improvement in $r$, the covariance term grows in absolute
-magnitude because $\sigma_{\text{sat}}$ has grown, while the
-spread-mismatch term shrinks toward zero. This is the
+satellite spread is inflated to match the reference spread without
+any improvement in $r$, this term grows, because
+$\sigma_{\text{sat}}$ has risen toward $\sigma_{\text{ref}}$ while
+$(1-r)$ stays near $0.65$, and its growth outweighs the vanishing
+spread-mismatch term $(\sigma_{\text{sat}} - \sigma_{\text{ref}})^2$.
+The whole decomposition is measured in sample against CPC-UNI,
+where the standard-deviation ratio does not stop at unity but
+overshoots to $1.15$; the convergence to $1.00$ reported in
+Chapter~\ref{chap:results} is the out-of-sample result against the
+BMKG stations, and mixing the two would misstate the mechanism.
+
+This is the
 variance-inflation-without-skill effect identified for quantile
 mapping in regional climate applications \citep{ref:maraun2013}:
 matching the spread without matching the timing increases the
@@ -261,8 +343,9 @@ retrieval blending across the half-hourly timestamp, and the
 diurnal phase of maritime-continent convection.
 
 \textbf{Convention dependence of the gauge references.} The two
-gauge references share the morning observation but not the date
-label, and resolving the difference sharpens the picture. The
+gauge references differ in both the hour at which a daily total
+closes and the date it is then given, and resolving the difference
+sharpens the picture. The
 gridded CPC-UNI archive dates each daily total by a per-cell
 end-of-day field; for every Indonesian cell this field is
 $24$~hours, so the total closes at $00{:}00$ UTC and is assigned
@@ -278,7 +361,9 @@ to the local-observation window (Figure~\ref{fig:convention}a).
 The calendar-window offset is thus specific to the BMKG
 labelling: IMERG and CPC-UNI share the UTC day and carry no
 window offset, so the calibration target is already consistent
-with the satellite. At
+with the satellite.
+
+At
 the station locations both references reach the same
 retrieval-limited correlation (approximately $0.57$ in the GPM
 era), but at offset windows: CPC-UNI at the UTC day and BMKG at
@@ -297,11 +382,14 @@ methods (Section~\ref{sec:discussion-paths}).
 \centering
 \includegraphics[width=\figFiveConventionWidth\textwidth]{fig_thesis_05_convention.png}
 \caption[The calendar-window convention conflict and its resolution]{Daily
-IMERG correlation against CPC-UNI and BMKG versus aggregation-window offset at
-the $178$ station locations (GPM era), showing (a) the convention conflict and
-(b) its resolution by relabelling CPC-UNI to the local-observation day.\label{fig:convention}}
+IMERG correlation against CPC-UNI and BMKG versus aggregation-window offset at the
+$178$ station locations with valid half-hourly coverage (GPM era): (a) the convention
+conflict and (b) its resolution by relabelling CPC-UNI to the local-observation day.\label{fig:convention}}
 \end{figure}
 
+The diagnostic pools the $178$ stations with valid half-hourly
+coverage, a slightly larger set than the $172$ out-of-sample
+validation stations used for the headline results.
 Table~\ref{tab:convention} lists the four correlations directly: each
 reference reaches approximately $0.57$ at its own optimal window
 (CPC-UNI at the UTC day, BMKG at $h = -23$~h) and falls to $0.18$
@@ -312,7 +400,7 @@ calendar labels.
 \centering
 \caption[Convention-dependence of the daily satellite-gauge correlation]{Daily
 IMERG Pearson $r$ at the $178$ BMKG station locations (GPM era), under the UTC
-and the local-day ($h=-23$~h) aggregation windows.\label{tab:convention}}
+and the local-day ($h=-23$~h) aggregation windows\label{tab:convention}}
 \begin{tabular}{lcc}
 \toprule
 Reference & UTC window ($h=0$) & Local-day window ($h=-23$~h) \\
@@ -334,25 +422,27 @@ CPC-UNI sharing the IMERG-L UTC day; relabelling CPC-UNI to the
 local-observation day moves the optimum to $h^\star \approx -23$~h
 everywhere (Figure~\ref{fig:gridded-cpc}b). The offset is
 identical in the timing-imprecise TRMM-input era ($2001$ to
-$2013$) and the GPM era, confirming it is a labelling effect and
-not a property of retrieval skill. Pooled over the cells that hold
-BMKG stations the correlation reaches $0.57$ in the GPM era
-(Figure~\ref{fig:gridded-cpc}c, bold), the same level as the
+$2013$) and the GPM era, which is consistent with a labelling
+effect rather than a property of retrieval skill. Pooled over the
+$134$ cells that hold
+BMKG stations the correlation reaches $0.56$ in the GPM era
+(Figure~\ref{fig:gridded-cpc}c, bold), close to the
 per-station diagnostic and Table~\ref{tab:convention}; pooled over
-the whole domain it falls to $0.34$ (faint), diluted by the
-data-sparse east where the contributing-gauge network thins and
-$h^\star$ turns noisy. The era gain against CPC-UNI is modest
-($0.51$ to $0.57$) next to the point-gauge recovery ($0.36$ to
+the whole domain it falls to $0.334$ (faint), close to the
+in-sample whole-coverage correlation against CPC-UNI
+(Table~\ref{tab:cpc-corr-dist}), diluted by the data-sparse east
+where the contributing-gauge network thins and $h^\star$ turns noisy. The era gain against CPC-UNI is modest
+($0.51$ to $0.56$) next to the point-gauge recovery ($0.36$ to
 $0.57$) because the smoothed $0.5^\circ$ analysis forgives the
 point-representativeness noise that depresses the early-era
-point-gauge correlation, so both references converge near $0.57$
-once the retrieval resolves the diurnal cycle.
+point-gauge correlation, so both references converge near $0.56$
+to $0.57$ once the retrieval resolves the diurnal cycle.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\figFiveGriddedCpcWidth\textwidth]{fig_thesis_05_gridded_cpc.png}
 \caption[Gridded window offset against CPC-UNI over the full record]{Gridded
-window-offset diagnostic against CPC-UNI over the full record.\label{fig:gridded-cpc}}
+window-offset diagnostic against CPC-UNI over the full record\label{fig:gridded-cpc}}
 \end{figure}
 
 \textbf{Timezone bands and the single peak.} The single broad
@@ -392,8 +482,9 @@ product's day-to-day temporal precision, and it places the IMERG
 precision improvement at the $2014$ to $2015$ transition to the
 GPM constellation. A telling detail is that in the early era the
 correlation optimum sits near the UTC day rather than at the
-convention offset: a field too temporally smeared to register the
-gauge window cannot be realigned to it. The era dependence is
+convention offset, consistent with a field too temporally smeared
+to register the gauge window; the reason the optimum takes this
+sign in the early era is not established here. The era dependence is
 independently corroborated over Indonesia: an evaluation in
 mountainous Sumatra attributes the improved daily IMERG accuracy in
 the GPM era to the denser passive-microwave constellation and the
@@ -409,12 +500,14 @@ GPM eras, showing why the window recovery is confined to the GPM
 era.\label{fig:window-precision}}
 \end{figure}
 
-\textbf{Calibration and validation.} Both gauge references follow
-the local-day morning-observation convention, CPC-UNI through its
-contributing stations \citep{ref:cpcuni_readme} and BMKG through
-SK.32/TL.202/KB/BMG-2006 \citep{ref:bmkg2006sk32}, but the two
-archives label that observation day about one day apart, so the
-window mismatch surfaces differently at the two ends of the
+\textbf{Calibration and validation.} The two gauge references are
+assembled under different conventions. CPC-UNI closes each daily
+total at $00{:}00$~UTC and assigns it the UTC date
+\citep{ref:cpcuni_readme}, while BMKG closes at the morning
+observation and assigns the local date under
+SK.32/TL.202/KB/BMG-2006 \citep{ref:bmkg2006sk32}. The two archives
+therefore label a day about one day apart, and the
+window mismatch surfaces at only one end of the
 pipeline. The CPC-UNI label coincides with the UTC-day IMERG-L
 archive, so the calibration pairing carries no window offset; the
 BMKG label sits one day from the archive, so the $-23$~h offset
@@ -431,7 +524,8 @@ effect is confined to the comparison against the local-day BMKG
 gauges.
 
 \textbf{The monthly scale and the headline ceiling.} Because the
-four-pillar metrics are window-invariant, only the
+four-pillar metrics are essentially window-invariant (the daily
+sample composition being nearly preserved across offsets), only the
 absolute Pearson~$r$ depends on the aggregation window, and
 aggregating to the monthly scale dissolves even that dependence:
 Section~\ref{sec:results-window} reports a monthly correlation near
@@ -443,22 +537,25 @@ rather than in the amount of rainfall captured. The bound of
 Section~\ref{sec:discussion-bound} separates accordingly into a
 calendar-window component, the larger and recoverable part, and a
 residual retrieval-skill component that no window choice removes.
-The full-record headline $r \approx 0.34$
-(Table~\ref{tab:headline}) is the correlation between the UTC-day
-IMERG aggregate and the BMKG morning-observation aggregate, blended
-across the timing-imprecise and GPM eras; it is unchanged by the
-marginal-correction pipeline because $r$ is invariant under the
-rank-preserving rescaling the pipeline applies.
+The correlation against CPC-UNI, the in-sample calibration target,
+holds near $0.35$ (Table~\ref{tab:cpc-corr-dist}) and is left
+pinned close to its raw value by the marginal-correction pipeline, which
+introduces no rank reversals in its LSEQM stages and only a small
+rank-changing CNN contribution, so Pearson $r$ against CPC-UNI
+changes only within sampling noise. The independent correlation
+against the BMKG point gauges is lower and era-dependent; over the
+GPM era it rises from $0.20$ at the UTC-day window to $0.57$ at the
+gauge-matched window (Section~\ref{sec:results-window}), the
+recoverable calendar-window component in action.
 
 \textbf{Scope and bounds of the contribution.} The window-offset
 search adopted here is the gauge-timing inference
 of \citet{ref:beck2019}, developed for global precipitation
-merging; the Indonesian morning-observation convention has itself
-been noted in validation \citep{ref:ramadhan2022,
-ref:ramadhan2024diurnal} without being carried into a daily
-bias-correction workflow, where daily correlation is reported
-against a fixed window \citep{ref:suhartanto2025,
-ref:ramadhan2024sumatra}. The contribution here is therefore not
+merging. Evaluations over the Maritime Continent pair the two
+series in Coordinated Universal Time rather than on the gauge
+reporting day \citep{ref:ramadhan2022ts}, and daily
+bias-correction workflows likewise report correlation
+against a fixed window \citep{ref:ramadhan2024sumatra, ref:suhartanto2025}. The contribution here is therefore not
 the offset search but its regional grounding in the BMKG
 convention, its propagation into the verification of a correction
 pipeline, and the quantified recovery with its seasonal, spatial,
@@ -474,7 +571,7 @@ read. It is confined to the GPM era; it is partial, lifting the
 pooled correlation to approximately $0.57$ rather than to unity; it
 is an upstream re-aggregation of the raw half-hourly archive,
 outside the LSEQM+DL pipeline, which by construction cannot move
-$r$; it requires access to the half-hourly source, since an
+$r$. It requires access to the half-hourly source, since an
 already-aggregated daily archive cannot be re-windowed; the
 $-23$~h offset is specific to the local-day morning convention and
 must be re-derived for any other reporting practice; and it acts on
@@ -505,7 +602,7 @@ relevant headline metric from Table~\ref{tab:headline}.
 \begin{table}[H]
 \centering
 \caption[Application classes for corrected IMERG-L over Indonesia]{Application classes for corrected IMERG-L over
-Indonesia.\label{tab:app-classes}}
+Indonesia\label{tab:app-classes}}
 \begingroup\small
 \begin{tabular}{@{}p{2cm}p{5.5cm}p{2.5cm}p{2.5cm}@{}}
 \toprule
@@ -525,7 +622,7 @@ Real-time flood-event nowcasting, single-event forecasting,
 day-1 hydrological model initialisation, day-specific field
 operations &
 Day-by-day timing &
-Pearson $r$, RMSE, NSE (all bounded by raw satellite) \\
+Pearson $r$, RMSE, NSE (set by the raw retrieval's timing; not improved by correction) \\
 \bottomrule
 \end{tabular}
 \endgroup
@@ -546,14 +643,36 @@ Chapter~\ref{chap:results} establish that the corrected product
 reproduces all of these properties close to the gauge target,
 typically to within $1\%$ to $5\%$ at the headline metrics.
 
+The threshold-stratified detection result of
+Section~\ref{sec:results-threshold} refines this guidance in a way
+the aggregate scores conceal, and it is the one result in this
+thesis with an immediate operational consequence. Aggregate
+probability of detection falls under the full pipeline, which read
+alone would argue against using the corrected product for any
+detection task. The stratified view reverses that reading at and
+above $20$~mm/day, and the reversal has a mechanism rather than a
+coincidence: the aggregate is dominated by light rain, where the
+uncorrected over-detection of drizzle inflates the hit count, while
+the corrected product recovers the truncated upper tail that carries
+the events an operational threshold is set to catch. A user whose
+decision threshold sits in the moderate-to-heavy range should
+therefore read the stratified curve and not the aggregate; a user
+screening for any measurable rain should not. This is the same
+lesson as the four-pillar split, applied within a single pillar:
+an aggregate score can conceal the regime that matters.
+
 The poorly-served class includes single-event nowcasting,
 real-time flood-event prediction at a specific date, day-1
 hydrological model initialisation, and any application that
 requires the corrected product to identify the precise calendar
 day of a heavy rain event. These applications depend on
-day-by-day timing that the corrected product inherits unchanged
-from raw IMERG-L. The Pearson $r$ ceiling at $0.34$ is the
-operational expression of this limit: on a randomly chosen day,
+day-by-day timing that the corrected product inherits from raw
+IMERG-L, pinned close to its raw value. The Pearson $r$ ceiling is
+the operational expression of this limit: $0.35$ in sample against
+CPC-UNI as a per-pixel dekadal median, and, pooled over all
+station-days of the GPM era, $0.20$ against the independent BMKG
+stations under the archived date label, rising to $0.57$ once the
+labels are matched but no further under correction. On a randomly chosen day
 the corrected product carries the same timing information as the
 raw retrieval, and no marginal correction can add the timing
 information that the satellite did not measure.
@@ -565,7 +684,9 @@ climatology against the $99$th percentile of the gauge-aligned
 daily distribution, and flood-risk insurance pricing all depend
 on the daily distribution and are well-served. Real-time
 flood-event prediction at a specific date, in contrast, depends
-on day-by-day timing and is not. Hydrological applications split
+on day-by-day timing and is not.
+
+Hydrological applications split
 similarly. Multi-year model calibration against gauge-aligned
 statistics is well-served; day-1 forecast initialisation is not.
 Agricultural applications split on the same axis. Dekadal water
@@ -578,7 +699,7 @@ well-served class. Dekadal, monthly, and seasonal aggregates
 inherit the bias structure of the daily fields they sum over. A
 daily product with a $20\%$ wet-day over-count produces a
 dekadal aggregate with the same fractional over-count in
-wet-day-day counts and a similarly biased dekadal mean intensity.
+wet-day counts and a similarly biased dekadal mean intensity.
 The pipeline corrects the daily fields so that the downstream
 aggregates derived from them inherit a bias-free input. The
 operational guidance is not to skip daily correction and aggregate
@@ -595,11 +716,11 @@ local-day BMKG validation gauges \citep{ref:bmkg2006sk32}
 reported in Chapter~\ref{chap:results} against those gauges mixes
 the underlying retrieval timing accuracy with a calendar-window
 label artefact. The implication for operational users is that the
-low daily correlation is largely a fixable metadata effect:
-re-aggregating the satellite to the local-observation day lifts
-the GPM-era daily correlation from approximately $0.20$ to
-approximately $0.57$, whereas the CPC-UNI calibration label
-already coincides with the UTC day and needs no such offset. The
+low daily correlation is largely a fixable metadata effect: the
+recovery quantified in Section~\ref{sec:discussion-subdaily} is
+obtained by re-aggregating the satellite to the local-observation
+day, an input-side change that the CPC-UNI calibration label does
+not need because it already coincides with the UTC day. The
 residual at the matched window is the genuine retrieval limit.
 Section~\ref{sec:discussion-paths} returns to this point as the
 most operationally actionable next step for users in the UTC+7
@@ -623,7 +744,7 @@ their own region, their own satellite product, or their own
 question. This section discusses what the open release enables, in
 the categories that the literature on reproducible computational
 research identifies as the substantive contributions of public
-code and notebook artefacts \citep{ref:stodden2014,ref:peng2011}.
+code and notebook artefacts \citep{ref:peng2011, ref:stodden2014}.
 
 The first category is independent re-verification. The
 four-pillar headline numbers in Table~\ref{tab:headline} are
@@ -662,8 +783,10 @@ Group InfraRed Precipitation with Stations (CHIRPS)
 Multi-Source Weighted-Ensemble Precipitation (MSWEP)
 \citep{ref:beck2017} as the satellite
 input, can do so by changing the precipitation-variable names in
-the configuration. The framework does not guarantee that the
-resulting bias correction will be skilful in those settings; the
+the configuration.
+
+The framework does not guarantee that the
+resulting bias correction will be skilful in those settings. The
 sensitivity of the GPD shape parameter to small samples, the
 calibration of $\alpha$ for blending, and the appropriateness of
 the saturation count for the local gauge network all require
@@ -684,7 +807,9 @@ with the notebooks provided. This shifts the work of optimisation
 from a
 single best-guess setting in the original paper to a tunable
 artefact whose default values are documented and whose tuning
-procedure is reproducible. The tuning is not free: each
+procedure is reproducible.
+
+The tuning is not free: each
 parameter sweep multiplies the runtime by the number of values
 in the sweep grid. A full three-parameter sweep at five values
 per parameter is $125$ end-to-end runs, which is feasible on a
@@ -709,14 +834,14 @@ cannot support CNN refinement.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\figFiveThreeWidth\textwidth]{fig_thesis_05_confidence_mask.png}
-\caption[Station-density confidence mask]{Station-density confidence mask.\label{fig:confmask}}
+\caption[Station-density confidence mask]{Station-density confidence mask\label{fig:confmask}}
 \end{figure}
 
 The fourth category combines comparison studies and training
 use. The notebook structure separates correction from
 verification, so the four-pillar verification report can be run
 on any pair of satellite and reference fields without re-running
-the correction; this lets independent groups compare IMERG Final
+the correction. This lets independent groups compare IMERG Final
 Run against IMERG Late Run, or a bias-corrected output from a
 different pipeline against the same BMKG validation set, against
 a numerically comparable baseline. The same structure, combined
@@ -747,7 +872,7 @@ returns to this scope in Section~\ref{sec:discussion-limitations}.
 \section{Paths Forward}\label{sec:discussion-paths}
 % ============================================================
 
-Raising the temporal-skill ceiling beyond $r \approx 0.34$
+Raising the temporal-skill ceiling beyond $r \approx 0.35$
 requires methods outside the marginal correction family. This
 section surveys four paths and assesses their feasibility for the
 Indonesian domain, the data products available, and the
@@ -761,8 +886,8 @@ Continent setting.
 
 \begin{table}[H]
 \centering
-\caption[Four paths for raising the temporal-skill ceiling beyond $r \approx 0.34$]{Four paths for raising the temporal-skill ceiling
-beyond $r \approx 0.34$.\label{tab:paths-forward}}
+\caption[Four paths for raising the temporal-skill ceiling beyond $r \approx 0.35$]{Four paths for raising the temporal-skill ceiling
+beyond $r \approx 0.35$\label{tab:paths-forward}}
 \begingroup\small
 % Use tabular* so the table fills \textwidth exactly: keep the original
 % 3.0/2.0/2.5/4.5 cm p-column widths (sum 12 cm) and let
@@ -840,7 +965,7 @@ timings consistent with the corrected distributional properties.
 The verification posture shifts from deterministic point-by-point
 scoring to ensemble metrics: the Continuous Ranked Probability
 Score for ensembles, the rank histogram for calibration, and
-threshold reliability diagrams for event detection~\citep{ref:wilks2011}. The path is
+threshold reliability diagrams for event detection~\citep{ref:wilks2020}. The path is
 attractive because it acknowledges the timing uncertainty
 explicitly rather than burying it in a flat $r$ value. The cost
 is that downstream operational users need to ingest ensemble
@@ -853,18 +978,25 @@ in the UTC+7 to UTC+9 band, is morning-observation re-aggregation
 of the daily IMERG-L archive. The calendar-window mismatch
 diagnosed in Section~\ref{sec:discussion-subdaily} places the
 optimal alignment at $h \approx -23$~h relative to UTC midnight,
-matching the local-day morning-observation convention shared by
-the CPC-UNI calibration target and the BMKG validation network
-\citep{ref:cpcuni_readme, ref:bmkg2006sk32}. Re-aggregating the native half-hourly
+matching the date label the BMKG validation network assigns under
+its morning-observation convention \citep{ref:bmkg2006sk32}. The
+CPC-UNI calibration target needs no such shift: it is already
+dated to the UTC day and peaks at $h \approx 0$
+\citep{ref:cpcuni_readme}. Re-aggregating the native half-hourly
 IMERG fields \citep{ref:imerghhl07} to a 24-hour window ending at
 $07{:}00$ local time on the recorded date, before applying the
 LSEQM+DL correction, would remove the mismatch component without
-changing the correction methodology. The expected operational
+changing the correction methodology.
+
+The expected operational
 effect, from the diagnostic in
-Section~\ref{sec:discussion-subdaily}, is a lift in headline
-Pearson $r$ from approximately $0.34$ to approximately $0.57$
-with no change to the four-pillar movements of value,
-distribution, extreme, and detection scores. The cost is a re-run
+Section~\ref{sec:discussion-subdaily}, is a lift in the GPM-era
+daily Pearson $r$ against BMKG, pooled over all station-days, from
+approximately $0.20$ at the
+UTC-day window to approximately $0.57$ at the matched window. The
+four-pillar corrections apply unchanged, and their value,
+distribution, extreme, and detection scores are recomputed on the
+re-aggregated daily totals and expected to remain close. The cost is a re-run
 of the entire pipeline against a re-aggregated input archive,
 which is computationally modest but archive-intensive. This is
 the path most directly enabled by the parallel reproducibility
@@ -921,8 +1053,14 @@ stability across the Bali sweep, which is a single-subdomain test.
 
 \textbf{CPC-UNI reference quality bound.} The framework
 calibrates against CPC-UNI, whose known undercatch of heavy
-rainfall and $0.5^{\circ}$ interpolation smoothing
-(Chapter~\ref{chap:methods}) bound the reference quality. The
+rainfall and $0.5^{\circ}$ interpolation smoothing bound the
+reference quality. Section~\ref{sec:methods-reference-quality}
+traces both to their source: the Indonesian input reaches CPC
+through the routine GTS exchange rather than the full national
+network, and that input is drawn from an archive missing a third
+of its station-days, so the reference is well constrained where
+the contributing network is dense and progressively less so where
+it thins. The
 corrected satellite product cannot be
 better than the reference it is calibrated against, except where
 the BMKG out-of-sample validation reveals that the corrected
@@ -966,11 +1104,13 @@ conditional component as the structural ceiling.
 
 \textbf{Calendar-window mismatch between IMERG-L and the gauge
 reference family.} The daily IMERG-L archive is constructed on
-the UTC calendar day, while both CPC-UNI and the BMKG network
-follow the local-day morning-observation convention of their
-contributing stations \citep{ref:cpcuni_readme, ref:bmkg2006sk32},
-a mismatch of approximately $23$~hours per the diagnostic in
-Section~\ref{sec:discussion-subdaily}. The four-pillar results
+the UTC calendar day. CPC-UNI shares that date label, closing each
+total at $00{:}00$~UTC \citep{ref:cpcuni_readme}, whereas the BMKG
+network dates its totals to the local day ending at the morning
+observation \citep{ref:bmkg2006sk32}, a mismatch of approximately
+$23$~hours per the diagnostic in
+Section~\ref{sec:discussion-subdaily}. The mismatch therefore
+arises only at the validation end, not at the calibration end. The four-pillar results
 (value, distribution, extreme, detection) are unaffected, being
 functions of the marginal distribution and of categorical events
 that are invariant to the 24-hour window choice; only Pearson~$r$
@@ -996,10 +1136,11 @@ prepared.
 
 The combined effect of these six limitations leaves the central
 claim of the chapter intact: marginal bias correction moves the
-four pillars cleanly toward the gauge target and cannot move the
-temporal-skill diagnostics, because rank preservation and variance
-inflation without skill jointly bound Pearson $r$ at the timing
-quality of the underlying satellite retrieval. The four-pillar
+four pillars cleanly toward the gauge target but does not improve
+the temporal-skill diagnostics beyond single-pixel sampling noise,
+because rank preservation and variance inflation without skill hold
+Pearson $r$ near the timing quality of the underlying satellite
+retrieval. The four-pillar
 improvement is the contribution that the framework delivers; the
 flat $r$ is the structural property of the method family rather
 than a failure of the implementation. The reproducibility
@@ -1007,3 +1148,9 @@ contribution lowers the cost of testing this proposition on other
 products, other references, and other regions; the transferability
 of the proposition itself is an empirical question that the open
 release lets the field answer one re-application at a time.
+Chapter~\ref{chap:conclusion} draws these threads together, states
+what the framework does and does not deliver against the objectives
+and hypotheses of Chapter~\ref{chap:introduction}, and sets out the
+recommendations that follow for users,
+for researchers extending the method, and for the institutions that
+maintain the underlying archives.
