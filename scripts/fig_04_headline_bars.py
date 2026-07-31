@@ -42,7 +42,7 @@ def bar_panel(ax, values, *, ylim, ylabel, title, target=None, fmt="{:.2f}"):
     ax.grid(axis="y", alpha=0.3, linestyle=":")
 
 
-fig, axes = plt.subplots(2, 2, figsize=(7.0, 5.8), constrained_layout=True)
+fig, axes = plt.subplots(2, 2, figsize=(7.0, 5.22), constrained_layout=True)
 ax_rb, ax_sdr, ax_q99, ax_csi = axes.flat
 
 bar_panel(ax_rb, rb_values, ylim=(-0.15, 0.05),

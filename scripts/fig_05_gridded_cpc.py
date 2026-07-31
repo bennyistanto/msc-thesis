@@ -5,7 +5,7 @@ CPC-UNI analysis at 0.5 degree:
   (a) CPC-UNI at native UTC labels  -> h* ~= 0 map (full record 2001-2025);
   (b) CPC-UNI harmonised to the local-observation day -> h* ~= -23 map;
   (c) pooled r(h) over the gauged cells (bold, ~0.57) and the whole domain
-      (faint, ~0.34), for the GPM (solid) and TRMM-input (dashed) eras.
+      (faint, ~0.33), for the GPM (solid) and TRMM-input (dashed) eras.
 
 Data: temp/subdaily_lag/gridded_cpc_window_stats_{2001_2014,2015_2021,2015_2025}.npz
       (gridded window-offset sweep, native + harmonised, per era)
@@ -94,7 +94,7 @@ def main():
     axc.set_xlabel("window offset $h$ (hours)")
     axc.set_ylabel("pooled Pearson $r$ vs CPC-UNI")
     axc.set_title("(c) Pooled $r(h)$: gauged cells reach $\\approx0.57$ "
-                  "(per-station level), whole domain $\\approx0.34$; offset era-identical",
+                  "(per-station level), whole domain $\\approx0.33$; offset era-identical",
                   fontsize=11, fontweight="bold", pad=6, loc="left")
     axc.legend(fontsize=7.6, ncol=2, framealpha=0.95, edgecolor="0.7", loc="upper right")
     axc.grid(True, alpha=0.25, ls=":")

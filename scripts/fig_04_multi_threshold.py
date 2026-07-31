@@ -71,7 +71,7 @@ def load_pooled(method):
 print("Loading pooled station-validation summaries...")
 data = {key: load_pooled(key) for key, *_ in METHODS}
 
-fig, axes = plt.subplots(2, 2, figsize=(7.0, 5.8), constrained_layout=True)
+fig, axes = plt.subplots(2, 2, figsize=(7.0, 5.22), constrained_layout=True)
 axes_flat = axes.flat
 
 for ax, (metric, title, ylim, ylabel, target) in zip(axes_flat, PANELS):

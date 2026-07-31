@@ -405,14 +405,6 @@
 % --- Appendices ---
 \input{chapter_99_appendices.tex}
 
-% Restore chapter-level bookmarks (the appendix file demoted them so A-H nest
-% under APPENDICES) so BIOGRAPHY sits at the outline top level again.
-\makeatletter
-\renewcommand{\toclevel@chapter}{0}%
-\renewcommand{\toclevel@section}{1}%
-\renewcommand{\toclevel@subsection}{2}%
-\makeatother
-
 % Restore the body chapter heading style, which chapter_99_appendices.tex
 % replaces with the appendix look. Anything included after the appendices needs
 % this. Keep in sync with the \titleformat/\titlespacing block in the preamble.

@@ -542,10 +542,8 @@ falls from $43.8\%$ to $30.7\%$. This is the dry-day counterpart
 of the wet-day frequency ratio moving from $1.21$ to $0.95$: the
 empirical quantile mapping reclassifies spurious light-rain pixels
 to dry and removes the raw product's over-detection. The gain is
-not free, and follows the same trade-off as the detection scores:
-the reclassification that suppresses false alarms also lowers the
-probability of detection from $0.78$ to $0.65$, exchanging a
-portion of light-rain hits for cleaner dry-day agreement.
+not free: it is the dry-day face of the same reclassification that
+costs light-rain hits above.
 
 \subsection*{What LSEQM+DL Adds: Tail Refinement}
 
@@ -572,11 +570,9 @@ change of $0.36$~mm/day. These individually small, spatially
 concentrated adjustments remove about four-fifths of the residual
 $99$th-percentile overshoot while leaving the day-by-day pairing,
 and hence Pearson~$r$, pinned close to its raw value
-(Section~\ref{sec:discussion-bound}). The CNN thus acts where the
-statistical stages leave a spatially incoherent residual in the
-extremes, which is the dimension it was placed at the end of the
-pipeline to address, without disturbing the bulk field that
-Stages~1 to 3 have already corrected.
+(Section~\ref{sec:discussion-bound}). The CNN thus acts only where
+the statistical stages leave an incoherent residual in the
+extremes, which is why it sits last in the pipeline.
 
 \begin{figure}[H]
 \centering
@@ -640,13 +636,10 @@ $1$, $5$, and $10~\mathrm{mm/day}$ thresholds LS retains a higher
 POD than LSEQM+DL. LS is a single multiplicative factor that leaves
 the wet-day count untouched, so it keeps the raw over-detection of
 light rain, and an over-detecting product scores more hits at a low
-threshold because it declares rain on more days. The distribution
-step of LSEQM+DL removes that over-detection, reclassifying the
-spurious drizzle to dry, which costs some of those low-threshold
-hits. The reversal does not occur at $5~\mathrm{mm/day}$: LS retains
-the higher probability of detection there and through
-$10~\mathrm{mm/day}$, and the ordering changes only at
-$20~\mathrm{mm/day}$.
+threshold. The distribution step of LSEQM+DL removes that
+over-detection, reclassifying the spurious drizzle to dry, which
+costs some of those low-threshold hits. The ordering changes only at
+$20~\mathrm{mm/day}$, not at $5~\mathrm{mm/day}$.
 
 Above the crossover the same two edits act the other way. LS
 inherits the truncated tail, so it under-detects the heavy events
@@ -670,9 +663,8 @@ $0.097$ and the improvement to $56\%$ without changing the
 ordering. The $100~\mathrm{mm/day}$ class supports
 no ordering: only $6$ of the $5{,}899$ station-dekad records reach
 the ten-exceedance minimum, and the median CSI is zero for both
-methods. The advantage is therefore established at the $20$ and
-$50~\mathrm{mm/day}$ thresholds, which is where the record carries
-enough events to resolve it.
+methods. The advantage is therefore established at $20$ and
+$50~\mathrm{mm/day}$, where the record carries enough events.
 
 The crossover threshold near $20~\mathrm{mm/day}$ is not an
 arbitrary cut. It is the fixed threshold of R20mm, the
@@ -681,12 +673,10 @@ Organization Expert Team on Climate Change Detection and Indices,
 defined as the annual count of days with precipitation at or above
 $20~\mathrm{mm}$; the corresponding heavy-precipitation index
 R10mm sits at $10~\mathrm{mm}$ and brackets the crossover from
-below \citep{ref:peterson2001, ref:zhang2011}. The regime in which LSEQM+DL
-overtakes LS is therefore the regime that internationally
-standardised indices class as very heavy precipitation, which is
-the regime that threshold-based warning and monitoring
-applications over the Maritime Continent depend on
-\citep{ref:ramadhan2022}.
+below \citep{ref:peterson2001, ref:zhang2011}. LSEQM+DL therefore
+overtakes LS in the regime that standardised indices class as very
+heavy precipitation, which is what threshold-based warning over the
+Maritime Continent depends on \citep{ref:ramadhan2022}.
 
 \begin{figure}[H]
 \centering
@@ -703,10 +693,8 @@ station locations\label{fig:threshold-skill}}
 Section~\ref{sec:results-intercomparison} established, against the
 independent BMKG stations and at both date labels, that the
 correction does not lift the daily correlation. This section
-reports the same result against the in-sample CPC-UNI target: the
-two are the two references of a single finding, and together they
-are what the discussion develops as the central observation of the
-thesis.
+reports the same result against the in-sample CPC-UNI target, so
+the finding holds against both references.
 
 One metric does not move across the three corrected stages. The Pearson
 correlation between paired daily satellite and CPC-UNI values,
@@ -730,8 +718,7 @@ ratio, an amplitude diagnostic measured against the independent
 BMKG gauges, moves from $0.71$ to $1.00$ across the same stages.
 The amplitude is corrected to the validation target, yet the
 timing does not improve even against the reference the correction
-was fitted to: one amplitude metric improves substantially while
-three temporal-skill metrics do not move or get worse.
+was fitted to.
 
 \begin{figure}[H]
 \centering
@@ -1248,9 +1235,8 @@ parameters, with the GPD threshold the single setting at which a
 downstream user would most need to revisit the trade-off.
 
 The sweep script that produced Table~\ref{tab:sensitivity-bali}
-accompanies the released code, so the same fifteen-setting table
-can be regenerated by an independent user without modifying the
-pipeline.
+accompanies the released code, so the table can be regenerated
+without modifying the pipeline.
 
 
 % ============================================================
@@ -1267,12 +1253,9 @@ $0.1^{\circ}$, spanning $114.4$ to $115.7^{\circ}$E and $-8.85$
 to $-8.05^{\circ}$N), processing all $36$ dekadal windows of the
 $2001$ to $2025$ record. Bali was chosen because it is small
 enough to run within the free-tier session limits while
-exercising every stage of the pipeline, from LSEQM+DL correction
-through metrics, quality assessment, station validation, and
-visualisation.
+exercising every stage of the pipeline.
 Appendix~\ref{app:repro}~Figure~\ref{fig:bali-coverage} shows the
-subdomain and its data coverage, and this self-contained domain
-is the one timed in Table~\ref{tab:colab-runtime}.
+subdomain and its data coverage.
 
 Table~\ref{tab:colab-runtime} reports the measured wall-clock
 time for the all-dekad batch in each notebook, recorded from the
@@ -1282,25 +1265,22 @@ Bali subdomain completed in $72.1$ minutes on a standard Central
 Processing Unit (CPU) runtime with no hardware accelerator, well
 within a single
 free-tier session. The figure covers notebooks $02$ to $06$ and
-excludes the two preparatory notebooks: defining the area of
-interest and downloading the source archive are dominated by the
-extent of the domain requested and by network throughput, so
-neither yields a timing that another user could reproduce or
-usefully compare.
+excludes the two preparatory notebooks, whose timing is dominated
+by the domain extent requested and by network throughput and so is
+not reproducible.
 
 This $72.1$-minute figure is the cost of all
-$36$ dekads for the $126$-pixel Bali grid; it is not the cost of
-the full Indonesian domain, which contains on the order of
-$10^{4}$ to $10^{5}$ land pixels and would scale up roughly in
-proportion to the pixel count for the per-pixel stages. The Bali
-run is a demonstration that the pipeline executes end-to-end on
-free-tier infrastructure for a self-contained region, not a
-timing estimate for a national run. Within that run, the metrics
-notebook dominates the budget because it computes the full
-$31$-metric catalogue at every pixel and dekad; the correction
-notebook, which trains a per-dekad CNN, is the second largest.
-The two heaviest notebooks were run on the high Random Access
-Memory (RAM) runtime option that Colab offers without charge.
+$36$ dekads for the $126$-pixel Bali grid, not of the full
+Indonesian domain, which contains on the order of $10^{4}$ to
+$10^{5}$ land pixels and would scale roughly in proportion to the
+pixel count for the per-pixel stages. It demonstrates that the
+pipeline runs on free-tier infrastructure for a self-contained
+region; it is not a timing estimate for a national run. Within
+that run, the metrics notebook dominates the budget because it
+computes the full $31$-metric catalogue at every pixel and dekad,
+and the correction notebook, which trains a per-dekad CNN, is
+second. Both were run on the high Random Access Memory (RAM)
+runtime Colab offers without charge.
 
 \begin{table}[H]
 \centering

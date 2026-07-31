@@ -293,10 +293,10 @@ of Section~\ref{sec:methods-metrics}, paired with Pearson $r$ as a
 separate temporal-skill diagnostic rather than as an
 all-encompassing skill score, lets the structural limit and the
 methodological improvement appear in the same report. This is the
-verification posture the present work argues for, and it is a
-posture that the parallel reproducibility contribution
+verification posture this work argues for, and the parallel
+reproducibility contribution
 (Section~\ref{sec:discussion-reproducibility}) lets any reader
-independently reconstruct on their own data.
+reconstruct it on their own data.
 
 
 % ============================================================
@@ -344,8 +344,7 @@ diurnal phase of maritime-continent convection.
 
 \textbf{Convention dependence of the gauge references.} The two
 gauge references differ in both the hour at which a daily total
-closes and the date it is then given, and resolving the difference
-sharpens the picture. The
+closes and the date it is then given. The
 gridded CPC-UNI archive dates each daily total by a per-cell
 end-of-day field; for every Indonesian cell this field is
 $24$~hours, so the total closes at $00{:}00$ UTC and is assigned
@@ -359,9 +358,8 @@ when CPC-UNI is shifted by a day, whereas the IMERG-versus-BMKG
 correlation is highest only after the satellite is re-aggregated
 to the local-observation window (Figure~\ref{fig:convention}a).
 The calendar-window offset is thus specific to the BMKG
-labelling: IMERG and CPC-UNI share the UTC day and carry no
-window offset, so the calibration target is already consistent
-with the satellite.
+labelling; the calibration target is already consistent with the
+satellite.
 
 At
 the station locations both references reach the same
@@ -475,7 +473,18 @@ with roughly one-day uncertainty: its correlation with the gauge on
 the day before a wet day is nearly as high as on the wet day
 itself, so no realignment of the 24-hour window can recover the
 day-by-day match, and the correlation stays near $r = 0.36$ at
-every offset. The GPM-era field is day-precise, so aligning the
+every offset.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\figFiveWindowPrecisionWidth\textwidth]{fig_thesis_05_window_precision.png}
+\caption[Why the window recovery is confined to the GPM era]{Day-offset
+correlation (a) and window-offset correlation (b) for the pre-GPM and
+GPM eras, showing why the window recovery is confined to the GPM
+era.\label{fig:window-precision}}
+\end{figure}
+
+The GPM-era field is day-precise, so aligning the
 window to the gauge convention recovers the correlation. The
 window-offset search therefore doubles as a diagnostic of a
 product's day-to-day temporal precision, and it places the IMERG
@@ -490,15 +499,6 @@ mountainous Sumatra attributes the improved daily IMERG accuracy in
 the GPM era to the denser passive-microwave constellation and the
 algorithm advances introduced with the 2014 GPM Core launch
 \citep{ref:ramadhan2024sumatra}.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\figFiveWindowPrecisionWidth\textwidth]{fig_thesis_05_window_precision.png}
-\caption[Why the window recovery is confined to the GPM era]{Day-offset
-correlation (a) and window-offset correlation (b) for the pre-GPM and
-GPM eras, showing why the window recovery is confined to the GPM
-era.\label{fig:window-precision}}
-\end{figure}
 
 \textbf{Calibration and validation.} The two gauge references are
 assembled under different conventions. CPC-UNI closes each daily
@@ -823,19 +823,20 @@ NetCDF file alongside the corrected product and the source code,
 so an independent user can inspect the spatial distribution of
 correction confidence directly and verify that the CNN
 contribution is suppressed in their region of interest if the
-local gauge density is below the saturation threshold.
-Figure~\ref{fig:confmask} shows the confidence mask and its
-operational consequence on Composite Quality Index (CQI) improvement.
-The CQI gain is concentrated in the highest-confidence regions, and
-the lowest confidence quintile shows a near-zero median improvement,
-by design, because the framework reverts to LSEQM where the reference
-cannot support CNN refinement.
+local gauge density is below the saturation threshold
+(Figure~\ref{fig:confmask}).
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\figFiveThreeWidth\textwidth]{fig_thesis_05_confidence_mask.png}
 \caption[Station-density confidence mask]{Station-density confidence mask\label{fig:confmask}}
 \end{figure}
+
+The operational consequence is on Composite Quality Index (CQI)
+improvement. The CQI gain is concentrated in the highest-confidence
+regions, and the lowest confidence quintile shows a near-zero median
+improvement, by design, because the framework reverts to LSEQM where
+the reference cannot support CNN refinement.
 
 The fourth category combines comparison studies and training
 use. The notebook structure separates correction from

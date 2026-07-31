@@ -652,11 +652,10 @@ the verification literature has examined closely
 \citep{ref:maraun2016}: they correct
 the marginal distribution of a series at each location, and they
 do so through transformations that preserve the rank order of
-the values they act on. This property has consequences for what
-such methods can and cannot improve, and those consequences
-frame the central empirical result of the present study. This
-section reviews the two established results that together bound
-the time-dependent skill attainable by any marginal correction.
+the values they act on. This section reviews the two established
+results that together bound the time-dependent skill attainable by
+any marginal correction, and that frame the central empirical
+result of this study.
 
 The first is rank preservation. Quantile mapping, in all of its
 parametric and non-parametric variants, maps each value to the
@@ -668,13 +667,12 @@ Pareto fit, the rank order of the values at a location is
 preserved. If the source series reports a higher value
 on one day than on another, the corrected series reports a value
 no lower on that day too
-\citep{ref:cannon2015}. Cannon and colleagues examined this
-property in the context of trend preservation and showed that
-standard quantile mapping can distort climate-change trends
-precisely because it operates on ranks rather than on the
-temporal sequence. The same rank-preservation mechanism that
-distorts trends also fixes the day-by-day ordering of a
-corrected series relative to its source.
+\citep{ref:cannon2015}. Cannon and colleagues examined this in the
+context of trend preservation, showing that quantile mapping can
+distort climate-change trends precisely because it operates on
+ranks rather than on the temporal sequence; the same mechanism
+fixes the day-by-day ordering of a corrected series relative to its
+source.
 
 The second is variance inflation without time-dependent skill
 gain. \citet{ref:maraun2013} analysed quantile mapping as
@@ -697,9 +695,8 @@ satellite series, it cannot change which satellite day is paired
 with which gauge day, and the day-by-day correlation is therefore
 held close to the correlation between the raw satellite series and
 the gauge. The amplitude correction that moves the standard
-deviation ratio toward unity has no corresponding effect on the
-day-by-day pairing: the correction introduces no rank reversals, so
-the Pearson correlation is left close to its raw value. This is not a deficiency
+deviation ratio toward unity has no corresponding effect on that
+pairing. This is not a deficiency
 of any particular implementation; it is a property of the
 marginal correction family as a whole, and any method built from
 linear scaling, quantile mapping, and tail adjustment inherits
@@ -770,11 +767,10 @@ Sulawesi) to UTC+9 in the east (Maluku, Papua).
 The IMERG product is accumulated on a UTC calendar day,
 so the local convective afternoon falls in the UTC 07:00 to
 10:00 band for the western archipelago and earlier in UTC terms
-for the east. The convective peak therefore sits well inside a
-single UTC day and is not split by the UTC boundary.
+for the east.
 
-The effect
-is one of labelling rather than of splitting: in the western zone
+The convective peak therefore sits well inside a single UTC day, so
+the effect is one of labelling rather than of splitting: in the western zone
 the 07:00 local morning observation coincides with 00:00~UTC, so a
 gauge total closed at that reading spans a complete UTC day but
 carries the following calendar date. The afternoon convection of
@@ -814,10 +810,9 @@ temporal cadence (on the order of ten minutes) and
 kilometre-scale spatial resolution \citep{ref:bessho2016}, which is
 sufficient to track
 the convective afternoon and to align a re-aggregated daily
-window to the local cycle. The present study does not perform
-this re-aggregation, but the regional context established here
-frames it as the natural extension that
-Chapter~\ref{chap:discussion} proposes.
+window to the local cycle. This study does not perform that
+re-aggregation; Chapter~\ref{chap:discussion} proposes it as the
+natural extension.
 
 
 % ============================================================
@@ -837,12 +832,11 @@ the broader literature. The bias correction literature has
 adopted these expectations unevenly: many influential studies
 publish methods without releasing the corresponding code or
 data, leaving any claim of reproduction to a reader who must
-re-implement the method from the paper alone. The present study
-adopts an explicit reproducibility design that is reviewed in
-Section~\ref{sec:methods-reproducibility} and demonstrated
-empirically in Section~\ref{sec:results-reproducibility}; the
-present section reviews the supporting literature on
-computational notebook workflows that the design draws on.
+re-implement the method from the paper alone. This study adopts an
+explicit reproducibility design, reviewed in
+Section~\ref{sec:methods-reproducibility} and demonstrated in
+Section~\ref{sec:results-reproducibility}; the literature it draws
+on is reviewed below.
 
 \subsection{Computational Notebooks in Climate and Earth Observation Analysis}
 
@@ -853,9 +847,8 @@ A notebook integrates code, results, and
 narrative in a single document, making the analytical process
 transparent and re-runnable on the same data. Jupyter is the
 most widely used implementation in the scientific Python
-ecosystem and is the format adopted in the present study; the
-Jupyter notebook format is portable across execution
-environments, opening in either a local installation or a
+ecosystem and is the format adopted here; it is portable across
+execution environments, opening in either a local installation or a
 cloud-hosted runtime such as Google Colab with no change to
 the underlying file. For climate science specifically,
 computational notebooks have been used to integrate satellite
@@ -865,8 +858,7 @@ and to teach climate-data analytics in a way that makes the
 underlying processing steps explicit and modifiable
 \citep{ref:wagemann2022}. The notebook format
 preserves the connection between the prose claim and the code
-that produced it, which is precisely the connection that a
-peer-reviewed paper without released code cannot guarantee.
+that produced it.
 
 The integration of computational notebooks with cloud-based
 geospatial platforms has further lowered the barrier to running

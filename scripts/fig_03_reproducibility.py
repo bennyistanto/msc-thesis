@@ -27,7 +27,7 @@ OUTB = ("#f2e7f1", "#835089")   # data/output
 DOC  = ("#f2f2f2", "#6f6f6f")   # docs (Quarto)
 INK  = "#232323"
 
-fig, ax = plt.subplots(figsize=(8.6, 10.0))
+fig, ax = plt.subplots(figsize=(8.6, 7.0))
 ax.set_xlim(0, 100)
 ax.set_ylim(0, 100)
 ax.axis("off")
@@ -55,48 +55,53 @@ def band(y, text, color):
             style="italic", color=color, fontweight="bold")
 
 
+# Vertical layout. Box heights are sized to the text they carry (line count x
+# font size x linespacing) plus a small padding, rather than to a fixed block
+# height; the band labels sit in the gap between an arrow head and the row it
+# names, so they never overlap either.
+
 # --- declared layer -------------------------------------------------------
-box(6, 89, 42, 8, "config.yml\nsingle source of paths and parameters", DECL, bold=True)
-box(52, 89, 42, 8, "environment.yml\npinned package versions", DECL, bold=True)
-flow(89, 83.5, "declared once")
+box(6, 89.5, 42, 7.5, "config.yml\nsingle source of paths and parameters", DECL, bold=True)
+box(52, 89.5, 42, 7.5, "environment.yml\npinned package versions", DECL, bold=True)
+flow(89.5, 85.0, "declared once")
 
 # --- notebooks ------------------------------------------------------------
-band(80.3, "six numbered notebooks/", NB[1])
-nb = ["01\ndata\nacquisition", "02\nLSEQM+DL\ncorrection", "03\nperformance",
-      "04\nQA\nframework", "05\nQA\nvisualisation", "06\nstation\nvalidation"]
+band(83.5, "six numbered notebooks/", NB[1])
+nb = ["01\ndata\nacquisition", "02\nLSEQM+DL\ncorrection", "03\nmeasuring\nperformances",
+      "04\nQA\nframework", "05\nstation\nvalidation", "06\nvisualisation\nhub"]
 nbw, gap, x0 = 13.75, 1.5, 5.0
 for i, t in enumerate(nb):
-    box(x0 + i * (nbw + gap), 71.5, nbw, 11, t, NB, fs=8)
-flow(71.5, 64.5, "call")
+    box(x0 + i * (nbw + gap), 73.0, nbw, 9, t, NB, fs=8)
+flow(73.0, 68.0, "call")
 
 # --- src/ modules ---------------------------------------------------------
-band(67.0, "src/  ten single-responsibility modules", SRC[1])
+band(66.5, "src/  twelve single-responsibility modules", SRC[1])
 mods = ["config", "io", "utility", "bias_\ncorrection", "distribution_\nfitting",
         "deep_\nlearning", "station_\ndensity", "metrics", "qa_\nframework",
-        "station_\nvalidation"]
-mw, mg, mx0 = 16.8, 1.5, 5.0
+        "station_\nvalidation", "taylor_\ndiagram", "visualisation"]
+mw, mg, mx0 = 13.8, 1.4, 5.0
 for r in range(2):
-    for c in range(5):
-        box(mx0 + c * (mw + mg), 55.5 - r * 9.5, mw, 8, mods[r * 5 + c], SRC, fs=7.6)
-flow(46.0, 40.5, "write")
+    for c in range(6):
+        box(mx0 + c * (mw + mg), 58.0 - r * 8.5, mw, 7, mods[r * 6 + c], SRC, fs=7.4)
+flow(49.5, 44.5, "write")
 
 # --- data/output ----------------------------------------------------------
-box(13, 32, 74, 8, "data/output\ncorrected fields   -   31 metrics   -   QA / CQI   -   figures",
+box(13, 36.0, 74, 7.5, "data/output\ncorrected fields   -   31 metrics   -   QA / CQI   -   figures",
     OUTB, bold=True)
 
 # --- docs (Quarto) --------------------------------------------------------
-box(13, 17, 74, 9,
+box(13, 20.5, 74, 7,
     "docs/  (Quarto site)\ncross-links every result to its notebook cell and src/ function",
     DOC, fs=8.5, dashed=True)
 # dashed link from docs up to the output layer
-ax.add_patch(FancyArrowPatch((50, 26), (50, 31.5), arrowstyle="-|>",
+ax.add_patch(FancyArrowPatch((50, 28.5), (50, 35.5), arrowstyle="-|>",
              mutation_scale=13, lw=1.3, color="#6f6f6f", linestyle="--"))
 
 # --- trace callout --------------------------------------------------------
-ax.add_patch(FancyBboxPatch((6, 5), 88, 7,
+ax.add_patch(FancyBboxPatch((6, 7.0), 88, 5.5,
              boxstyle="round,pad=0.4,rounding_size=1.4",
              fc="#fffdf4", ec="#b9a24a", lw=1.2))
-ax.text(50, 8.5,
+ax.text(50, 9.75,
         "Every reported number traces to a config value, a notebook cell, and a src/ function.",
         ha="center", va="center", fontsize=9.2, color="#5c531f", fontweight="bold")
 
