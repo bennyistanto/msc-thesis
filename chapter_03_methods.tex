@@ -497,12 +497,6 @@ suppresses spurious light-rain events at the cost of reduced
 aggregate probability of detection, but with the benefit of a
 reduced false alarm ratio.
 
-The Gamma family fits the bulk of the wet-day sample by design, so
-its upper tail is fit only as a by-product and is systematically too
-short for the flood and drought thresholds that matter operationally
-(Section~\ref{sec:lit-gpd}). The next stage corrects this.
-
-
 \subsection{Extreme Tail Preservation: Generalized Pareto Distribution}\label{sec:methods-gpd}
 
 \medskip\noindent\textbf{Motivation.}
@@ -548,9 +542,7 @@ seven steps.
     by maximum likelihood with the location parameter fixed at
     the threshold \citep{ref:coles2001}; the parameters are
     averaged across five subsamples to reduce variance on the
-    small per-pixel exceedance set (see
-    Section~\ref{sec:methods-gpd} subsection on subsample
-    aggregation below).
+    small per-pixel exceedance set (see below).
     \item Above the 80th percentile, replace the Gamma-based
     quantile from Stage~2 with the GPD-based quantile.
     \item Cap the final value at the 99.9th percentile of the
@@ -576,11 +568,10 @@ threshold $u_{\text{ref}}$:
 P_{\text{LSEQM}} = u_{\text{ref}} + G_{\text{ref}}^{-1}(p_c).
 \label{eq:gpd-map}
 \end{equation}
-In the implementation the reference GPD is fitted to the
-threshold exceedances $x - u_{\text{ref}}$ with its location
-pinned to zero, so $G_{\text{ref}}^{-1}(p_c)$ returns an
-exceedance above $u_{\text{ref}}$ and the threshold is added
-back to recover the absolute value.
+The reference GPD is fitted to the exceedances
+$x - u_{\text{ref}}$ with its location pinned to zero, so
+$G_{\text{ref}}^{-1}(p_c)$ returns an exceedance and
+$u_{\text{ref}}$ is added back.
 Equations~\eqref{eq:gpd-pc} and~\eqref{eq:gpd-map} preserve the
 rank of the satellite value within its own tail and place it at
 the matching quantile of the reference tail, so the heavy-tail
@@ -621,17 +612,15 @@ well below the practical floor for a stable MLE.
 
 In the latter case the GPD fit returns a degenerate default
 (shape~$= 0$, location~$= 0$, scale~$= 1$) that produces the
-trivial mapping $y = x$, effectively disabling the tail
-adjustment for that pixel and leaving the Gamma EQM value in
+trivial mapping $y = x$, leaving the Gamma EQM value in
 place. The fallback is defensible in genuinely dry pixels, where
 the few wet days are climatologically light-rain events and the
 Gamma EQM result is the right answer by default; the fallback
 is less defensible in pixels with 25 to 50 wet days, where heavy
 events do exist but cannot be fit reliably. The fraction of
-pixel-dekads in which the GPD adjustment is active versus
-fallback was not reported as a spatial diagnostic in the present
-study; producing such a map would be a useful supplementary
-artefact for future work.
+pixel-dekads in which the adjustment is active rather than
+fallback was not mapped; such a diagnostic would be a useful
+supplementary artefact for future work.
 
 \medskip\noindent\textbf{Why subsample-averaged MLE rather than a single fit.}
 A single GPD maximum-likelihood fit to approximately 50
@@ -663,11 +652,10 @@ own 80th percentile of its own wet sample. A pixel in Java
 might have a threshold around 25~mm/day; a pixel in eastern
 Nusa Tenggara might have a threshold of about 8~mm/day. This
 per-pixel behaviour is the correct response to the
-climatological heterogeneity of the domain. Below the threshold
-the Gamma EQM result is used; above it, the GPD-adjusted
-quantile is used. There is no smoothing across the join: the
-two curves are constrained to match at the threshold percentile,
-so the discontinuity is small in practice but is not exactly
+climatological heterogeneity of the domain. There is no
+smoothing across the join: the two curves are constrained to
+match at the threshold percentile, so the discontinuity is small
+in practice but is not exactly
 zero. The 99.9th-percentile cap is also computed per pixel and
 varies spatially: over wet-season Java the cap is on the order
 of 200 to 400~mm/day, while over dry-season eastern Nusa
@@ -776,14 +764,11 @@ tried. Second, the saved model expects a fixed input shape
 matching the $171 \times 461$ Indonesian grid; transferring
 the framework to a different domain or grid resolution
 requires retraining rather than direct inference. Third, a
-spatial diagnostic of per-dekad CNN validation loss across the
-36 dekadal windows would surface seasons in which the CNN
-contribution is weaker because the training extreme-event
-sample is thinner, typically dry-season dekads with few
-heavy-rain events. Such a diagnostic is not formally produced
-in the present study and is flagged in
-Section~\ref{sec:methods-cnn} as a useful supplementary
-artefact for future work.
+spatial diagnostic of per-dekad CNN validation loss would
+surface seasons in which the CNN contribution is weaker because
+the training extreme-event sample is thinner, typically
+dry-season dekads. It is not produced here and would be a useful
+supplementary artefact for future work.
 
 Figure~\ref{fig:cnn-arch} shows the CNN architecture in detail
 alongside the station-density-aware blending mechanism that
@@ -832,7 +817,10 @@ summary in panel (j) confirm that relative bias, the
 standard-deviation ratio, and the 99th-percentile ratio each move
 toward their targets across the four stages.
 
-\begin{figure}[H]
+% [p]: at 555 pt the panel grid cannot share a page with the 24 lines that
+% precede it, so [H] left 339 pt blank on the preceding page. Floating it to a
+% dedicated page lets Section 3.4 fill that space instead.
+\begin{figure}[p]
 \centering
 \includegraphics[width=\figThreeFourWidth\textwidth]{fig_thesis_03_stage_demonstration.png}
 \caption[Illustrative effect of the LSEQM+DL pipeline stages applied to a synthetic 60-day daily-precipitation sample]{Illustrative effect of the LSEQM+DL pipeline stages applied to a synthetic 60-day daily-precipitation sample\label{fig:stage-demo}}
