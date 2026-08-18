@@ -5,10 +5,6 @@
 
 Master's thesis (Bogor Agricultural University, 2026) on the hybrid LSEQM+DL bias correction framework for daily Integrated Multi-satellitE Retrievals for GPM Late Run (IMERG-L) precipitation over Indonesia, with gauge validation against 172 independent BMKG stations.
 
-> **Status:** final draft submitted to the IPB Applied Climatology
-> programme. See the parent code repository for the implementation
-> and the data archive.
-
 ## Author
 
 **Benny Istanto** (G2501222008)</br>
