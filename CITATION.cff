@@ -1,6 +1,5 @@
 # Citation metadata for this thesis.
 # Renders as a "Cite this repository" button on GitHub.
-# Add the Zenodo DOI to the `doi:` field below once the release is published.
 
 cff-version: 1.2.0
 message: "If you reference this thesis, please cite it as below."
@@ -25,12 +24,27 @@ keywords:
   - reproducibility
   - IMERG
 license: "CC-BY-4.0"
-# doi: "10.5281/zenodo.XXXXXXX"   # TODO: add after Zenodo release
+doi: "10.5281/zenodo.21996372"
 repository-code: "https://github.com/bennyistanto/msc-thesis"
-url: "https://github.com/bennyistanto/hybrid-bias-correction"
+url: "https://zenodo.org/records/21996372"
 
-# Companion outputs (parent code repository, data archive):
+# Companion outputs (peer-reviewed article, parent code repository, data archive):
 references:
+  - type: article
+    title: "A Modular and Transferable Framework for Enhancing Satellite-Derived Daily Precipitation: Adjusting Values, Aligning Distributions, and Preserving Extremes"
+    authors:
+      - family-names: "Istanto"
+        given-names: "Benny"
+      - family-names: "Boer"
+        given-names: "Rizaldi"
+      - family-names: "Santikayasa"
+        given-names: "I Putu"
+    journal: "Remote Sensing"
+    year: 2026
+    volume: 18
+    issue: 14
+    number: "2298"
+    doi: "10.3390/rs18142298"
   - type: software
     title: "Hybrid Bias Correction: Values, Distributions, Extremes - with Neural Refinement"
     authors:
