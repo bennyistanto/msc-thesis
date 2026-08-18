@@ -1,5 +1,8 @@
 # A Hybrid Bias Correction Framework for Daily Satellite Precipitation
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21996372.svg)](https://doi.org/10.5281/zenodo.21996372)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+
 Master's thesis (Bogor Agricultural University, 2026) on the hybrid LSEQM+DL bias correction framework for daily Integrated Multi-satellitE Retrievals for GPM Late Run (IMERG-L) precipitation over Indonesia, with gauge validation against 172 independent BMKG stations.
 
 > **Status:** final draft submitted to the IPB Applied Climatology
@@ -77,7 +80,7 @@ The figure generators live in `scripts/`. See `scripts/README.md` for the one-sc
 
 ## Citation
 
-If you reference this thesis, please cite it as recorded in [`CITATION.cff`](CITATION.cff). After publication on Zenodo a DOI will be added.
+If you reference this thesis, please cite it as recorded in [`CITATION.cff`](CITATION.cff). The archived PDF and citation metadata are deposited on Zenodo: <https://doi.org/10.5281/zenodo.21996372>.
 
 ## License
 
