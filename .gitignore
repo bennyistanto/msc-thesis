@@ -21,7 +21,7 @@ main_thesis*.html
 # Compiled PDF (publish via GitHub Releases instead of in-repo)
 main_thesis.pdf
 GFM1699*.pdf
-Draft_*.pdf
+*.pdf
 
 # Editor / OS
 .DS_Store
