@@ -38,5 +38,8 @@ scripts/__pycache__/
 # Local working notes (not part of the published thesis)
 docs/
 
+# Scratch / experimental builds (alternate fonts, drafts) - never published
+temp/
+
 # PPKI skill files (not relevant to the thesis)
 SKILL.md
