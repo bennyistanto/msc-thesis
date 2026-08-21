@@ -37,6 +37,7 @@ scripts/__pycache__/
 
 # Local working notes (not part of the published thesis)
 docs/
+HANDOFF.md
 
 # Scratch / experimental builds (alternate fonts, drafts) - never published
 temp/
